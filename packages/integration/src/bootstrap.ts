@@ -32,7 +32,7 @@ export async function bootstrap(container: Container, appPort: any, appPath: any
 
         const uploadFile = async () => {
             const apiKey = '4f615c9533354e07b9b5baf5e1a30943'; // Thay bằng API Key của bạn
-            const filePath = 'D:/Code/Nodejs/inversify-js/dist/audio/input/test.mp3'; // Đường dẫn đến tệp cần tải lên
+            const filePath = './dist/audio/input/test.mp3'; // Đường dẫn đến tệp cần tải lên
           
             try {
               const response = await axios.post('https://api.assemblyai.com/v2/upload', 
@@ -47,7 +47,7 @@ export async function bootstrap(container: Container, appPort: any, appPath: any
                 }
               );
           
-              console.log('Upload response:', response.data);
+              // console.log('Upload response:', response.data);
               const client = new AssemblyAI({
                 apiKey: "4f615c9533354e07b9b5baf5e1a30943"
             })
@@ -60,7 +60,7 @@ export async function bootstrap(container: Container, appPort: any, appPath: any
             const transcript = await client.transcripts.transcribe(config)
             console.log(transcript.text)
             } catch (error) {
-              console.error('Error uploading file:', error);
+              console.error('Error uploading file:');
             }
           };
           
