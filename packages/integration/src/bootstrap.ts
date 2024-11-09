@@ -11,6 +11,9 @@ import { cookies, InversifyExpressServer } from "inversify-express-utils";
 import { DataSourceConnection } from "@inversifyjs/domain";
 import { Repository, getRepository, LessThanOrEqual } from "typeorm";
 import { TypeormStore } from "connect-typeorm";
+import { AssemblyAI } from 'assemblyai';
+import axios from "axios";
+import * as fs from "fs";
 export async function bootstrap(container: Container, appPort: any, appPath: any, ...modules: ContainerModule[]) {
     if (container.isBound(TYPES.App) == false) {
         container.load(...modules);
@@ -26,6 +29,44 @@ export async function bootstrap(container: Container, appPort: any, appPath: any
             mergeParams: false,
             strict: false
         });
+
+        const uploadFile = async () => {
+            const apiKey = '4f615c9533354e07b9b5baf5e1a30943'; // Thay bằng API Key của bạn
+            const filePath = 'D:/Code/Nodejs/inversify-js/dist/audio/input/test.mp3'; // Đường dẫn đến tệp cần tải lên
+          
+            try {
+              const response = await axios.post('https://api.assemblyai.com/v2/upload', 
+                fs.createReadStream(filePath), 
+                {
+                  headers: {
+                    'Authorization': apiKey,
+                    'Content-Type': 'application/octet-stream'
+                  },
+                  maxContentLength: Infinity,
+                  maxBodyLength: Infinity
+                }
+              );
+          
+              console.log('Upload response:', response.data);
+              const client = new AssemblyAI({
+                apiKey: "4f615c9533354e07b9b5baf5e1a30943"
+            })
+    
+            const audioUrl = response.data.upload_url;
+    
+            const config = {
+                audio_url: audioUrl
+            }
+            const transcript = await client.transcripts.transcribe(config)
+            console.log(transcript.text)
+            } catch (error) {
+              console.error('Error uploading file:', error);
+            }
+          };
+          
+        uploadFile();
+
+        
 
         /* Inject DataSourceConnection for database connection */
         const dataSourceConnection = container.get<DataSourceConnection>(TYPES.DataSourceConnect);
