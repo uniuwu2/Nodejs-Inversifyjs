@@ -11,9 +11,10 @@ import { cookies, InversifyExpressServer } from "inversify-express-utils";
 import { DataSourceConnection } from "@inversifyjs/domain";
 import { Repository, getRepository, LessThanOrEqual } from "typeorm";
 import { TypeormStore } from "connect-typeorm";
-import { AssemblyAI } from 'assemblyai';
+import { AssemblyAIJob } from './assembly-ai-job/assembly-ai-job';
 import axios from "axios";
 import * as fs from "fs";
+import { AssemblyAI } from "assemblyai";
 export async function bootstrap(container: Container, appPort: any, appPath: any, ...modules: ContainerModule[]) {
     if (container.isBound(TYPES.App) == false) {
         container.load(...modules);
@@ -30,41 +31,44 @@ export async function bootstrap(container: Container, appPort: any, appPath: any
             strict: false
         });
 
-        const uploadFile = async () => {
-            const apiKey = '4f615c9533354e07b9b5baf5e1a30943'; // Thay bằng API Key của bạn
-            const filePath = './dist/audio/input/test.mp3'; // Đường dẫn đến tệp cần tải lên
+        const assemblyAIJob = container.get<AssemblyAIJob>(TYPES.AssemblyAIJob);
+        assemblyAIJob.start();
+
+        // const uploadFile = async () => {
+        //     const apiKey = '4f615c9533354e07b9b5baf5e1a30943'; // Thay bằng API Key của bạn
+        //     const filePath = './dist/audio/input/test.mp3'; // Đường dẫn đến tệp cần tải lên
           
-            try {
-              const response = await axios.post('https://api.assemblyai.com/v2/upload', 
-                fs.createReadStream(filePath), 
-                {
-                  headers: {
-                    'Authorization': apiKey,
-                    'Content-Type': 'application/octet-stream'
-                  },
-                  maxContentLength: Infinity,
-                  maxBodyLength: Infinity
-                }
-              );
+        //     try {
+        //       const response = await axios.post('https://api.assemblyai.com/v2/upload', 
+        //         fs.createReadStream(filePath), 
+        //         {
+        //           headers: {
+        //             'Authorization': apiKey,
+        //             'Content-Type': 'application/octet-stream'
+        //           },
+        //           maxContentLength: Infinity,
+        //           maxBodyLength: Infinity
+        //         }
+        //       );
           
-              // console.log('Upload response:', response.data);
-              const client = new AssemblyAI({
-                apiKey: "4f615c9533354e07b9b5baf5e1a30943"
-            })
+        //       console.log('Upload response:', response.data.upload_url);
+        //       const client = new AssemblyAI({
+        //         apiKey: "4f615c9533354e07b9b5baf5e1a30943"
+        //     })
     
-            const audioUrl = response.data.upload_url;
+        //     const audioUrl = response.data.upload_url;
     
-            const config = {
-                audio_url: audioUrl
-            }
-            const transcript = await client.transcripts.transcribe(config)
-            console.log(transcript.text)
-            } catch (error) {
-              console.error('Error uploading file:');
-            }
-          };
+        //     const config = {
+        //         audio_url: audioUrl
+        //     }
+        //     const transcript = await client.transcripts.transcribe(config)
+        //     console.log(transcript.text)
+        //     } catch (error) {
+        //       console.error('Error uploading file:');
+        //     }
+        //   };
           
-        uploadFile();
+        // uploadFile();
 
         
 

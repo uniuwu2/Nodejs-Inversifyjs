@@ -3,4 +3,5 @@ export const TYPES = {
     Logger: Symbol.for("Logger"),
     DataSourceConnect: Symbol.for("DataSourceConnect"),
     Repository: Symbol.for("Repository"),
+    AssemblyAIJob: Symbol.for("AssemblyAIJob")
 };

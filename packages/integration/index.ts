@@ -1,5 +1,5 @@
 import { bootstrap } from "./src/bootstrap";
 import { container } from "./src/ioc-container";
 import { referenceDataIoCModule } from "./src/modules-registration";
-
-export { bootstrap, container, referenceDataIoCModule };
+import { AssemblyAIJob } from './src/assembly-ai-job/assembly-ai-job';
+export { bootstrap, container, referenceDataIoCModule, AssemblyAIJob };
