@@ -1,16 +1,15 @@
 import { injectable } from "inversify";
-import winston, { createLogger, format, transports, loggers } from "winston";
-import WinstonDailyRotateFile from "winston-daily-rotate-file";
+import winston, { createLogger, transports, format, loggers } from "winston";
+import * as WinstonDailyRotateFile from "winston-daily-rotate-file";
 
 import { Logger } from "./logger.interface";
-import moment from "moment";
+import * as moment from "moment";
 const timezoned = () => {
     let now = moment();
     const bdTime = now.utcOffset(Intl.DateTimeFormat().resolvedOptions().timeZone);
     const date = bdTime.format("YYYY-MM-DD HH:mm:ss");
     return date;
-}
-
+};
 @injectable()
 export class LoggerMod implements Logger {
     private logFormat: any;
@@ -22,15 +21,13 @@ export class LoggerMod implements Logger {
                 format: timezoned,
             }),
             format.align(),
-            format.printf(
-                (info) => `${info.timestamp} ${info.level}: ${info.message}`
-            )
+            format.printf((info) => `${info.timestamp} ${info.level}: ${info.message}`)
         );
 
         this.initialize();
     }
 
-    private initialize() {
+    private initialize(): void {
         loggers.add("customLogger", {
             format: this.logFormat,
             exitOnError: false,
@@ -41,15 +38,7 @@ export class LoggerMod implements Logger {
                     level: "info",
                     zippedArchive: true,
                     maxSize: "20m",
-                    maxFiles: "14d",
-                }),
-                new WinstonDailyRotateFile({
-                    filename: "./logs/error-%DATE%.log",
-                    datePattern: "YYYY-MM-DD",
-                    level: "error",
-                    zippedArchive: true,
-                    maxSize: "20m",
-                    maxFiles: "14d",
+                    maxFiles: "10d",
                 }),
                 new WinstonDailyRotateFile({
                     filename: "./logs/debug-%DATE%.log",
@@ -57,7 +46,15 @@ export class LoggerMod implements Logger {
                     level: "debug",
                     zippedArchive: true,
                     maxSize: "20m",
-                    maxFiles: "14d",
+                    maxFiles: "10d",
+                }),
+                new WinstonDailyRotateFile({
+                    filename: "./logs/error-%DATE%.log",
+                    datePattern: "YYYY-MM-DD",
+                    level: "error",
+                    zippedArchive: true,
+                    maxSize: "20m",
+                    maxFiles: "20d",
                 }),
             ],
         });
@@ -76,17 +73,16 @@ export class LoggerMod implements Logger {
     public get logger(): winston.Logger {
         return loggers.get("customLogger");
     }
-    
 
     public info(message: any): void {
         this.logger.info(message);
     }
 
-    public error(message: any): void {
-        this.logger.error(message);
-    }
-
     public debug(message: any): void {
         this.logger.debug(message);
+    }
+
+    public error(message: any): void {
+        this.logger.error(message);
     }
 }

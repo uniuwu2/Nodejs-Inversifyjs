@@ -3,9 +3,17 @@ import { injectable } from "inversify";
 import { DataSource } from "typeorm";
 import { User } from "./entities/user";
 import { Role } from "./entities/role";
-
+import { Student } from "./entities/student";
+import { Staff } from "./entities/staff";
+import { Activity } from "./entities/activity";
+import { ActivityStudent } from "./entities/activity_student";
+import { CourseClass } from "./entities/course_class";
+import { Course } from "./entities/course";
+import { Session } from "./entities/session";
+import { ClassStudent } from "./entities/class_student";
+import { Attendance } from "./entities/attendance";
 /**
- * Datasoruce connection
+ * Datasource connection
  */
 @injectable()
 export class DataSourceConnection {
@@ -19,7 +27,7 @@ export class DataSourceConnection {
     private _synchronize: boolean = true;
     private _logging: boolean = true;
 
-    constructor() { }
+    constructor() {}
 
     /**
      * Connect to database
@@ -28,26 +36,24 @@ export class DataSourceConnection {
         if (this._dataSource == undefined || this._dataSource.isInitialized == false) {
             this._dataSource = new DataSource({
                 type: "mysql",
-                host: this._host,
-                port: this._port,
-                username: this._username,
-                password: this._password,
-                database: this._database,
-                synchronize: this._synchronize,
-                logging: this._logging,
-                entities: [User, Role]
+                host: this.host,
+                port: this.port,
+                username: this.username,
+                password: this.password,
+                database: this.database,
+                synchronize: this.synchronize,
+                //logging: this.logging,
+                entities: [User, Role, Student, Staff, Activity, ActivityStudent, CourseClass, Course, Session, ClassStudent, Attendance],
             });
-
-            await this._dataSource.connect();
+            await this._dataSource.initialize();
         }
     }
 
     /**
-     * Disconnect from database
+     * Disconnect database and destroy
      */
-
     public async disconnect(): Promise<void> {
-        if (this._dataSource != undefined) {
+        if (this._dataSource !== undefined) {
             await this._dataSource.destroy();
         }
     }
@@ -60,55 +66,54 @@ export class DataSourceConnection {
         return this._host;
     }
 
-    public set host(value: string) {
-        this._host = value;
+    public set host(v: string) {
+        this._host = v;
     }
 
     public get port(): number {
         return this._port;
     }
 
-    public set port(value: number) {
-        this._port = value;
+    public set port(v: number) {
+        this._port = v;
     }
 
     public get username(): string {
         return this._username;
     }
 
-    public set username(value: string) {
-        this._username = value;
+    public set username(v: string) {
+        this._username = v;
     }
 
     public get password(): string {
         return this._password;
     }
 
-    public set password(value: string) {
-        this._password = value;
+    public set password(v: string) {
+        this._password = v;
     }
 
     public get database(): string {
         return this._database;
     }
 
-    public set database(value: string) {
-        this._database = value;
+    public set database(v: string) {
+        this._database = v;
     }
 
     public get synchronize(): boolean {
         return this._synchronize;
     }
 
-    public set synchronize(value: boolean) {
-        this._synchronize = value;
+    public set synchronize(v: boolean) {
+        this._synchronize = v;
     }
-
     public get logging(): boolean {
         return this._logging;
     }
 
-    public set logging(value: boolean) {
-        this._logging = value;
+    public set logging(v: boolean) {
+        this._logging = v;
     }
 }
