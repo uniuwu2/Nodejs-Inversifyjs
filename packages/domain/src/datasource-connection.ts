@@ -2,7 +2,7 @@ import "reflect-metadata";
 import { injectable } from "inversify";
 import { DataSource } from "typeorm";
 import { User } from "./entities/user";
-
+import { Role } from "./entities/role";
 
 /**
  * Datasoruce connection
@@ -35,7 +35,7 @@ export class DataSourceConnection {
                 database: this._database,
                 synchronize: this._synchronize,
                 logging: this._logging,
-                entities: [User]
+                entities: [User, Role]
             });
 
             await this._dataSource.connect();
