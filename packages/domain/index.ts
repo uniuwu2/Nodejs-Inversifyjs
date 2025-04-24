@@ -1,5 +1,14 @@
 import { DataSourceConnection } from "./src/datasource-connection";
 import { GenericEntity } from "./src/generic-entities";
 import { User } from "./src/entities/user";
-
-export { DataSourceConnection, User, GenericEntity };
+import { Role } from "./src/entities/role";
+import { Student } from "./src/entities/student";
+import { Staff } from "./src/entities/staff";
+import { Activity } from "./src/entities/activity";
+import { ActivityStudent } from "./src/entities/activity_student";
+import { CourseClass } from "./src/entities/course_class";
+import { Course } from "./src/entities/course";
+import { Session } from "./src/entities/session";
+import { ClassStudent } from "./src/entities/class_student";
+import { Attendance } from "./src/entities/attendance";
+export { DataSourceConnection, User, Role, GenericEntity, Student, Staff, Activity, ActivityStudent, CourseClass, Course, Session, ClassStudent, Attendance };

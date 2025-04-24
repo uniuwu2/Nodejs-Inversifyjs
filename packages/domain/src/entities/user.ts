@@ -1,5 +1,11 @@
-import { Column, Entity, OneToMany } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from "typeorm";
 import { GenericEntity } from "../generic-entities";
+import { Role } from "./role";
+import { Student } from "./student";
+import { ActivityStudent } from "./activity_student";
+import { CourseClass } from "./course_class";
+import { ClassStudent } from "./class_student";
+import { Attendance } from "./attendance";
 
 @Entity("user")
 export class User extends GenericEntity {
@@ -18,18 +24,42 @@ export class User extends GenericEntity {
     @Column("varchar", { name: "phone_number", nullable: true, length: 255 })
     public phoneNumber: string = "";
 
-    @Column("varchar", { name: "profile_picture", length: 255 })
-    public profilePicture: string = "";
-
-    @Column("varchar", { name: "role", length: 255 })
-    public role: string = "";
+    @Column("varchar", { name: "image_path", length: 255, nullable: true })
+    public image_path: string | null = "";
 
     @Column("tinyint", { name: "active", nullable: true, default: 1 })
     public active: number | null = 1;
 
-    @Column("tinyint", { name: "is_editable", default: 1})
-    public isEditable: number = 1;
+    @Column("varchar", { name: "oauth_id", nullable: true, length: 255 })
+    public oauthId: string | null = "";
 
-    @Column("tinyint", { name: "language", default: 1})
-    public language: number = 1;
+    @Column("varchar", { name: "oauth_provider", nullable: true, length: 255 })
+    public oauthProvider: string | null = "";
+
+    @Column("int", { name: "role_id" })
+    public roleId: number = 0;
+    @ManyToOne(() => Role, (role) => role.user, {
+        onDelete: "NO ACTION",
+        onUpdate: "NO ACTION",
+    })
+    @JoinColumn([{ name: "role_id", referencedColumnName: "id" }])
+    public role: Role | null = null;
+
+    @OneToOne(() => Student, (student) => student.user)
+    public student: Student | null = null;
+
+    @OneToOne(() => Student, (student) => student.user)
+    public staff: Student | null = null;
+
+    @OneToOne(() => Student, (student) => student.user)
+    public activity: Student | null = null;
+
+    @OneToMany(() => ActivityStudent, (activityStudent) => activityStudent.student)
+    public activityStudent!: ActivityStudent[];
+
+    @OneToMany(() => CourseClass, (courseClass) => courseClass.teacher)
+    public courseClass!: CourseClass[];
+
+    @OneToMany(() => ClassStudent, (classStudent) => classStudent.student)
+    public classStudent!: ClassStudent[];
 }
