@@ -7,6 +7,8 @@ import { UserServiceImpl } from "./src/services/user-service-impl";
 import { RouteHelper } from "./src/helpers/route-helper";
 import { Message } from "./src/constants/message";
 import { EncryptHelper } from "./src/helpers/encrypt-helper";
+import { Permission } from "./src/constants/permission";
+import { UserPermission } from "./src/constants/user-permission";
 export {
     TYPES,
     HttpCode,
@@ -16,5 +18,7 @@ export {
     RouteHelper,
     UserServiceImpl,
     Message,
-    EncryptHelper
+    EncryptHelper,
+    Permission,
+    UserPermission,
 }

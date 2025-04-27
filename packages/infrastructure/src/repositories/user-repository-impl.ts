@@ -26,6 +26,12 @@ export class UserRepositoryImpl extends AbstractRepository<User> implements User
         }
         return undefined;
     }
+
+    public createQueryBuilder(alias: string) {
+        if (!this.repository) throw new Error("Repository not initialized");
+        return this.repository.createQueryBuilder(alias);
+      }
+    
     
     public getEntityType(): any {
         return User;

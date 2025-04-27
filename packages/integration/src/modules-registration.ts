@@ -18,6 +18,7 @@ import {
 import "./controllers/home.controller";
 import "./controllers/admin/user-controller";
 import "./controllers/login.controller";
+import "./controllers/logout.controller";
 export const referenceDataIoCModule = new ContainerModule((bind) => {
     bind<Logger>(TYPES.Logger).to(LoggerMod).inSingletonScope();
     bind<DataSourceConnection>(TYPES.DataSourceConnect).to(DataSourceConnection).inSingletonScope();

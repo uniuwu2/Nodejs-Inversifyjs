@@ -4,9 +4,10 @@ import { BaseController } from "../base-controller";
 import { inject } from "inversify";
 import { TYPES } from "@inversifyjs/application";
 import { Response, Request } from "express";
-import { RouteHelper } from "@inversifyjs/application";
+import { RouteHelper, Permission } from "@inversifyjs/application";
+import { checkPermissions, verifyAuthTokenRouter } from "@inversifyjs/infrastructure";
 
-@controller("/admin/user")
+@controller("/users")
 export class UserController extends BaseController {
     private userService: UserService;
 
@@ -15,9 +16,18 @@ export class UserController extends BaseController {
         this.userService = _userService;
     }
 
-    @httpGet("/")
+    @httpGet("/", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN, Permission.ONLY_TEACHER]))
     public async getAllUsers(request: Request, response: Response): Promise<void> {
         try {
+            let currentUser = response.locals.jwtPayload.user;
+            if (currentUser.role.id === Permission.ONLY_TEACHER) {
+                let users = await this.userService.findStudentByTeacherId(currentUser.id);
+                response.render(this.routeHelper.getRenderPage(RouteHelper.USER_LIST), {
+                    users: users,
+                    title: "User List",
+                });
+                return;
+            }
             let users = await this.userService.findAll(["role"]);
             response.render(this.routeHelper.getRenderPage(RouteHelper.USER_LIST), {
                 users: users,
@@ -25,10 +35,7 @@ export class UserController extends BaseController {
             });
         } catch (error: any) {
             this.logger.error(error);
-            response.status(HttpCode.BAD_REQUEST).send({
-                message: error.message,
-                status: HttpCode.BAD_REQUEST,
-                });
+            response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST});
         }
     }
 }

@@ -4,7 +4,7 @@ import { exceptionLoggerMiddleware, requestMiddleware } from "./src/middleware/l
 import { GenericRepository } from "./src/repositories/generic-repository.interface";
 import { UserRepository } from "./src/repositories/user-repository.interface";
 import { UserRepositoryImpl } from "./src/repositories/user-repository-impl";
-import { verifyAuthTokenRouter, destroySession } from "./src/middleware/authentication-middleware";
+import { verifyAuthTokenRouter, destroySession, checkPermissions } from "./src/middleware/authentication-middleware";
 export { 
     LoggerMod, 
     Logger,
@@ -15,4 +15,5 @@ export {
     UserRepositoryImpl,
     verifyAuthTokenRouter,
     destroySession,
+    checkPermissions,
 };

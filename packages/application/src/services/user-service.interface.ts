@@ -4,4 +4,5 @@ import { GenericService } from "./generic-service.interface";
 export interface UserService extends GenericService<User> {
     findByEmail(email: string): Promise<User> | undefined;
     createFromGoogle(profile: any): Promise<User> | undefined;
+    findStudentByTeacherId(teacherId: number): Promise<User[]> | undefined;
 }

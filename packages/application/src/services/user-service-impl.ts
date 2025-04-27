@@ -33,6 +33,25 @@ export class UserServiceImpl extends AbstractService<User, UserRepository> imple
         }
         return undefined;
     }
+    
+    public findStudentByTeacherId(teacherId: number): Promise<User[]> | undefined {
+        if (!this.repository) return undefined;
+    
+        return this.repository
+            .createQueryBuilder('user')
+            .innerJoin('class_student', 'cs', 'cs.student_id = user.id')
+            .innerJoin('course_class', 'cc', 'cs.course_class_id = cc.id')
+            .where('cc.teacher_id = :teacherId', { teacherId })
+            .andWhere('user.role_id = :roleId', { roleId: 4 }) // 4 = student
+            .groupBy('user.id')
+            .addGroupBy('user.firstName')
+            .addGroupBy('user.lastName')
+            .addGroupBy('user.email')
+            .addGroupBy('user.phoneNumber')
+            .getMany();
+    }
+    
+
 
     public getRepositoryName(): string {
         return "UserRepositoryImpl";

@@ -1,0 +1,39 @@
+<%- include("../../partials/main") %>
+
+<head>
+  <%- include("../../partials/title-meta", {title: 'NGワードリスト' }) %>
+        <link href="/libs/alertifyjs/build/css/alertify.min.css" rel="stylesheet" type="text/css" />
+        <link href="/libs/sweetalert2/sweetalert2.min.css" rel="stylesheet" type="text/css" />
+        <link href="/css/call-records-list/style.css" rel="stylesheet" type="text/css" />
+        <link href="/css/word-list/style.css" rel="stylesheet" type="text/css" />
+        <script src="/js/pages/jquery-3.6.3.min.js"></script>
+  <!-- datepicker css -->
+  <link rel="stylesheet" href="/libs/flatpickr/flatpickr.min.css">
+  <%- include("../../partials/head-css"); %>
+</head>
+
+<body data-layout="horizontal">
+  <div id="layout-wrapper">
+    <!-- Get menu -->
+    <%- include("../../partials/horizontal", {title: "NGワードリスト" }) %>
+    <div class="main-content">
+      <%- include("../../partials/word-list") %>
+      <%- include("../../partials/modals/new-word") %>
+      <%- include("../../partials/modals/edit-word") %>
+      <%- include("../../partials/footer") %>
+      <%- include("../../partials/modals/spinner") %>
+    </div>
+  </div>
+    <%- include("../../partials/scripts/vendor-script") %>
+      <%- include("../../partials/scripts/notification-script") %>
+      <%- include("../../partials/scripts/date-range-script") %>
+
+      <div id="wordList" data-test=<%- JSON.stringify(wordList.map(word => word.id)) %>></div>
+
+    <!-- Customize init js-->
+    <script src="/js/pages/customize-search-pagination.init.js"></script>
+      <script src="/libs/sweetalert2/sweetalert2.min.js"></script>
+      <script src="/js/pages/word-list.init.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>

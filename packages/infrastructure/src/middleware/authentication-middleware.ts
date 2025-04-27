@@ -12,14 +12,15 @@ export async function verifyAuthTokenRouter(request: express.Request, response: 
         destroySession(request, response);
         return response.clearCookie("wacts", { maxAge: 0 }).status(HttpCode.UNAUTHORIZATION).redirect(RouteHelper.LOGIN);
     }
+
     try {
-        let jwtPayload = jwt.verify(EncryptHelper.decryptToken(token), process.env.TOKEN_KEY!) as {
+        let decryptedToken = EncryptHelper.decryptToken(token);
+        let jwtPayload = jwt.verify(decryptedToken, process.env.TOKEN_KEY!) as {
             userId: number;
             remember: string;
         };
-
         let userServices = container.get<UserService>(TYPES.UserService);
-        let refreshUserDecoded = await userServices.findById(jwtPayload.userId, ["userRoles"]);
+        let refreshUserDecoded = await userServices.findById(jwtPayload.userId, ["role"]);
 
         if (!refreshUserDecoded?.active || (userId && userId !== jwtPayload.userId) || userId === undefined) {
             if (jwtPayload.remember === undefined || (jwtPayload.remember === "on" && !request.session.cookie.expires) || userId !== jwtPayload.userId) {
@@ -37,6 +38,7 @@ export async function verifyAuthTokenRouter(request: express.Request, response: 
         response.locals.jwtPayload = { ...jwtPayload, user: refreshUserDecoded, defaultLanguage: process.env.DEFAULT_LANGUAGE || "ja" };
         return next();
     } catch (err: any) {
+        console.log("err", err);
         return response.status(HttpCode.UNAUTHORIZATION).redirect(RouteHelper.LOGIN);
     }
 }
@@ -46,4 +48,16 @@ export async function destroySession(request: express.Request, response: express
     let sessionRepository: any = ds?.getRepository("session");
     const sessionId = request.session.id;
     await sessionRepository.delete({ id: sessionId });
+}
+
+export function checkPermissions(permissions: number[]) {
+    return function (request: express.Request, response: express.Response, next: () => void) {
+        let currentUser = response.locals.jwtPayload.user;
+        let matchedPermission: boolean = false;
+        if (currentUser) matchedPermission = permissions.includes(currentUser.role.id);
+        if (matchedPermission) {
+            return next();
+        }
+        return response.redirect(RouteHelper.INDEX + RouteHelper.UNAUTHORIZATION);
+    };
 }

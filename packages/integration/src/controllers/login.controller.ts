@@ -105,8 +105,8 @@ export class LoginController extends BaseController {
             // Kiểm tra xem người dùng đã tồn tại trong cơ sở dữ liệu chưa
             let user: User | undefined | null = await this.userService.findByEmail(userData.profile.emails[0].value);
             // console.log("user", user);
-            const accessToken: string = userData.accessToken;
-            const refreshToken = randToken.generate(parseInt(this.refreshTokenSize));
+            // const accessToken: string = userData.accessToken;
+            // const refreshToken = randToken.generate(parseInt(this.refreshTokenSize));
             if (!user) {
                 // Nếu người dùng chưa tồn tại, tạo mới người dùng
                 let newUser = await this.userService.createFromGoogle(userData.profile);
@@ -114,6 +114,8 @@ export class LoginController extends BaseController {
                     user = await this.userService.findOneById(newUser.id);
                 }
             }
+            let accessToken: string = jwt.sign({ userId: user?.id }, this.tokenKey, { expiresIn: `${process.env.REMEMBER_TOKEN!}s` });
+            let refreshToken = randToken.generate(parseInt(this.refreshTokenSize));
             if (user) {
                 user.refreshToken = refreshToken;
                 user.role = { id: user.roleId } as Role;
