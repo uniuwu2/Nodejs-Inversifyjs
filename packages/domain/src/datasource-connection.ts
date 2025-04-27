@@ -9,9 +9,11 @@ import { Activity } from "./entities/activity";
 import { ActivityStudent } from "./entities/activity_student";
 import { CourseClass } from "./entities/course_class";
 import { Course } from "./entities/course";
-import { Session } from "./entities/session";
+import { SessionClass } from "./entities/session_class";
 import { ClassStudent } from "./entities/class_student";
 import { Attendance } from "./entities/attendance";
+import { Session } from "./entities/session";
+
 /**
  * Datasource connection
  */
@@ -42,8 +44,8 @@ export class DataSourceConnection {
                 password: this.password,
                 database: this.database,
                 synchronize: this.synchronize,
-                //logging: this.logging,
-                entities: [User, Role, Student, Staff, Activity, ActivityStudent, CourseClass, Course, Session, ClassStudent, Attendance],
+                // logging: this.logging,
+                entities: [User, Role, Student, Staff, Activity, ActivityStudent, CourseClass, Course, SessionClass, ClassStudent, Attendance, Session],
             });
             await this._dataSource.initialize();
         }

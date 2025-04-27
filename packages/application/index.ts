@@ -5,6 +5,8 @@ import { GenericService } from "./src/services/generic-service.interface";
 import { UserService } from "./src/services/user-service.interface";
 import { UserServiceImpl } from "./src/services/user-service-impl";
 import { RouteHelper } from "./src/helpers/route-helper";
+import { Message } from "./src/constants/message";
+import { EncryptHelper } from "./src/helpers/encrypt-helper";
 export {
     TYPES,
     HttpCode,
@@ -12,5 +14,7 @@ export {
     GenericService,
     UserService,
     RouteHelper,
-    UserServiceImpl
+    UserServiceImpl,
+    Message,
+    EncryptHelper
 }

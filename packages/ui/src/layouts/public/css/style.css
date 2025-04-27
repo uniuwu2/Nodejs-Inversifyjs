@@ -1,0 +1,680 @@
+/* Grid CSS :- Start */
+
+.container {
+    min-height: 600px;
+    min-width: 80%;
+}
+
+h2 {
+    background: #eaf2f5;
+    padding: 12px 20px;
+    margin: 10px -10px 10px;
+    letter-spacing: -1px;
+    color: #444;
+}
+
+.box {
+    background-color: #fcfcfc;
+    padding: 16px;
+}
+
+#date_after,
+#author_id,
+#regword {
+    margin-top: 5px;
+    margin-left: 5px;
+}
+
+#btn-search,
+.btn-regist {
+    margin-top: 15px;
+    font-size: 18px;
+    background-color: white;
+    border: 2px solid #ccc;
+}
+
+/*  span.regmode label,
+  span.search_option label{
+    width: 170px;
+    margin-left: 8px; 
+  } */
+
+input[type="radio"] {
+    margin-right: 3px;
+}
+
+#ngword,
+div.mode,
+#regword {
+    margin-bottom: 8px;
+}
+
+/* Newly added  2022-07-14*/
+
+h3 {
+    color: white;
+    padding-top: 26px;
+}
+
+/* Summary Screen : Start */
+
+.summary-body {
+    background-color: #d4d4d473;
+    padding: 20px;
+}
+
+.summary-info-heading {
+    padding-bottom: -2px;
+}
+.margin-space {
+    height: 80px;
+}
+.summary-main-head {
+    background-color: #eaf2f5;
+    padding: 12px;
+}
+.h3-head {
+    position: relative;
+    top: 4px;
+    color: #000000;
+    font-size: 1.4rem;
+}
+
+.h3-head span {
+    font-size: 1rem;
+}
+
+/* Table Design*/
+table.GeneratedTable {
+    width: 100%;
+    background-color: #ffffff;
+    border-collapse: collapse;
+    border-width: 1px;
+    border-color: #999393;
+    border-style: solid;
+    color: #000000;
+}
+
+table.GeneratedTable td,
+table.GeneratedTable th {
+    border-width: 1px;
+    border-color: #999393;
+    border-style: solid;
+    text-align: center;
+    padding: 3px;
+}
+
+table.GeneratedTable thead {
+    background-color: #cfccbe;
+}
+
+/* Summary Screen : End */
+
+/* Grid CSS :- End */
+
+/* Chart CSS :- Start */
+.graph {
+    width: 75%;
+    height: 75%;
+    margin-bottom: 15px;
+}
+
+/* Chart CSS :- End */
+
+/* Detail CSS :- Start */
+.container {
+    min-height: 600px;
+    min-width: 80%;
+}
+h2 {
+    background: #eaf2f5;
+    padding: 12px 20px;
+    margin: 10px -10px 10px;
+    letter-spacing: -1px;
+    color: #444;
+}
+
+div.issue .attributes {
+    margin-top: 2em;
+}
+
+div.issue .attributes .attribute {
+    padding-left: 180px;
+    clear: left;
+    min-height: 1.8em;
+}
+
+div.issue .attributes .attribute .label {
+    width: 170px;
+    margin-left: -180px;
+    font-weight: bold;
+    float: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+div.issue .attribute .value {
+    overflow: auto;
+    text-overflow: ellipsis;
+}
+
+.hit {
+    color: white;
+}
+
+.nglist {
+    margin-left: 30px;
+    color: red;
+}
+
+.player {
+    float: right;
+    margin-top: 20px;
+    margin-right: 150px;
+}
+/* Detail CSS :- End */
+
+/* User CSS :- Start */
+.contextual {
+    float: right;
+    white-space: nowrap;
+    line-height: 1.4em;
+    padding-left: 10px;
+    font-size: 0.9em;
+    margin-top: 15px;
+    margin-right: 10px;
+}
+
+table.list {
+    width: 100%;
+    border: 1px solid #e5e7eb;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+table.list thead th,
+table.list tbody td {
+    padding: 0.6em 3em;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+table.list thead th {
+    text-align: center;
+    background-color: #f9fafb;
+}
+
+table.list thead th + th,
+table.list tbody td {
+    border-left: 1px solid #e5e7eb;
+}
+
+table.list tbody tr:last-child td {
+    border-bottom: none;
+}
+
+td.status {
+    text-align: center;
+}
+
+a.backlist,
+span.arrow,
+span.username {
+    font-size: 0.8em;
+    margin-right: 10px;
+}
+
+.box {
+    background-color: #fcfcfc;
+    padding: 16px;
+    margin-bottom: 10px;
+    color: #505050;
+    line-height: 1.5em;
+    border: 1px solid #e4e4e4;
+    word-wrap: break-word;
+    border-radius: 3px;
+}
+
+.tabular p {
+    margin: 0;
+    padding: 3px 0 3px 0;
+    padding-left: 10px;
+    min-height: 2em;
+    clear: left;
+}
+
+.tabular label {
+    font-weight: bold;
+    float: left;
+    text-align: right;
+    margin-left: -60px;
+    width: 175px;
+    line-height: 24px;
+}
+
+input {
+    margin-left: 8px;
+    /* width: 30%; */
+}
+
+button {
+    margin-top: 15px;
+    font-size: 18px;
+    background-color: white;
+    border: 2px solid #ccc;
+}
+
+span.required {
+    color: #bb0000;
+}
+
+.info {
+    margin-left: 5px;
+}
+/* User CSS :- End */
+
+/* header CSS :- Start */
+
+.logo-heading {
+    font-size: 3rem;
+    margin-left: -22px;
+    font-family: initial;
+}
+
+.logo-heading > span:nth-child(1) {
+    color: #9d9fa1;
+}
+.logo-heading > span:nth-child(2) {
+    color: #9d9fa1;
+}
+
+.subject {
+    color: #7e7d7d !important;
+}
+
+#loggedas {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.username {
+    margin-right: 20px;
+    margin-top: 8px;
+}
+
+img.gravatar {
+    margin: 0.2em 0.5em 0 0;
+    vertical-align: top;
+    border: #888b8b;
+    border-style: solid;
+    border-width: 2px;
+}
+
+.account {
+    margin-right: 25px;
+    padding-left: 25px;
+}
+
+ul.ddmenu li a.selected {
+    color: #ffffff !important;
+    border-radius: 08px;
+    background-color: #3274d6;
+}
+
+/*�X�s�i�[�p*/
+#overlay {
+    position: fixed;
+    top: 0;
+    z-index: 100;
+    width: 100%;
+    height: 100%;
+    display: none;
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.cv-spinner {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px #ddd solid;
+    border-top: 4px #2e93e6 solid;
+    border-radius: 50%;
+    animation: sp-anime 0.8s infinite linear;
+}
+
+@keyframes sp-anime {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.is-hide {
+    display: none;
+}
+
+.loading {
+    margin-left: 10px;
+    color: #ffffff;
+    font-size: 20px;
+}
+
+.flash.error {
+    border: 1px solid silver;
+    text-shadow: 0 1px white;
+    border-radius: 0px;
+    background-color: #ffe3e3;
+    border-color: #d88;
+    color: #880000;
+    padding: 9px 35px 10px;
+    margin: 5px 0px 1px 0px;
+    font-size: 1.1em;
+}
+
+.flash.success {
+    border: 0px solid;
+    padding: 9px 35px 10px;
+    margin: 5px 0px 1px 0px;
+    position: relative;
+    border-bottom: 1px solid #aeccd7;
+    background-color: #dfffdf;
+    border-color: #9fcf9f;
+    color: #005f00;
+    border-radius: 0px;
+    font-size: 1.1em;
+}
+
+/*  Newly Added Code */
+
+.topnav {
+    overflow: hidden;
+    background-color: #055160;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.topnav a {
+    float: left;
+    color: #f2f2f2;
+    text-align: center;
+    text-decoration: none;
+}
+
+.topnav .profile-pic {
+    width: 40px;
+    border-radius: 100%;
+}
+
+/*   ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  } */
+
+li {
+    float: left;
+}
+
+/*   .nav-item {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: left 8px;
+    padding-right: 12px;
+    text-decoration: none;
+  }
+  
+ */
+
+.nav-item:hover {
+    color: #1e5ccf;
+}
+
+/* dropdown */
+
+ul.ddmenu {
+    margin: 0px;
+    padding: 0px 0px 0px 15px;
+    /* background-color: #F8F9FA;  */
+}
+
+ul.ddmenu li a.dropdown {
+    margin-top: 8px !important;
+}
+
+ul.ddmenu li {
+    padding: 1rem;
+    display: inline-block;
+    list-style-type: none;
+    position: relative;
+}
+ul.ddmenu a {
+    /* background-color: #F8F9FA;  */
+    color: rgba(0, 0, 0, 0.55);
+    line-height: 28px;
+    text-align: center;
+    text-decoration: none;
+    font-weight: bold;
+    display: block;
+}
+ul.ddmenu a:hover {
+    background-color: #1e5ccf;
+    border-radius: 8px;
+    color: #fafafa !important;
+}
+
+ul.ddmenu li:hover ul {
+    display: block;
+}
+
+ul.ddmenu ul {
+    margin: 0px;
+    padding: 0px;
+    display: none;
+    position: absolute;
+}
+
+ul.ddmenu ul li {
+    width: 165px;
+    border-top: 1px solid #4a6eb1;
+    background-color: #c9c9c9 !important;
+    z-index: 10;
+}
+ul.ddmenu ul li a {
+    line-height: 35px;
+    text-align: left;
+    padding-left: 5px;
+    font-weight: normal;
+}
+ul.ddmenu ul li a:hover {
+    background-color: #1e5ccf;
+    color: #fafafa !important;
+}
+
+/* dropdown */
+
+h3 {
+    color: #3f8283;
+    padding-top: 2px;
+}
+
+.logo-icon {
+    width: 25%;
+    float: left;
+    display: flex;
+    padding: 15px;
+}
+.userloginfo {
+    width: 75%;
+    float: left;
+}
+
+.username span {
+    color: white;
+}
+.lgout-btn {
+    cursor: pointer;
+    outline: 0;
+    color: #fff;
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    display: inline-block;
+    font-weight: 400;
+    line-height: 1.5;
+    text-align: center;
+    border: 1px solid transparent;
+    padding: 6px 12px;
+    font-size: 16px;
+    border-radius: 0.25rem;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+lgout-btn :hover {
+    color: #fff;
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+
+.navbar {
+    background-color: #c9c9c9 !important;
+    padding-top: 0rem !important;
+    padding-bottom: 0rem !important;
+}
+
+/* header CSS :- End */
+
+/* log CSS :- Start */
+span.batch_search_option,
+span.batch_search_option label {
+    width: 220px;
+}
+
+input[type="radio"] {
+    margin-right: 3px;
+}
+
+#batchday,
+#batchdate {
+    margin-top: 18px;
+}
+
+#batchdate {
+    margin-left: 5px;
+}
+/* log CSS :- End */
+
+/* login CSS :- Start */
+
+/* login CSS :- End */
+
+/* Footer CSS :- Start */
+
+footer {
+    margin-top: 20px;
+}
+
+/* Footer CSS :- End */
+
+/* Other CSS :- Start */
+
+.ngreglist {
+    font-weight: bold;
+    text-decoration: underline;
+    font-size: 1.1rem;
+}
+
+.calllist {
+    font-weight: bold;
+    /* text-decoration: underline; */
+    font-size: 1.1rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.gnl-btn {
+    cursor: pointer;
+    outline: 0;
+    color: #fff;
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    display: inline-block;
+    font-weight: 400;
+    line-height: 1.5;
+    text-align: center;
+    border: 1px solid transparent;
+    padding: 8px 24px;
+    font-size: 16px;
+    border-radius: 0.25rem;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.gnl-btn :hover {
+    color: #fff;
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+/* Other CSS :- End */
+
+#btn-usr-regist {
+    margin-top: 15px;
+    font-size: 18px;
+    background-color: white;
+    border: 2px solid #ccc;
+    margin-left: 132px;
+}
+
+.gridjs-table {
+    width: 100% !important;
+}
+
+td.score-color {
+    text-align: center;
+}
+
+td.score-color.yellow {
+    background-color: #ffff88 !important;
+    font-weight: bold;
+}
+td.score-color.red {
+    background-color: #ee0000 !important;
+    color: white;
+    font-weight: bold;
+}
+td.score-color.green {
+    background-color: #00bb00 !important;
+    color: white;
+    font-weight: bold;
+}
+
+span.notes.positive {
+    background-color: #00bb00 !important;
+    color: white;
+}
+span.notes.natural {
+    background-color: #ffff88 !important;
+}
+span.notes.negative {
+    background-color: #ee0000 !important;
+    color: white;
+}
+
+span.notes {
+    margin-left: 6px;
+    margin-right: 6px;
+    padding: 5px 10px 5px 10px;
+    text-decoration: none !important;
+}
+
+#title {
+    text-decoration: underline;
+}

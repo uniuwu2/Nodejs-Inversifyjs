@@ -1,0 +1,22 @@
+<%- include("../../partials/main") %>
+
+<head>
+  <%- include("../../partials/title-meta", {title: 'ホーム'}) %>
+  <link href="/css/home/style.css" rel="stylesheet" type="text/css" />
+  <%- include("../../partials/head-css"); %>
+</head>
+
+<body data-layout="horizontal">
+  <div id="layout-wrapper">
+    <!-- Get menu -->
+  <%- include("../../partials/horizontal") %>
+    <div class="main-content">
+      <%- include("../../partials/home") %>
+      <%- include("../../partials/footer") %>
+    </div>
+  </div>
+  <%- include("../../partials/scripts/vendor-script") %>
+  <script src="/js/app.js"></script>
+</body>
+
+</html>

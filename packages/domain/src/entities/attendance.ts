@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from "typeorm";
 import { GenericEntity } from "../generic-entities";
-import { Session } from "./session";
+import { SessionClass } from "./session_class";
 
 
 @Entity("attendance")
@@ -26,10 +26,10 @@ export class Attendance extends GenericEntity {
     @Column("varchar", { name: "attendance_location", length: 255 })
     public attendanceLocation: string = "";
 
-    @ManyToOne(() => Session, (session) => session.attendance, {
+    @ManyToOne(() => SessionClass, (sessionClass) => sessionClass.attendance, {
         onDelete: "NO ACTION",
         onUpdate: "NO ACTION",
     })
     @JoinColumn([{ name: "session_id", referencedColumnName: "id" }])
-    public session: Session | null = null;
+    public sessionClass: SessionClass | null = null;
 }

@@ -9,7 +9,24 @@ import { UserRepository } from "./user-repository.interface";
  */
 @injectable()
 export class UserRepositoryImpl extends AbstractRepository<User> implements UserRepository {
-
+    public findOneByFieldName(fieldName: any): Promise<User> | undefined {
+        if (this.repository != undefined) {
+            return this.repository
+                .findOne({
+                    where: { ...fieldName },
+                    relations: ["role"],
+                })
+                .then((res: any) => {
+                    if (res == null) {
+                        return undefined;
+                    }
+                    return res;
+                })
+                .catch((err: any) => err);
+        }
+        return undefined;
+    }
+    
     public getEntityType(): any {
         return User;
     }

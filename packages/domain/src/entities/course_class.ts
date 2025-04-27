@@ -2,7 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from "type
 import { GenericEntity } from "../generic-entities";
 import { Course } from "./course";
 import { User } from "./user";
-import { Session } from "./session";
+import { SessionClass } from "./session_class";
 import { ClassStudent } from "./class_student";
 
 @Entity("course_class")
@@ -33,8 +33,8 @@ export class CourseClass extends GenericEntity {
     @JoinColumn([{ name: "teacher_id", referencedColumnName: "id" }])
     public teacher: User | null = null;
 
-    @OneToMany(() => Session, (session) => session.courseClass)
-    public session!: Session[];
+    @OneToMany(() => SessionClass, (sessionClass) => sessionClass.courseClass)
+    public sessionClass!: SessionClass[];
 
     @OneToMany(() => ClassStudent, (classStudent) => classStudent.courseClass)
     public classStudent!: ClassStudent[];

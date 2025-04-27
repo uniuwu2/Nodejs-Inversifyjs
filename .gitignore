@@ -1,0 +1,34 @@
+# Node modules
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+
+# IDE/editor settings
+.vscode/
+.idea/
+
+# OS-specific files
+.DS_Store
+
+# Optional: nếu bạn dùng TypeORM và tạo migration tự động
+
+# Optional: nếu bạn dùng các package như jest
+coverage/
+
+# Optional: nếu có cache của package manager
+.cache/
+
+logs/
+
+package.json
+package-lock.json
+tsconfig.json

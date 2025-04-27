@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { Container, ContainerModule } from "inversify";
-import {  TYPES, Variables } from "@inversifyjs/application";
+import { TYPES, Variables } from "@inversifyjs/application";
 import { InversifyExpressServer } from "inversify-express-utils";
 import * as express from "express";
 import * as session from "express-session";
@@ -11,6 +11,9 @@ import { DataSourceConnection,  } from "@inversifyjs/domain";
 import * as cookieParser from "cookie-parser";
 import { Repository, getRepository, LessThanOrEqual } from "typeorm";
 import { TypeormStore } from "connect-typeorm";
+const passport = require("passport");
+
+import { serializeUser, initializePassport } from "./auth-passport";
 export async function bootstrap(container: Container, appPort: any, appPath: any, ...modules: ContainerModule[]) {
     if (container.isBound(TYPES.App) == false) {
         container.load(...modules);
@@ -43,22 +46,28 @@ export async function bootstrap(container: Container, appPort: any, appPath: any
         logger.info("Initialized inversify express server ...");
         const server = new InversifyExpressServer(container, router);
 
-        // let ds = container.get<DataSourceConnection>(TYPES.DataSourceConnect).getDataSource();
-        // let sessionRepository: any = ds?.getRepository("session");
+        let ds = container.get<DataSourceConnection>(TYPES.DataSourceConnect).getDataSource();
+        let sessionRepository: any = ds?.getRepository("session");
 
-        // const sessionStore = new TypeormStore().connect(sessionRepository);
+        const sessionStore = new TypeormStore().connect(sessionRepository);
 
         server.setConfig((app: any) => {
             app.set("etag", false);
             app.use(cookieParser());
-            // app.use(
-            //     session({
-            //         secret: process.env.ENCRYPT_KEY!,
-            //         resave: false,
-            //         saveUninitialized: false,
-            //         cookie: { httpOnly: false },
-            //     })
-            // );
+            app.use(
+                session({
+                    secret: process.env.ENCRYPT_KEY!,
+                    resave: false,
+                    saveUninitialized: false,
+                    cookie: { httpOnly: false },
+                    store: sessionStore,
+                })
+            );
+
+            serializeUser();
+            initializePassport();
+            app.use(passport.initialize());
+            app.use(passport.session());
             // set ejs
             app.set("view engine", "ejs");
             app.engine("ejs", require("ejs").__express);
@@ -83,12 +92,12 @@ export async function bootstrap(container: Container, appPort: any, appPath: any
             app.use(exceptionLoggerMiddleware);
         });
 
-        // setInterval(removeExpiredTokens, Variables.TOKEN_LIFETIME);
+        setInterval(removeExpiredTokens, Variables.TOKEN_LIFETIME);
 
-        // async function removeExpiredTokens() {
-        //     const now = new Date().getTime();
-        //     await sessionRepository.delete({ expiredAt: LessThanOrEqual(now) });
-        // }
+        async function removeExpiredTokens() {
+            const now = new Date().getTime();
+            await sessionRepository.delete({ expiredAt: LessThanOrEqual(now) });
+        }
 
         const app = server.build();
         app.listen(appPort);

@@ -15,6 +15,9 @@ export class User extends GenericEntity {
     @Column("varchar", { name: "password", length: 512 })
     public password: string = "";
 
+    @Column("varchar", { name: "refresh_token", length: 1024, nullable: true })
+    public refreshToken: string = "";
+    
     @Column("varchar", { name: "first_name", length: 255 })
     public firstName: string = "";
 
