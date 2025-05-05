@@ -6,4 +6,5 @@ export class HttpCode {
     public static readonly FORBIDDEN = 403;
     public static readonly NOT_FOUND = 404;
     public static readonly INTERNAL_SERVER_ERROR = 500;
+    public static readonly IMPORT_SUCCESS = 201;
 }

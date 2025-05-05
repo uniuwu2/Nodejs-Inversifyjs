@@ -44,7 +44,7 @@ export class DataSourceConnection {
                 password: this.password,
                 database: this.database,
                 synchronize: this.synchronize,
-                // logging: this.logging,
+                // logging: true,
                 entities: [User, Role, Student, Staff, Activity, ActivityStudent, CourseClass, Course, SessionClass, ClassStudent, Attendance, Session],
             });
             await this._dataSource.initialize();

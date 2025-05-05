@@ -5,6 +5,15 @@ import { GenericRepository } from "./src/repositories/generic-repository.interfa
 import { UserRepository } from "./src/repositories/user-repository.interface";
 import { UserRepositoryImpl } from "./src/repositories/user-repository-impl";
 import { verifyAuthTokenRouter, destroySession, checkPermissions } from "./src/middleware/authentication-middleware";
+import { uploadMiddleware } from "./src/middleware/upload-middleware";
+import { StudentRepository } from "./src/repositories/student-repository.interface";
+import { StudentRepositoryImpl } from "./src/repositories/student-repository-impl";
+import { RoleRepository } from "./src/repositories/role-repository.interface";
+import { RoleRepositoryImpl } from "./src/repositories/role-repository-impl";
+import { CourseRepository } from "./src/repositories/course-repository.interface";
+import { CourseRepositoryImpl } from "./src/repositories/course-repository-impl";
+import { CourseClassRepository } from "./src/repositories/course-class-repository.interface";
+import { CourseClassRepositoryImpl } from "./src/repositories/course-class-repository-impl";
 export { 
     LoggerMod, 
     Logger,
@@ -16,4 +25,13 @@ export {
     verifyAuthTokenRouter,
     destroySession,
     checkPermissions,
+    uploadMiddleware,
+    StudentRepository,
+    StudentRepositoryImpl,
+    RoleRepository,
+    RoleRepositoryImpl,
+    CourseRepository,
+    CourseRepositoryImpl,
+    CourseClassRepository,
+    CourseClassRepositoryImpl,
 };

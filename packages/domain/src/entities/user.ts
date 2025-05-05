@@ -28,7 +28,7 @@ export class User extends GenericEntity {
     public phoneNumber: string = "";
 
     @Column("varchar", { name: "image_path", length: 255, nullable: true })
-    public image_path: string | null = "";
+    public imagePath: string | null = "";
 
     @Column("tinyint", { name: "active", nullable: true, default: 1 })
     public active: number | null = 1;
@@ -61,7 +61,7 @@ export class User extends GenericEntity {
     public activityStudent!: ActivityStudent[];
 
     @OneToMany(() => CourseClass, (courseClass) => courseClass.teacher)
-    public courseClass!: CourseClass[];
+    public course!: CourseClass[];
 
     @OneToMany(() => ClassStudent, (classStudent) => classStudent.student)
     public classStudent!: ClassStudent[];

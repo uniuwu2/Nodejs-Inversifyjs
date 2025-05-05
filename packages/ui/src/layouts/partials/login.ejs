@@ -1,46 +1,38 @@
-<div class="authentication-bg min-vh-100">
-    <div class="bg-overlay bg-light"></div>
-    <div class="container">
-        <div class="pb-2 m-auto d-flex justify-content-center">
-            <a href="/" class="d-block auth-logo">
-                <img src="/images/logo-240px.png" alt="" class="auth-logo-dark me-start" />
-            </a>
-        </div>
-        <div class="content">
-            <div class="content-form">
+<div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+    data-sidebar-position="fixed" data-header-position="fixed">
+    <div
+      class="position-relative overflow-hidden radial-gradient min-vh-100 d-flex align-items-center justify-content-center">
+      <div class="d-flex align-items-center justify-content-center w-100">
+        <div class="row justify-content-center w-100">
+          <div class="col-md-8 col-lg-6 col-xxl-3">
                 <div class="card">
-                    <div class="card-header">ログイン</div>
-                    <% if(locals.message) { %>
-                    <div class="alert-message alert">
-                        <div role="alert"><%= message %></div>
-                    </div>
-                    <% } %>
+                    <div class="card-header">Login</div>
                     <div class="card-body">
                         <form action="/login" method="POST">
                             <div class="mb-3">
-                                <label for="email" class="form-label">ログインID </label>
+                                <label for="email" class="form-label">Email </label>
                                 <div class="position-relative input-custom-icon">
-                                    <input value="<%= locals?.data?.email || '' %>" type="text" class="form-control <%- locals?.errorValidator?.email && 'form-error' %>" id="email" name="email" placeholder="ログインID を入力してください" />
-                                    <span class="bx bx-user"></span>
+                                    <input value="<%= locals?.data?.email || '' %>" type="text" class="form-control <%- locals?.errorValidator?.email && 'form-error' %>" id="email" name="email" placeholder="Enter your email" />
+                                    <span class="ti ti-mail"></span>
                                 </div>
                                 <% if(locals?.errorValidator?.email) { %>
                                 <div class="invalid-feedback d-block"><%= locals?.errorValidator?.email %></div>
                                 <%}%>
                             </div>
                             <div class="mb-3">
-                                <label for="password" class="form-label">パスワード</label>
+                                <label for="password" class="form-label">Password</label>
                                 <div class="position-relative auth-pass-inputgroup input-custom-icon">
-                                    <span class="bx bx-lock-alt"></span>
+                                    <span class="ti ti-lock"></span>
                                     <input
                                         value="<%= locals?.data?.password || '' %>"
                                         type="password"
                                         class="form-control <%- locals?.errorValidator?.password && 'form-error' %>"
                                         id="password"
                                         name="password"
-                                        placeholder="パスワードを入力してください"
+                                        placeholder="Enter your password"
                                     />
                                     <button type="button" class="btn btn-link position-absolute h-100 end-0 top-0" id="password-addon">
-                                        <i class="mdi mdi-eye-outline font-size-18 text-muted"></i>
+                                        <i class="ti ti-eye"></i>
                                     </button>
                                 </div>
                                 <% if(locals?.errorValidator?.password) { %>
@@ -51,18 +43,18 @@
                             <div class="form-check py-1">
                                 <% let checked = locals?.data?.remember ? "checked" : "" %>
                                 <input type="checkbox" class="form-check-input" id="remember" name="remember" <%= checked %> />
-                                <label class="form-check-label" for="remember">ログイン状態を保持する</label>
+                                <label class="form-check-label" for="remember">Remember me</label>
                             </div>
 
-                            <button type="submit" class="btn btn-primary">ログイン</button>
+                            <button type="submit" class="btn btn-primary">Sign In</button>
                         </form>
+                        <div class="gl-owing-text text-center  mb-3 gl-grow">or</div>
+                        <a href="/login/auth/google" class="btn btn-outline-dark mt-3 d-flex align-items-center justify-content-center gap-2">
+                            <i class="ti ti-brand-google"></i>
+                            <span>Login with Google</span>
+                        </a>
                     </div>
-                    <a href="/login/auth/google" class="btn btn-outline-dark mt-3 d-flex align-items-center justify-content-center gap-2">
-                        <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google Logo" style="width: 20px; height: 20px;">
-                        <span>Googleでログイン</span>
-                    </a>
                 </div>
-                                
             </div>
         </div>
     </div>

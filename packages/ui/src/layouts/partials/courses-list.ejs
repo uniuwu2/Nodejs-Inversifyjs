@@ -1,0 +1,112 @@
+<h1 class="mb-4">Courses</h1>
+<form method="GET" action="/classroom/courses" id="search-form">
+  <div class="row">
+    <div class="col-xl-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="row mb-3 gap-3">
+            <form id="upload-form" enctype="multipart/form-data">
+              <div class="col-md-12">
+                <label for="csv-file" class="form-label">Choose CSV File</label>
+                <div class="d-flex">
+                  <input type="file" class="form-control" id="csv-file" accept=".csv" />
+                  <button type="button" class="btn btn-primary" onclick="uploadCSV()">Upload</button>
+                </div>
+                <div class="form-text" id="file-name">No file chosen</div>
+              </div>
+            </form>
+          </div>
+          <div class="row align-items-center mb-3 gap-3">
+            <div class="col">
+              <div class="mb-3 mb-md-0">
+                <div class="position-relative">
+                  <input type="text" class="form-control" placeholder="Search..." id="searchField" name="searchField"
+                    value="<%= locals?.searchField %>" autofocus />
+                  <% if(locals?.searchField.length> 0) { %>
+                    <button id="clear-search" type="button" class="btn-close button-clos" aria-label="Close"></button>
+                    <% } %>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-3 position-relative d-flex">
+              <div class="input-group flex-nowrap">
+                <span class="input-group-text">Department</span>
+                <select class="form-select" id="departmentSelect" name="departmentSelect">
+                  <option value="ALL" <%=departmentSelect=='ALL' && 'selected' %>>All</option>
+                  <% if (departmentList?.length> 0) { departmentList.forEach(department => { %>
+                    <option value="<%= department.department %>" <%=String(department.department)==locals?.departmentSelect && 'selected' %>><%=
+                        department.department %>
+                    </option>
+                    <%}); } else { %>
+                        <option value="1" <%=locals?.departmentSelect=='1' && 'selected' %>>Department 1</option>
+                        <option value="2" <%=locals?.departmentSelect=='2' && 'selected' %>>Department 2</option>
+                        <option value="3" <%=locals?.departmentSelect=='3' && 'selected' %>>Department 3</option>
+                        <option value="4" <%=locals?.departmentSelect=='4' && 'selected' %>>Department 4</option>                        
+                      <% } %>
+                </select>
+              </div>
+            </div>
+            <div class="row pe-0">
+              <div class="table-responsive pe-0">
+                  <table class="table table-nowrap align-middle">
+                      <thead class="table-light">
+                          <tr>
+                              <input hidden type="text" id="sortBy" name="sortBy" value="<%= sortBy %>" />
+                              <input hidden type="text" id="sort" name="sort" value="<%= sort %>" />
+                              <% function iconSort() { 
+                                  if(sort === "ASC") { %> 
+                                      <i class="ti ti-arrow-narrow-up"></i> 
+                                  <% } else if (sort === "DESC") {  %> 
+                                  <i class="ti -ti-arrow-narrow-down"></i>  
+                              <% }} %>
+                              <th scope="col"  role="button" id="sort-by-id">ID <% if(sortBy === "id") { iconSort() } else { %> <i class="ti ti-arrows-sort"></i>  <% } %></th>
+                              <th scope="col"  role="button" id="sort-by-courseName">Course Name <% if(sortBy === "courseName") { iconSort() } else { %> <i class="ti ti-arrows-sort"></i>  <% } %></th>
+                                <th scope="col"  role="button" id="sort-by-courseCode">Course Code <% if(sortBy === "courseCode") { iconSort() } else { %> <i class="ti ti-arrows-sort"></i>  <% } %></th>
+                                <th scope="col"  role="button" id="sort-by-department">Department <% if(sortBy === "department") { iconSort() } else { %> <i class="ti ti-arrows-sort"></i>  <% } %></th>
+                                <th scope="col"  role="button" id="sort-by-credit">Credit(s) <% if(sortBy === "credits") { iconSort() } else { %> <i class="ti ti-arrows-sort"></i>  <% } %></th>  
+                              <th scope="col"  style="width: 200px">Action</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                  <% if(courses.length > 0) { %> 
+                      <%  courses.forEach(course=> { %>
+                              <tr id="coursrRow-<%= course.id %>">
+                                  <td class="d-flex align-items-center">
+                                    <%= course.id %>
+                                </td>
+                                  <td>
+                                      <%= course.courseName %>
+                                  </td>
+                                  <td>
+                                      <%= course.courseCode %>
+                                  </td>
+                                  <td>
+                                      <%= course.department %>
+                                  </td>
+                                    <td>
+                                        <%= course.credit %>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="d-flex gap-2 justify-content-center">
+                                            <a href="/classroom/courses/<%= course.id %>" class="btn btn-primary btn-sm">View</a>
+                                            <a href="/classroom/courses/edit/<%= course.id %>" class="btn btn-warning btn-sm">Edit</a>
+                                        </div>
+                                    </td>
+
+                              </tr>
+                              <% }) %>
+                              <% } else { %> 
+                                  <tr>
+                                      <td colspan="7" class="text-center pt-4 pb-0 border-bottom-0 ">No result found</td>
+                                  </tr>
+                                  <% } %>
+                      </tbody>
+                  </table>
+              </div>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</form>
+<%- include("../partials/bottom-of-table", {page, limit, list: courses, lastPage, total}) %>

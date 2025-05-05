@@ -1,24 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Home</title>
-</head>
-<body>
-  <header>
-    <h1>Welcome to the Home Page</h1>
-  </header>
-  <main>
-    <p>This is the main content of the home page.</p>
-    <!-- logout -->
-    <form action="/logout" method="get" id="logout-form">
-      <button type="submit">Logout</button>
-    </form>
-    <!-- end logout -->
-  </main>
-  <footer>
-    <p>&copy; 2023 Your Company</p>
-  </footer>
-</body>
+<%- include("../../partials/main") %>
+  <head>
+    <%- include("../../partials/title-meta", {title: 'Home' }) %>
+    <%- include("../../partials/head-css"); %>
+  </head>
+
+  <body>
+    <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+      data-sidebar-position="fixed" data-header-position="fixed">
+      <%- include("../../partials/left-sidebar") %>
+    </div>
+    <%- include("../../partials/scripts/vendor-script") %>
+  </body>
 </html>
