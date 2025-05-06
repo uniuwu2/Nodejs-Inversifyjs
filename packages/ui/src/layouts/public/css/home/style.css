@@ -1,0 +1,59 @@
+@media (min-width: 812px) {
+    .card {
+        display: flex;
+    }
+}
+
+@media (min-width: 992px) and (max-width: 1024px) {
+    .page-content {
+        height: 90vh;
+    }
+}
+
+@media (min-width: 1024px) and (max-width: 1228px) {
+    .page-content {
+        height: 89vh;
+    }
+}
+
+@media (min-width: 1228px) and (max-width: 1396px) {
+    .page-content {
+        height: 82vh;
+    }
+}
+
+@media (min-width: 1396px) and (max-width: 1536px) {
+    .page-content {
+        height: 85vh;
+    }
+}
+
+@media (min-width: 1536px) and (max-width: 1706px) {
+    .page-content {
+        height: 86vh;
+    }
+}
+
+@media (min-width: 1706px) and (max-width: 1920px) {
+    .page-content {
+        height: 87vh;
+    }
+}
+
+@media (min-width: 1920px) and (max-width: 2048px) {
+    .page-content {
+        height: 88vh;
+    }
+}
+
+@media (min-width: 2048px) and (max-width: 2304px) {
+    .page-content {
+        height: 89vh;
+    }
+}
+
+@media (min-width: 2304px) {
+    .page-content {
+        height: 90vh;
+    }
+}

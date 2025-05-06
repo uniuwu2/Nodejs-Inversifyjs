@@ -1,0 +1,35 @@
+<% if(list.length > 0) { %>
+<div class="bottom-of-table d-flex">
+    <div class="col-md-6">
+        <div>
+            <% let totalPage = (page * limit) - limit; let totalOfPage = Number(total) > page * limit ? page * limit : total; %>
+            <p class="mb-sm-0 total-pages">Showing <%- list.length > 0 ? `${totalPage + 1} - ${totalOfPage}` : 0 %> of <%= total %> </p>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="float-sm-end">
+            <ul class="pagination mb-sm-0">
+                <input hidden id="page" name="page" type="text" value="<%= page %>" />
+                <li class="page-item <%- Number(page) === 1 && 'disabled' %>">
+                    <button class="page-link text-nowrap prev-btn" id="page-link" value="<%= Number(page) - 1 %>"><< Previous</button>
+                </li>
+                <% if (Number(page) > 3) { %>
+                <button class="page-link" id="page-link" value="<%= 1 %>">1</button>
+                <button class="page-link" disabled>...</button>
+                <% } %> <% let totalMax = Number(page) + 3 === lastPage ? lastPage - 2 : Number(page) + 2 %> <% let currentPage = Number(page) <= 3 ? 1 : Number(page) - 1 ;%> <% for (let i = currentPage; i <= totalMax; i++) { %> <% if (i >
+                0 && i <= lastPage) { %>
+                <li class="page-item <%- Number(page) === i && 'active' %>">
+                    <button class="page-link" id="page-link" value="<%= i %>"><%= i %></button>
+                </li>
+                <% } %> <% } %> <% if (Number(page) < lastPage - 2) { %>
+                <button class="page-link" disabled>...</button>
+                <button class="page-link" id="page-link" value="<%= lastPage %>"><%= lastPage %></button>
+                <% } %>
+                <li class="page-item <%- Number(page) === Number(lastPage) && 'disabled' %>">
+                    <button class="page-link text-nowrap" id="page-link" value="<%=  Number(page) + 1 %>">Next >></button>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <% } %>
+</div>

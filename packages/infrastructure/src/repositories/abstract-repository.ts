@@ -148,6 +148,21 @@ export abstract class AbstractRepository<E extends GenericEntity> implements Gen
         }
         return undefined;
     }
+
+    public findByFieldName(fieldName: any, relations?: string[]): Promise<E[]> | undefined {
+        if (this.repository != undefined) {
+            return this.repository
+                .find({ where: { ...fieldName }, relations } as unknown as FindOneOptions<E>)
+                .then((res) => {
+                    return res;
+                })
+                .catch((err) => err);
+        }
+        return undefined;
+    }
+    
+
+
     public count(): Promise<number> {
         if (this.repository != undefined) {
             return this.repository.count();

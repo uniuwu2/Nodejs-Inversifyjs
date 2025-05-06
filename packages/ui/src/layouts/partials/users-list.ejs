@@ -1,0 +1,153 @@
+<h1 class="mb-4">Users</h1>
+<form method="GET" action="/users" id="search-form">
+  <div class="row">
+    <div class="col-xl-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="row mb-3 gap-3">
+            <form id="upload-form" enctype="multipart/form-data">
+              <div class="col-md-12">
+                <label for="csv-file" class="form-label">Choose CSV File</label>
+                <div class="d-flex">
+                  <input type="file" class="form-control" id="csv-file" accept=".csv" />
+                  <button type="button" class="btn btn-primary" onclick="uploadCSV()">Upload</button>
+                </div>
+                <div class="form-text" id="file-name">No file chosen</div>
+              </div>
+            </form>
+          </div>
+          <div class="row align-items-center mb-3 gap-3">
+            <div class="col">
+              <div class="mb-3 mb-md-0">
+                <div class="position-relative">
+                  <input type="text" class="form-control" placeholder="Search..." id="searchField" name="searchField"
+                    value="<%= locals?.searchField %>" autofocus />
+                  <% if(locals?.searchField.length> 0) { %>
+                    <button id="clear-search" type="button" class="btn-close button-clos" aria-label="Close"></button>
+                    <% } %>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-3 position-relative d-flex">
+              <div class="input-group flex-nowrap">
+                <span class="input-group-text">Role</span>
+                <select class="form-select" id="roleSelect" name="roleSelect">
+                  <option value="ALL" <%=roleSelect=='ALL' && 'selected' %>>All</option>
+                  <% if (roleList?.length> 0) { roleList.forEach(role => { %>
+                    <option value="<%= role.id %>" <%=String(role.id)==locals?.roleSelect && 'selected' %>><%=
+                        role.roleName %>
+                    </option>
+                    <%}); } else { %>
+                      <option value="1" <%=locals?.roleSelect=='1' && 'selected' %>>Administrator
+                      </option>
+                      <option value="2" <%=locals?.roleSelect=='2' && 'selected' %>>Teacher
+                      </option>
+                      <option value="3" <%=locals?.roleSelect=='3' && 'selected' %>>Staff
+                      </option>
+                      <option value="4" <%=locals?.roleSelect=='4' && 'selected' %>>Student
+                      </option>
+                      <% } %>
+                </select>
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="input-group flex-nowrap">
+                <span class="input-group-text">Status</span>
+                <select class="form-select" id="validSelect" name="validSelect">
+                  <% validList.forEach(item=> { %>
+                    <option value="<%= item.value %>" <%=String(item.value)===locals?.validSelect && 'selected' %>><%=
+                        item.name %>
+                    </option>
+                    <% }) %>
+                </select>
+              </div>
+            </div>
+            <div class="row pe-0">
+              <div class="table-responsive pe-0">
+                <table class="table table-nowrap align-middle">
+                  <thead class="table-light">
+                    <tr>
+                      <input hidden type="text" id="sortBy" name="sortBy" value="<%= sortBy %>" />
+                      <input hidden type="text" id="sort" name="sort" value="<%= sort %>" />
+                      <% function iconSort() { if(sort==="ASC" ) { %>
+                        <i class="ti ti-arrow-narrow-up"></i>
+                        <% } else if (sort==="DESC" ) { %>
+                          <i class="ti ti-arrow-narrow-down"></i>
+                          <% }} %>
+                            <th scope="col" role="button" id="sort-by-id">ID <% if(sortBy==="id" ) { iconSort() } else {
+                                %> <i class="ti ti-arrows-sort"></i>
+                                <% } %>
+                            </th>
+                            <th scope="col" role="button" id="sort-by-firstName">Firstname <% if(sortBy==="firstName" )
+                                { iconSort() } else { %> <i class="ti ti-arrows-sort"></i>
+                                <% } %></i></th>
+                            <th scope="col" role="button" id="sort-by-lastName">Lastname <% if(sortBy==="lastName" ) {
+                                iconSort() } else { %> <i class="ti ti-arrows-sort"></i>
+                                <% } %></i></th>
+                            <th scope="col" role="button" id="sort-by-email">Email <% if(sortBy==="email" ) { iconSort()
+                                } else { %> <i class="ti ti-arrows-sort"></i>
+                                <% } %></i></th>
+                            <th scope="col" role="button">Role</th>
+                            <th scope="col" role="button">Status</th>
+                            <th scope="col" style="width: 200px">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% if(users.length> 0) { %>
+                      <% users.forEach(user=> { %>
+                        <tr id="userRow-<%= user.id %>">
+                          <td class="d-flex align-items-center">
+                            <% if(user.imagePath && user.imagePath !="" ) { %>
+                              <img src="/uploads/users/<%= user.imagePath %>" alt=""
+                                class="avatar rounded-circle img-thumbnail me-2" />
+                              <% } else { %>
+                                <img src="/images/users/default.jpg" alt="" class="avatar rounded-circle img-thumbnail me-2" />
+                                <% } %>
+                                <a href="/profile/<%= user.id %>" class="ms-2">
+                                  <%= user.id %>
+                                </a>
+                          </td>
+                          <td>
+                            <%= user.firstName %>
+                          </td>
+                          <td>
+                            <%= user.lastName %>
+                          </td>
+                          <td>
+                            <%= user.email %>
+                          </td>
+                          <td>
+                            <% if(user.roleId===1) { %>
+                              <span class="alert alert-success p-2">Administrator</span>
+                              <% } else if(user.roleId===2) { %>
+                                <span class="alert alert-secondary p-2">Teacher</span>
+                                <% } else if(user.roleId===3) { %>
+                                  <span class="alert alert-danger p-2">Staff</span>
+                                  <% } else { %>
+                                    <span class="alert alert-warning p-2">Student</span>
+                                    <% } %>
+                          </td>
+                          <td>
+                            <% if(user.active===1) { %>
+                              <span class="alert alert-success p-2">Active</span>
+                              <% } else { %>
+                                <span class="alert alert-danger p-2">Inactive</span>
+                                <% } %>
+                          </td>
+                        </tr>
+                        <% }) %>
+                          <% } else { %>
+                            <tr>
+                              <td colspan="7" class="text-center pt-4 pb-0 border-bottom-0 ">No results found</td>
+                            </tr>
+                            <% } %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</form>
+<%- include("../partials/bottom-of-table", {page, limit, list: users, lastPage, total}) %>

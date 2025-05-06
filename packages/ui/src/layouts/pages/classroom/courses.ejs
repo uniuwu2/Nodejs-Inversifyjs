@@ -1,0 +1,25 @@
+<%- include("../../partials/main") %>
+
+  <head>
+    <%- include("../../partials/title-meta", {title: 'Courses List' }) %>
+      <%- include("../../partials/head-css"); %>
+  </head>
+
+  <body>
+    <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+      data-sidebar-position="fixed" data-header-position="fixed">
+      <%- include("../../partials/left-sidebar") %>
+        <div class="body-wrapper">
+          <%- include("../../partials/header") %>
+            <div class="container-fluid">
+              <%- include("../../partials/courses-list") %>
+            </div>
+            <div id="courses" data-test=<%- JSON.stringify(courses.map(course=> course.id)) %>></div>
+        </div>
+    </div>
+    <script src="/js/pages/customize-search-pagination.init.js"></script>
+    <script src="/js/pages/courses-list.js"></script>
+    <%- include("../../partials/scripts/vendor-script") %>
+  </body>
+
+  </html>

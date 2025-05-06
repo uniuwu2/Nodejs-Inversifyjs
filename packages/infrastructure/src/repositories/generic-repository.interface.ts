@@ -50,4 +50,5 @@ export interface GenericRepository<E> {
      */
     getRepositoryName(): string;
     deleteBy(fieldName: any): Promise<boolean>;
+    findByFieldName(fieldName: any, relations?: string[]): Promise<E[]> | undefined;
 }

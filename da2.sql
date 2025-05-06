@@ -141,6 +141,7 @@ CREATE TABLE `course_class`  (
   `teacher_id` int(11) NOT NULL,
   `semester` varchar(255) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL,
   `class_schedule` json NOT NULL,
+  `group` varchar(255) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL,
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `REL_d59572ed8471d5e6415579bfdf`(`teacher_id`) USING BTREE,
   INDEX `fk_course_class_course`(`course_id`) USING BTREE,

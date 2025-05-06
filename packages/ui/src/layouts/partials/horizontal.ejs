@@ -1,0 +1,78 @@
+<header class="ishorizontal-topbar">
+  <div class="navbar-header">
+    <div class="d-flex">
+      <div class="navbar-brand-box p-0">
+        <a href="/home" class="logo logo-dark">
+          <span class="logo-sm">
+            <img src="/images/logos/favicon.png" alt="" height="30">
+          </span>
+          <span class="logo-lg">
+            <img src="/images/logo-180px.png" alt="">
+          </span>
+        </a>
+      </div>
+      <button type="button" class="btn btn-sm px-3 font-size-24 d-lg-none header-item" data-bs-toggle="collapse" data-bs-target="#topnav-menu-content">
+        <i class="bx bx-menu align-middle"></i>
+      </button>
+    </div>
+    <div class="header-user">
+        <div class="dropdown d-inline-block">
+            <button type="button" class="btn header-item user text-start d-flex align-items-center" id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <% if(locals.jwtPayload.user.imagePath) { %>
+              <img class="rounded-circle header-profile-user" src="/uploads/users/<%= locals.jwtPayload.user.imagePath %>" alt="Header Avatar" />
+              <% } else {%>
+                  <i class="bx bxs-user-circle" style="font-size: 40px"></i>
+              <% } %>
+                <span class="d-none d-xl-inline-block ms-2 fw-medium font-size-15"><%= locals.jwtPayload.user.firstName %> <%= locals.jwtPayload.user.lastName %></span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end pt-0">
+                <div class="p-3 border-bottom">
+                    <h6 class="mb-0"><%= locals.jwtPayload.user.firstName %> <%= locals.jwtPayload.user.lastName %></h6>
+                    <p class="mb-0 font-size-11 text-muted"><%= locals.jwtPayload.user.email %></p>
+                </div>
+                <a class="dropdown-item" href="/profile/<%= locals.jwtPayload.user.id %>"><i class="mdi mdi-account-circle text-muted font-size-16 align-middle me-2"></i> <span class="align-middle">プロフィール</span></a>
+                <div class="dropdown-divider"></div>
+                <form action="/logout" method="get">
+                    <button class="dropdown-item" type="submit"><i class="mdi mdi-logout text-muted font-size-16 align-middle me-2"></i> <span class="align-middle">ログアウト</span></button>
+                </form>
+            </div>
+        </div>
+    </div>
+  </div>
+  <div class="topnav">
+    <div class="container-fluid">
+      <nav class="navbar navbar-light navbar-expand-lg topnav-menu">
+        <div class="collapse navbar-collapse justify-content-center" id="topnav-menu-content">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link notify-item d-flex " href="/home"><i class='bx bx-home'></i>ホーム</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link notify-item d-flex " href="/call-records-list"><i class='bx bxs-phone'></i>通話記録一覧</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link notify-item d-flex " href="/search-list"><i class="bx bx-search-alt"></i> NGワード検索</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link notify-item d-flex " href="/word-list"><i class="bx bx-list-ol"></i>NGワードリスト</a>
+            </li>
+            <% if(locals.jwtPayload.user.userRoles[0].roleId === 1) { %>  
+              <li class="nav-item">
+              <a class="nav-link notify-item d-flex " href="/logs-list"><i class='bx bxs-calendar'></i>バッチログ確認</a>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle arrow-none " href="#" id="topnav-user" role="button">
+                <i class="bx bx-user icon nav-icon"></i>
+                <span data-key="t-pages">ユーザー管理</span>
+                <div class="arrow-down"></div>
+              </a>
+              <div class="dropdown-menu" ar ia-labelledby="topnav-user">
+                <a href="/users-list" data-key="t-userlist" class="dropdown-item ">ユーザーリスト</a>
+                <a href="/signup" data-key="t-register" class="dropdown-item ">新しいユーザー</a>
+              </div>
+              <% } %>
+            </li>
+          </ul>
+        </div>
+    </div>
+</header>
