@@ -45,11 +45,11 @@ export class CourseServiceImpl extends AbstractService<Course, CourseRepository>
             }
         }
 
-        const finalWhere =
-        department !== Variables.ALL
-          ? where.map((w:any) => ({ ...w, department: Like(`%${department}%`) }))
-          : where;
-        return this.repository?.findAndCount([], (name || department) && finalWhere, page && { take: limit, page: page }, sortBy && this.order)?.then((result: any) => {
+        if (department !== Variables.ALL) {
+            where.push({ department: Like(`%${department}%`) });
+        }
+
+        return this.repository?.findAndCount([], (name || department) && where, page && { take: limit, page: page }, sortBy && this.order)?.then((result: any) => {
             return {
                 list: result.list,
                 total: result.count,

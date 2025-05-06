@@ -20,4 +20,5 @@ export interface CourseClassService extends GenericService<CourseClass> {
               pageSize: number;
           }>
         | undefined;
+    getSemesterList(): Promise<any[]> | undefined;
 }

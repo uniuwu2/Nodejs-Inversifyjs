@@ -26,9 +26,25 @@ export class CourseClassServiceImpl extends AbstractService<CourseClass, CourseC
               pageSize: number;
           }>
         | undefined {
+        // if (sortBy) {
+        //     this.order = { [sortBy]: sort };
+        // }
+
         if (sortBy) {
-            this.order = { [sortBy]: sort };
+            if (sortBy === 'courseName') {
+                this.order = { course: { courseName: sort } };
+            } else if (sortBy === 'teacherName') {
+                this.order = {
+                    teacher: {
+                        lastName: sort,
+                        firstName: sort
+                    }
+                };
+            } else {
+                this.order = { [sortBy]: sort };
+            }
         }
+
         let where: any = [];
         if (teacher && teacher !== Variables.ALL) {
             where.push({ teacher: { id: teacher } });
@@ -65,6 +81,18 @@ export class CourseClassServiceImpl extends AbstractService<CourseClass, CourseC
             page: number;
             pageSize: number;
         }>;
+    }
+
+    public getSemesterList(): Promise<any[]> | undefined {
+        if (!this.repository) return undefined;
+        return this.repository
+            .createQueryBuilder("course_class")
+            .select("DISTINCT course_class.semester", "semester")
+            .orderBy("course_class.semester", "ASC")
+            .getRawMany()
+            .then((result: any) => {
+                return result.map((item: any) => item.semester);
+            });
     }
     
     public getRepositoryName(): string {

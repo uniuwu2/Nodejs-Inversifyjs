@@ -27,18 +27,18 @@ export class ClassroomController extends BaseController {
             response.clearCookie("messages");
         }
 
-        let deparment: any = request.query.departmentSelect || Variables.ALL;
+        let department: any = request.query.departmentSelect || Variables.ALL;
         let name: any = (request.query.searchField as string)?.trim() || "";
         let page: any = request.query.page || 1;
         let sortBy: any = request.query.sortBy || "courseName";
         let sort: any = request.query.sort || "asc";
         try {
-            let courses = await this.courseService.showCourseList(deparment, name, page, this.limitedItem, sortBy, sort);
+            let courses = await this.courseService.showCourseList(department, name, page, this.limitedItem, sortBy, sort);
             let departmentList = await this.courseService.getDepartmentList();
             if (courses) {
                 response.render(this.routeHelper.getRenderPage(RouteHelper.COURSES), {
                     courses: courses.list,
-                    departmentSelect: deparment,
+                    departmentSelect: department,
                     departmentList: departmentList,
                     searchField: name,
                     limit: this.limitedItem,
@@ -125,8 +125,7 @@ export class ClassroomController extends BaseController {
             let classes = await this.courseClassService.showCourseClassList(teacher, course, group, semester, name, page, this.limitedItem, sortBy, sort);
             let courseList = await this.courseService.findAll();;
             let teacherList = await this.userService.getAllTeacher();
-            let semesterList = [...new Set(classes?.list.map(item => item.semester))];
-            
+            let semesterList = await this.courseClassService.getSemesterList();
             if (classes) {
                 const dayOrder = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
                 const dayMap: any = {
