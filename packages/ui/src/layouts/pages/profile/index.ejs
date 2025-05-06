@@ -1,0 +1,23 @@
+<%- include("../../partials/main") %>
+
+  <head>
+    <%- include("../../partials/title-meta", {title: 'User Profile' }) %>
+      <%- include("../../partials/head-css"); %>
+  </head>
+
+  <body>
+    <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+    data-sidebar-position="fixed" data-header-position="fixed">
+      <%- include("../../partials/left-sidebar") %>
+      <div class="body-wrapper">
+        <%- include("../../partials/header") %>
+        <div class="container-fluid">
+        <%- include("../../partials/profile") %>
+        </div>
+      </div>
+  </div>
+  <%- include("../../partials/scripts/vendor-script") %>
+  <script src="/js/pages/customize-search-pagination.init.js"></script>
+  </body>
+
+  </html>

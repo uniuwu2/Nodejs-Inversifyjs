@@ -99,6 +99,8 @@
                                             <th scope="col" role="button" id="sort-by-group">Group <% if(sortBy === "group") { iconSort() } else { %> <i class="ti ti-arrows-sort"></i>  <% } %></th>
                                             <th scope="col" role="button" id="sort-by-teacher">Teacher <% if(sortBy === "teacherName") { iconSort() } else { %> <i class="ti ti-arrows-sort"></i>  <% } %></th>
                                             <th scope="col" role="button" id="sort-by-semester">Semester <% if(sortBy === "semester") { iconSort() } else { %> <i class="ti ti-arrows-sort"></i>  <% } %></th>
+                                            <th scope="col" style="width: 200px">Current Students</th>
+                                            <th scope="col" style="width: 200px">Max Students</th>
                                             <th scope="col" style="width: 200px">Schedule</th>
                                             <th scope="col" class="text-center" style="width: 200px">Action</th>
                                         </tr>
@@ -113,6 +115,8 @@
                                             <td><%= classItem.group %></td>
                                             <td><%= classItem.teacher.lastName + " " + classItem.teacher.firstName %></td>
                                             <td><%= classItem.semester %></td>
+                                            <td><%= classItem.currentStudent %></td>
+                                            <td><%= classItem.maxStudent %></td>
                                             <td class="schedule-cell">
                                             <% classItem.schedule.forEach(schedule => { %>
                                                 <div class="schedule-item">

@@ -2148,6 +2148,11 @@ body[data-layout-mode="dark"][data-layout-size="boxed"] #layout-wrapper {
     width: 6rem;
 }
 
+.avatar-xxl {
+    height: 10rem;
+    width: 10rem;
+}
+
 .avatar-title {
     -webkit-box-align: center;
     -ms-flex-align: center;

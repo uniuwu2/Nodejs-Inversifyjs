@@ -17,6 +17,12 @@ export class CourseClass extends GenericEntity {
     @Column("json", { name: "class_schedule" })
     public classSchedule: string = "";
 
+    @Column("int", { name: "max_student" })
+    public maxStudent: number = 0;
+
+    @Column("int", { name: "current_student" })
+    public currentStudent: number = 0;
+
     @Column("int", { name: "course_id"})
     public courseId: number = 0;
     @ManyToOne(() => Course, (course) => course.course, {
