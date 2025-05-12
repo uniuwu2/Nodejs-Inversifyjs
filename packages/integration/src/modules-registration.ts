@@ -16,6 +16,8 @@ import {
     CourseRepositoryImpl,
     CourseClassRepository,
     CourseClassRepositoryImpl,
+    DepartmentRepository,
+    DepartmentRepositoryImpl,
 } from "@inversifyjs/infrastructure"; 
 import { 
     UserService,
@@ -28,6 +30,8 @@ import {
     CourseServiceImpl,
     CourseClassService,
     CourseClassServiceImpl,
+    DepartmentService,
+    DepartmentServiceImpl,
  } from "@inversifyjs/application";    
 
 /** import controller */
@@ -37,6 +41,7 @@ import "./controllers/login.controller";
 import "./controllers/logout.controller";
 import "./controllers/classroom.controller";
 import "./controllers/user-profile.controller";
+import "./controllers/signup.controller";
 export const referenceDataIoCModule = new ContainerModule((bind) => {
     bind<Logger>(TYPES.Logger).to(LoggerMod).inSingletonScope();
     bind<DataSourceConnection>(TYPES.DataSourceConnect).to(DataSourceConnection).inSingletonScope();
@@ -51,4 +56,6 @@ export const referenceDataIoCModule = new ContainerModule((bind) => {
     bind<CourseService>(TYPES.CourseService).to(CourseServiceImpl).inSingletonScope();
     bind<CourseClassRepository>(TYPES.Repository).to(CourseClassRepositoryImpl).inSingletonScope();
     bind<CourseClassService>(TYPES.CourseClassService).to(CourseClassServiceImpl).inSingletonScope();
+    bind<DepartmentRepository>(TYPES.Repository).to(DepartmentRepositoryImpl).inSingletonScope();
+    bind<DepartmentService>(TYPES.DepartmentService).to(DepartmentServiceImpl).inSingletonScope();
 });

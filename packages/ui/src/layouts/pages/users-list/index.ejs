@@ -2,6 +2,10 @@
   <head>
     <%- include("../../partials/title-meta", {title: 'Users List' }) %>
       <%- include("../../partials/head-css"); %>
+      <link href="/libs/sweetalert2/sweetalert2.min.css" rel="stylesheet" type="text/css" />
+      <link href="/libs/alertifyjs/build/css/alertify.min.css" rel="stylesheet" type="text/css" />
+
+
   </head>
   <body>
     <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
@@ -16,6 +20,9 @@
         </div>
     </div>
     <%- include("../../partials/scripts/vendor-script") %>
+    <%- include("../../partials/scripts/notification-script") %>
+        <script src="/libs/sweetalert2/sweetalert2.min.js"></script>
+
     <script src="/js/pages/customize-search-pagination.init.js"></script>
     <script src="/js/pages/users-list.js"></script>
   </body>

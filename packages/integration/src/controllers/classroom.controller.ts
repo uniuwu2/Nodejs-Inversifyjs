@@ -1,6 +1,6 @@
 import { controller, httpGet, httpPost } from "inversify-express-utils";
 import { BaseController } from "./base-controller";
-import { CourseClassService, CourseService, HttpCode, Permission, RouteHelper, TYPES, UserService, Variables } from "@inversifyjs/application";
+import { CourseClassService, CourseService, DepartmentService, HttpCode, Messages, Permission, RouteHelper, TYPES, UserService, Variables } from "@inversifyjs/application";
 import { inject } from "inversify";
 import { checkPermissions, uploadMiddleware, verifyAuthTokenRouter } from "@inversifyjs/infrastructure";
 import * as fs from "fs";
@@ -11,11 +11,18 @@ export class ClassroomController extends BaseController {
     private courseService!: CourseService;
     private courseClassService!: CourseClassService;
     private userService!: UserService;
-    public constructor(@inject(TYPES.CourseService) _courseService: CourseService, @inject(TYPES.CourseClassService) _courseClassService: CourseClassService, @inject(TYPES.UserService) _userService: UserService) {
+    private departmentService!: DepartmentService;
+    public constructor(
+        @inject(TYPES.CourseService) _courseService: CourseService, 
+        @inject(TYPES.CourseClassService) _courseClassService: CourseClassService, 
+        @inject(TYPES.UserService) _userService: UserService,
+        @inject(TYPES.DepartmentService) _departmentService: DepartmentService
+    ) {
         super();
         this.courseService = _courseService;
         this.courseClassService = _courseClassService;
         this.userService = _userService;
+        this.departmentService = _departmentService;
     }
 
     // Môn học
@@ -23,18 +30,18 @@ export class ClassroomController extends BaseController {
     public async getCourses(request: any, response: any): Promise<void> {
         let successMessage: string = "";
         if (request.cookies.messages) {
-            successMessage = "「" + request.cookies.messages.user + "」" + request.cookies.messages.message;
+            successMessage = "「"+ request.cookies.messages.message + "」";
             response.clearCookie("messages");
         }
 
         let department: any = request.query.departmentSelect || Variables.ALL;
         let name: any = (request.query.searchField as string)?.trim() || "";
         let page: any = request.query.page || 1;
-        let sortBy: any = request.query.sortBy || "courseName";
-        let sort: any = request.query.sort || "asc";
+        let sortBy: any = request.query.sortBy;
+        let sort: any = request.query.sort || "ASC";
         try {
             let courses = await this.courseService.showCourseList(department, name, page, this.limitedItem, sortBy, sort);
-            let departmentList = await this.courseService.getDepartmentList();
+            let departmentList = await this.departmentService.findAll();
             if (courses) {
                 response.render(this.routeHelper.getRenderPage(RouteHelper.COURSES), {
                     courses: courses.list,
@@ -62,23 +69,31 @@ export class ClassroomController extends BaseController {
             response.status(HttpCode.BAD_REQUEST).send({ message: "File not found", status: HttpCode.BAD_REQUEST });
         }
         try {
+            let departments = await this.departmentService.findAll();
             const filePath: any = request.file?.path;
             fs.createReadStream(filePath)
                 .pipe(require("csv-parser")())
                 .on("data", async (row: any) => {
-                    let courseExist = await this.courseService.getCourseByCode(row.code);
+                    let courseExist = await this.courseService.getCourseByCode(row.course_code);
                     if (courseExist) {
-                        this.logger.error("Course already exists: " + row.code);
+                        this.logger.error("Course already exists: " + row.course_name);
                     } else {
                         let course = this.courseService.create();
                         if (course) {
-                            course.courseCode = row.code;
-                            course.courseName = row.name;
-                            course.department = row.department;
-                            course.courseDescription = row.description;
+                            course.courseCode = row.course_code;
+                            course.courseName = row.course_name;
+                            course.courseDescription = row.course_description;
                             course.credit = row.credit;
+                            departments?.forEach((department: any) => {
+                                if (department.departmentName === row.department) {
+                                    course.departmentId = department.id;
+                                }
+                            });
+                            if (departments?.length === 0) {
+                                course.departmentId = 0;
+                            }
                             this.courseService.save(course)?.then(() => {
-                                this.logger.info("Course created successfully: " + row.code);
+                                this.logger.info("Course created successfully: " + row.course_name);
                             })
                             .catch((error: any) => {
                                 this.logger.error("Error creating course: " + error.message);
@@ -90,7 +105,7 @@ export class ClassroomController extends BaseController {
                 .on("end", () => {
                     fs.unlinkSync(filePath);
                 });
-            response.status(HttpCode.IMPORT_SUCCESS).send({ message: "File imported successfully", status: HttpCode.IMPORT_SUCCESS });
+            response.status(HttpCode.IMPORT_SUCCESS).cookie("messages", { message: Messages.IMPORT_COURSE_SUCCESS }).send({ status: HttpCode.IMPORT_SUCCESS });
         } catch (error: any) {
             this.logger.error(error);
             response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
@@ -115,7 +130,7 @@ export class ClassroomController extends BaseController {
         // console.log("name", name);
         let page: any = request.query.page || 1;
         let sortBy: any = request.query.sortBy || "id";
-        let sort: any = request.query.sort || "asc";
+        let sort: any = request.query.sort || "ASC";
         try {
             // người đăng nhập hiện tại
             let userId = request.session.userId;
@@ -174,5 +189,109 @@ export class ClassroomController extends BaseController {
             response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
         }
         
+    }
+
+    // Trả về thông tin course được chọn
+    @httpGet("/course/info/:id", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN, Permission.ONLY_TEACHER]))
+    public async getCourseInfo(request: any, response: any): Promise<void> {
+        let courseId = request.params.id;
+        try {
+            let course = await this.courseService.findById(courseId,["department"]);
+            if (course) {
+                response.status(HttpCode.SUCCESSFUL).json(course);
+            } else {
+                response.status(HttpCode.NOT_FOUND).send({ message: "Course not found", status: HttpCode.NOT_FOUND });
+            }
+        } catch (error: any) {
+            this.logger.error(error);
+            response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
+        }
+    }
+
+    @httpPost("/course/:id/edit", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN]), uploadMiddleware.single("file"))
+    public async editCourse(request: any, response: any): Promise<void> {
+        let courseId = Number(request.params.id);
+        let name: string = request.body.courseName;
+        let code: string = request.body.courseCode;
+        let credit: number = request.body.credit;
+        let url: string = request.body.url;
+        let oldCourse = await this.courseService.findById(courseId,["department"]);
+        try {
+            if (!name) this.errors = {...this.errors, courseName: "Course name is required" };
+            if (!code) this.errors = {...this.errors, courseCode: "Course code is required" };
+            if (!credit) this.errors = {...this.errors, credit: "Credit is required" };
+
+            if (this.errors) {
+                return response.status(HttpCode.SUCCESSFUL).send({ errors: this.errors });
+            }
+
+            delete request.body.id;
+
+            let newCourse = {
+                id: courseId,
+                ...request.body,
+            }
+            if (newCourse) {
+                this.courseService.save(newCourse);
+            }
+
+            return response.status(HttpCode.SUCCESSFUL).cookie("messages", { message: "Edit course successfullyyyyyyyyyyyyyyyyyyyyyy", course: newCourse}).send({ url: url });
+            
+        } catch (error: any) {
+            this.logger.error(error);
+            response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
+        }
+    }
+
+    @httpPost("/course/:id/delete", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN]))
+    public async deleteCourse(request: any, response: any): Promise<void> {
+        let courseId = Number(request.params.id);
+        let url = request.body.href || "";
+        try {
+            let course = await this.courseService.findById(courseId);
+            if (course) {
+                await this.courseService.delete(courseId);
+                return response.status(HttpCode.SUCCESSFUL).cookie("messages", { message: "Delete course successfullyyyyyyyyyyyyyyyyyyyyyy", user: course.courseName}).redirect(RouteHelper.CLASSROOM + RouteHelper.COURSES + url);
+            } else {
+                return response.status(HttpCode.NOT_FOUND).send({ message: "Course not found", status: HttpCode.NOT_FOUND });
+            }
+        } catch (error: any) {
+            this.logger.error(error);
+            response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
+        }
+    }
+
+    @httpPost("/course/create", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN]))
+    public async createCourse(request: any, response: any): Promise<void> {
+        let name: string = request.body.courseName;
+        let code: string = request.body.courseCode;
+        let credit: number = request.body.credit;
+        let url: string = request.body.url;
+        try {
+            if (!name) this.errors = {...this.errors, courseName: "Course name is required" };
+            if (!code) this.errors = {...this.errors, courseCode: "Course code is required" };
+            if (!credit) this.errors = {...this.errors, credit: "Credit is required" };
+
+            if (this.errors) {
+                return response.status(HttpCode.SUCCESSFUL).send({ errors: this.errors });
+            }
+            // check if course already exists
+            let courseExist = await this.courseService.getCourseByCode(code);
+            if (courseExist) {
+                this.errors = {...this.errors, courseCode: "Course code already exists" };
+                return response.status(HttpCode.SUCCESSFUL).send({ errors: this.errors });
+            }
+            let course = {
+                ...request.body,
+            }
+
+            if (course) {
+                this.courseService.save(course);
+            }
+            return response.status(HttpCode.SUCCESSFUL).cookie("messages", { message: "Create course successfullyyyyyyyyyyyyyyyyyyyyyy", course: course}).send({ url: url });
+        } catch (error: any) {
+            this.logger.error(error);
+            response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
+        }
     }
 }

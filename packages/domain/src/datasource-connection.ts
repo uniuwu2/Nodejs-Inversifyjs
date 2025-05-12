@@ -13,6 +13,7 @@ import { SessionClass } from "./entities/session_class";
 import { ClassStudent } from "./entities/class_student";
 import { Attendance } from "./entities/attendance";
 import { Session } from "./entities/session";
+import { Department } from "./entities/department";
 
 /**
  * Datasource connection
@@ -45,7 +46,7 @@ export class DataSourceConnection {
                 database: this.database,
                 synchronize: this.synchronize,
                 // logging: true,
-                entities: [User, Role, Student, Staff, Activity, ActivityStudent, CourseClass, Course, SessionClass, ClassStudent, Attendance, Session],
+                entities: [User, Role, Student, Staff, Activity, ActivityStudent, CourseClass, Course, SessionClass, ClassStudent, Attendance, Session, Department],
             });
             await this._dataSource.initialize();
         }

@@ -99,14 +99,8 @@ export class LoginController extends BaseController {
                     resolve(data);
                 })(request, response, next);
             });
-
-            // console.log(userData);
-
             // Kiểm tra xem người dùng đã tồn tại trong cơ sở dữ liệu chưa
             let user: User | undefined | null = await this.userService.findByEmail(userData.profile.emails[0].value);
-            // console.log("user", user);
-            // const accessToken: string = userData.accessToken;
-            // const refreshToken = randToken.generate(parseInt(this.refreshTokenSize));
             if (!user) {
                 // Nếu người dùng chưa tồn tại, tạo mới người dùng
                 let newUser = await this.userService.createFromGoogle(userData.profile);

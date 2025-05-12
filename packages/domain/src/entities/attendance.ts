@@ -26,10 +26,7 @@ export class Attendance extends GenericEntity {
     @Column("varchar", { name: "attendance_location", length: 255 })
     public attendanceLocation: string = "";
 
-    @ManyToOne(() => SessionClass, (sessionClass) => sessionClass.attendance, {
-        onDelete: "NO ACTION",
-        onUpdate: "NO ACTION",
-    })
+    @ManyToOne(() => SessionClass, (sessionClass) => sessionClass.attendance)
     @JoinColumn([{ name: "session_id", referencedColumnName: "id" }])
     public sessionClass: SessionClass | null = null;
 }

@@ -17,7 +17,7 @@
             </form>
           </div>
           <div class="row align-items-center mb-3 gap-3">
-            <div class="col">
+            <div class="col-md-4">
               <div class="mb-3 mb-md-0">
                 <div class="position-relative">
                   <input type="text" class="form-control" placeholder="Search..." id="searchField" name="searchField"
@@ -62,6 +62,14 @@
                 </select>
               </div>
             </div>
+            <div class="col">
+              <!-- Signup Button to page sign up -->
+                <div class="d-flex flex-wrap align-items-center justify-content-end gap-2">
+                  <div>
+                    <a href="/signup" class="btn btn-primary">Create</a>
+                  </div>
+                </div>
+            </div>
             <div class="row pe-0">
               <div class="table-responsive pe-0">
                 <table class="table table-nowrap align-middle">
@@ -78,11 +86,8 @@
                                 %> <i class="ti ti-arrows-sort"></i>
                                 <% } %>
                             </th>
-                            <th scope="col" role="button" id="sort-by-firstName">Firstname <% if(sortBy==="firstName" )
+                            <th scope="col" role="button" id="sort-by-firstName">Name <% if(sortBy==="firstName" )
                                 { iconSort() } else { %> <i class="ti ti-arrows-sort"></i>
-                                <% } %></i></th>
-                            <th scope="col" role="button" id="sort-by-lastName">Lastname <% if(sortBy==="lastName" ) {
-                                iconSort() } else { %> <i class="ti ti-arrows-sort"></i>
                                 <% } %></i></th>
                             <th scope="col" role="button" id="sort-by-email">Email <% if(sortBy==="email" ) { iconSort()
                                 } else { %> <i class="ti ti-arrows-sort"></i>
@@ -108,10 +113,9 @@
                                 </a>
                           </td>
                           <td>
-                            <%= user.firstName %>
-                          </td>
-                          <td>
-                            <%= user.lastName %>
+                            <a href="/profile/<%= user.id %>" >
+                              <%= user.firstName %> <%= user.lastName %>
+                            </a>
                           </td>
                           <td>
                             <%= user.email %>
@@ -134,6 +138,27 @@
                                 <span class="alert alert-danger p-2">Inactive</span>
                                 <% } %>
                           </td>
+                          <% if(user.roleId !== 1) { %>
+                            <td>
+                              <ul class="list-inline m-0">
+                                <li class="list-inline-item">
+                                  <button class="p-0 btn btn-link" type="button">
+                                    <a href="/signup/<%= user.id %>" class="px-2 text-primary" data-bs-toggle="tooltip"
+                                      data-bs-placement="top" title="Edit">
+                                      <i class="ti ti-pencil font-size-20"></i>
+                                    </a>
+                                  </button>
+                                </li>
+                                <li class="list-inline-item">
+                                  <form id="form-delete"></form>
+                                  <button type="button" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    title="Delete" id="sa-params-<%= user?.id %>"
+                                    class="p-0 btn btn-link waves-effect waves-light text-danger">
+                                    <i class="ti ti-trash font-size-20"></i>
+                                  </button>
+                                </li>
+                            </td>
+                          <% } %>
                         </tr>
                         <% }) %>
                           <% } else { %>

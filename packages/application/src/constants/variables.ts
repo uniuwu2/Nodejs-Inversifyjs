@@ -21,4 +21,6 @@ export class Variables {
             value: this.INACTIVE,
         },
     ];
+
+    public static readonly UPLOAD_IMAGE_MAX: number = 1024 * 1024 * 5; // 5MB
 }

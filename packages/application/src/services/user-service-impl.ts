@@ -21,10 +21,11 @@ export class UserServiceImpl extends AbstractService<User, UserRepository> imple
                 user.email = profile.emails[0].value;
                 user.firstName = profile._json.given_name;
                 user.lastName = profile._json.family_name;
-                user.roleId = 3;
+                user.roleId = 4;
                 user.active = 1;
                 user.oauthId = profile.id;
                 user.oauthProvider = profile.provider;
+                user.departmentId = null;
                 return this.repository.save(user);
             }
         }

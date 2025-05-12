@@ -1,5 +1,5 @@
 import { controller, httpGet, httpPost } from "inversify-express-utils";
-import { HttpCode, UserService, StudentService, RoleService, Variables } from "@inversifyjs/application";
+import { HttpCode, UserService, StudentService, RoleService, Variables, DepartmentService } from "@inversifyjs/application";
 import { BaseController } from "./base-controller";
 import { inject } from "inversify";
 import { TYPES } from "@inversifyjs/application";
@@ -13,12 +13,18 @@ export class UserController extends BaseController {
     private userService: UserService;
     private studentService: StudentService;
     private roleService: RoleService;
-
-    public constructor(@inject(TYPES.UserService) _userService: UserService, @inject(TYPES.StudentService) _studentService: StudentService, @inject(TYPES.RoleService) _roleService: RoleService) {
+    private departmentService: DepartmentService
+    public constructor(
+        @inject(TYPES.UserService) _userService: UserService, 
+        @inject(TYPES.StudentService) _studentService: StudentService, 
+        @inject(TYPES.RoleService) _roleService: RoleService,
+        @inject(TYPES.DepartmentService) _departmentService: DepartmentService
+    ) {
         super();
         this.userService = _userService;
         this.studentService = _studentService;
         this.roleService = _roleService;
+        this.departmentService = _departmentService;
     }
 
     @httpGet("/", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN, Permission.ONLY_TEACHER]))
@@ -29,12 +35,12 @@ export class UserController extends BaseController {
             response.clearCookie("messages");
         }
         // Có thể search theo tên, email, số điện thoại, mã sinh viên, phòng ban,
-        let roleId: any = request.query.roleSelect || Permission.ONLY_ADMIN;
+        let roleId: any = request.query.roleSelect || Variables.ALL;
         let name: any = (request.query.searchField as string)?.trim() || "";
-        let valid: any = request.query.validSelect || Permission.ONLY_ADMIN;
+        let valid: any = request.query.validSelect || Variables.ALL;
         let page: any = request.query.page || 1;
-        let sortBy: any = request.query.sortBy || "firstName";
-        let sort: any = request.query.sort || "asc";
+        let sortBy: any = request.query.sortBy;
+        let sort: any = request.query.sort || "ASC";
 
         try {
             let users = await this.userService.showUserList(roleId, valid, name, page, this.limitedItem, sortBy, sort);
@@ -68,6 +74,7 @@ export class UserController extends BaseController {
             response.status(HttpCode.BAD_REQUEST).send({ message: "File not found", status: HttpCode.BAD_REQUEST });
         }
         try {
+            let departments = await this.departmentService.findAll();
             const filePath: any = request.file?.path;
             fs.createReadStream(filePath)
                 .pipe(require("csv-parser")())
@@ -85,12 +92,19 @@ export class UserController extends BaseController {
                             user.phoneNumber = "";
                             user.roleId = 4; // 4 = student
                             user.active = 1;
+                            departments?.forEach((department: any) => {
+                                if (department.departmentName === row.department) {
+                                    user.departmentId = department.id;
+                                }
+                            });
+                            if (departments?.length === 0) {
+                                user.departmentId = null;
+                            }
                             this.userService.save(user)?.then((user: any) => {
                                 let student = this.studentService.create();
                                 if (student) {
                                     student.student_number = row.student_number;
                                     student.studentId = user.id;
-                                    student.major = row.major;
                                     this.studentService.save(student);
                                     this.logger.info("Student created successfully");
                                 }
@@ -107,4 +121,25 @@ export class UserController extends BaseController {
             response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
         }
     }
+    
+    @httpPost("/:id/delete" , verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN]))
+    public async deleteUser(request: Request, response: Response): Promise<void> {
+        let userId = Number(request.params.id);
+        let user = await this.userService.findById(userId);
+        let pathHref = String(request.body.href);
+        try {
+            if (user?.imagePath) {
+                let path = `${process.env.IMAGE_PATH}/${user.imagePath}`;
+                fs.rmSync(path, { recursive: true, force: true });
+            }
+
+            await this.userService.delete(userId);
+
+            return response.cookie("messages", "User deleted successfully").redirect(RouteHelper.USER_LIST + pathHref);
+        } catch (error: any) {
+            this.logger.error(error);
+            response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
+        }
+    }
+
 }

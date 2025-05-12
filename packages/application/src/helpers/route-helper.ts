@@ -21,6 +21,7 @@ export class RouteHelper {
     public static readonly CLASSES: string = "/classes";
     public static readonly COURSE_UPLOAD_CSV: string = "/classroom/course-upload-csv";
     public static readonly USER_PROFILE: string = "/profile";
+    public static readonly SIGNUP: string = "/signup";
     
 
     private routeMap: Map<string, string> = new Map<string, string>();
@@ -39,6 +40,8 @@ export class RouteHelper {
         this.routeMap.set(RouteHelper.COURSES, "classroom/courses");
         this.routeMap.set(RouteHelper.CLASSES, "classroom/classes");
         this.routeMap.set(RouteHelper.USER_PROFILE, "profile/index");
+        this.routeMap.set(RouteHelper.SIGNUP, "signup/index");
+
     }
 
     /**

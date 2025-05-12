@@ -1,11 +1,13 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from "typeorm";
 import { GenericEntity } from "../generic-entities";
 import { Role } from "./role";
+import { Staff } from "./staff";
 import { Student } from "./student";
 import { ActivityStudent } from "./activity_student";
 import { CourseClass } from "./course_class";
 import { ClassStudent } from "./class_student";
 import { Attendance } from "./attendance";
+import { Department } from "./department";
 
 @Entity("user")
 export class User extends GenericEntity {
@@ -41,17 +43,14 @@ export class User extends GenericEntity {
 
     @Column("int", { name: "role_id" })
     public roleId: number = 0;
-    @ManyToOne(() => Role, (role) => role.user, {
-        onDelete: "NO ACTION",
-        onUpdate: "NO ACTION",
-    })
+    @ManyToOne(() => Role, (role) => role.user)
     @JoinColumn([{ name: "role_id", referencedColumnName: "id" }])
-    public role: Role | null = null;
+    public role!: Role;
 
     @OneToOne(() => Student, (student) => student.user)
     public student: Student | null = null;
 
-    @OneToOne(() => Student, (student) => student.user)
+    @OneToOne(() => Staff, (student) => student.user)
     public staff: Student | null = null;
 
     @OneToOne(() => Student, (student) => student.user)
@@ -65,4 +64,10 @@ export class User extends GenericEntity {
 
     @OneToMany(() => ClassStudent, (classStudent) => classStudent.student)
     public classStudent!: ClassStudent[];
+
+    @Column("int", { name: "department_id", nullable: true })
+    public departmentId: number | null = 0;
+    @ManyToOne(() => Department, (department) => department.user)
+    @JoinColumn([{ name: "department_id", referencedColumnName: "id" }])
+    public department!: Department;
 }

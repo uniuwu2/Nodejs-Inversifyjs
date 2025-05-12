@@ -25,19 +25,13 @@ export class CourseClass extends GenericEntity {
 
     @Column("int", { name: "course_id"})
     public courseId: number = 0;
-    @ManyToOne(() => Course, (course) => course.course, {
-        onDelete: "NO ACTION",
-        onUpdate: "NO ACTION",
-    })
+    @ManyToOne(() => Course, (course) => course.course)
     @JoinColumn([{ name: "course_id", referencedColumnName: "id" }])
     public course: Course | null = null;
 
     @Column("int", { name: "teacher_id" })
     public teacherId: number = 0;
-    @OneToOne(() => User, (user) => user.course, {
-        onDelete: "NO ACTION",
-        onUpdate: "NO ACTION",
-    })
+    @OneToOne(() => User, (user) => user.course)
     @JoinColumn([{ name: "teacher_id", referencedColumnName: "id" }])
     public teacher: User | null = null;
 

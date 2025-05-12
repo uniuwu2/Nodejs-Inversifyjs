@@ -17,6 +17,9 @@ import { CourseService } from "./src/services/course-service.interface";
 import { CourseServiceImpl } from "./src/services/course-service-impl";
 import { CourseClassService } from "./src/services/course-class-service.interface";
 import { CourseClassServiceImpl } from "./src/services/course-class-service-impl";
+import { DepartmentService } from "./src/services/department-service.interface";
+import { DepartmentServiceImpl } from "./src/services/department-service-impl";
+import { Messages } from "./src/constants/messages";
 export {
     TYPES,
     HttpCode,
@@ -37,4 +40,7 @@ export {
     CourseServiceImpl,
     CourseClassService,
     CourseClassServiceImpl,
+    DepartmentService,
+    DepartmentServiceImpl,
+    Messages,
 }

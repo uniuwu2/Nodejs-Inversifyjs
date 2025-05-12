@@ -49,7 +49,7 @@ export class CourseServiceImpl extends AbstractService<Course, CourseRepository>
             where.push({ department: Like(`%${department}%`) });
         }
 
-        return this.repository?.findAndCount([], (name || department) && where, page && { take: limit, page: page }, sortBy && this.order)?.then((result: any) => {
+        return this.repository?.findAndCount(['department'], (name || department) && where, page && { take: limit, page: page }, sortBy && this.order)?.then((result: any) => {
             return {
                 list: result.list,
                 total: result.count,

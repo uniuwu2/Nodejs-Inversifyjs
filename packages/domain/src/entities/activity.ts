@@ -32,10 +32,7 @@ export class Activity extends GenericEntity {
     @Column("int", { name: "user_id" })
     public userId: number = 0;
 
-    @OneToOne(() => User, (user) => user.activity, {
-        onDelete: "NO ACTION",
-        onUpdate: "NO ACTION",
-    })
+    @OneToOne(() => User, (user) => user.activity)
     @JoinColumn({ name: "user_id" })
     public user: User | null = null;
 

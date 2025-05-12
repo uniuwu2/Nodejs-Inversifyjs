@@ -3,21 +3,28 @@
   <head>
     <%- include("../../partials/title-meta", {title: 'User Profile' }) %>
       <%- include("../../partials/head-css"); %>
+      <link href="/css/profile/style.css" rel="stylesheet" type="text/css" />
+      <link href="/libs/alertifyjs/build/css/alertify.min.css" rel="stylesheet" type="text/css" />
+
+
   </head>
 
   <body>
     <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
-    data-sidebar-position="fixed" data-header-position="fixed">
+      data-sidebar-position="fixed" data-header-position="fixed">
       <%- include("../../partials/left-sidebar") %>
-      <div class="body-wrapper">
-        <%- include("../../partials/header") %>
-        <div class="container-fluid">
-        <%- include("../../partials/profile") %>
+        <div class="body-wrapper">
+          <%- include("../../partials/header") %>
+            <div class="container-fluid">
+              <%- include("../../partials/profile") %>
+            </div>
         </div>
-      </div>
-  </div>
-  <%- include("../../partials/scripts/vendor-script") %>
-  <script src="/js/pages/customize-search-pagination.init.js"></script>
+    </div>
+    <%- include("../../partials/scripts/vendor-script") %>
+      <script src="/js/pages/customize-search-pagination.init.js"></script>
+      <script src="/libs/sweetalert2/sweetalert2.min.js"></script>
+
+      <script src="/js/pages/profile.init.js"></script>
   </body>
 
   </html>

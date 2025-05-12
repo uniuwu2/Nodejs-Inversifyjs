@@ -1,0 +1,10 @@
+<% if(locals?.successMessage && typeof locals?.successMessage == 'string') { %>
+<div id="successMessage" data-test="<%= successMessage %>"></div>
+<% } %> <% if(locals?.errorMessage && typeof locals?.errorMessage == 'string') { %>
+<div id="errorMessage" data-test="<%= errorMessage %>"></div>
+<% } %>
+
+<!-- alertifyjs js -->
+<script src="/libs/alertifyjs/build/alertify.min.js"></script>
+<!-- notification init -->
+<script src="/js/pages/notification.init.js"></script>

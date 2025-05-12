@@ -11,17 +11,11 @@ export class ActivityStudent extends GenericEntity {
     @Column("int", { name: "student_id" })
     public studentId: number = 0;
 
-    @ManyToOne(() => Activity, (activity) => activity.student, {
-        onDelete: "NO ACTION",
-        onUpdate: "NO ACTION",
-    })
+    @ManyToOne(() => Activity, (activity) => activity.student)
     @JoinColumn([{ name: "activity_id", referencedColumnName: "id" }])
     public activity: Activity | null = null;
 
-    @ManyToOne(() => User, (user) => user.activityStudent, {
-        onDelete: "NO ACTION",
-        onUpdate: "NO ACTION",
-    })
+    @ManyToOne(() => User, (user) => user.activityStudent)
     @JoinColumn([{ name: "student_id", referencedColumnName: "id" }])
     public student: User | null = null;    
 }

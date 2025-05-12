@@ -4773,7 +4773,7 @@ fieldset:disabled .btn {
     --bs-btn-disabled-border-color: transparent;
     --bs-btn-box-shadow: none;
     --bs-btn-focus-shadow-rgb: 117, 153, 255;
-    text-decoration: underline
+    text-decoration: none;
 }
 
 .btn-link:focus-visible {

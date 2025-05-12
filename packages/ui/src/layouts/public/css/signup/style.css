@@ -1,0 +1,47 @@
+.validation-password {
+    font-size: 12px;
+}
+
+.form-label {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.form-control {
+    display: block !important;
+    appearance: auto;
+}
+
+.select-selected.select-arrow-active:after {
+    right: 1px;
+}
+
+.select-selected:after {
+    position: absolute;
+    content: "";
+    width: 0;
+    height: 0;
+    border: 6px solid transparent;
+    border-color: #fff transparent transparent transparent;
+}
+
+.select-items div,
+.select-selected {
+    color: #ffffff;
+    padding: 8px 16px;
+    border: 1px solid transparent;
+    border-color: transparent transparent rgba(0, 0, 0, 0.1) transparent;
+    cursor: pointer;
+    user-select: none;
+}
+
+.input-group > .form-control:focus,
+.input-group > .form-select:focus {
+    z-index: 0;
+}
+
+@media (min-width: 768px) {
+    .field-col {
+        width: 49%;
+    }
+}
