@@ -1,5 +1,5 @@
 import { controller, httpGet, httpPost } from "inversify-express-utils";
-import { EncryptHelper, HttpCode, Message, RouteHelper, TYPES, UserService, Variables } from "@inversifyjs/application";
+import { EncryptHelper, HttpCode, Message, Messages, RouteHelper, TYPES, UserService, Variables } from "@inversifyjs/application";
 import { BaseController } from "./base-controller";
 import { inject } from "inversify";
 import { Request, Response } from "express";
@@ -94,7 +94,7 @@ export class LoginController extends BaseController {
                         return reject(err);
                     }
                     if (!data) {
-                        return reject(new Error('No user found'));
+                        return reject(new Error(Messages.USER_NOT_FOUND));
                     }
                     resolve(data);
                 })(request, response, next);
@@ -125,11 +125,6 @@ export class LoginController extends BaseController {
             response.redirect(RouteHelper.LOGIN);
         }
     }
-
-
-
-
-
 
     @httpGet("/auth/google")
     public googleLogin(req: Request, res: Response): void {

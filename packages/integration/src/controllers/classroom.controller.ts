@@ -66,7 +66,7 @@ export class ClassroomController extends BaseController {
     @httpPost("/course-upload-csv", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN]), uploadMiddleware.single("file"))
     public async uploadCourseCSV(request: Request, response: Response): Promise<void> {
         if (!request.file) {
-            response.status(HttpCode.BAD_REQUEST).send({ message: "File not found", status: HttpCode.BAD_REQUEST });
+            response.status(HttpCode.BAD_REQUEST).send({ message: Messages.FILE_NOT_FOUND, status: HttpCode.BAD_REQUEST });
         }
         try {
             let departments = await this.departmentService.findAll();
@@ -76,7 +76,7 @@ export class ClassroomController extends BaseController {
                 .on("data", async (row: any) => {
                     let courseExist = await this.courseService.getCourseByCode(row.course_code);
                     if (courseExist) {
-                        this.logger.error("Course already exists: " + row.course_name);
+                        this.logger.error(Messages.COURSE_EXISTED + ": " + row.course_code);
                     } else {
                         let course = this.courseService.create();
                         if (course) {
@@ -93,10 +93,10 @@ export class ClassroomController extends BaseController {
                                 course.departmentId = 0;
                             }
                             this.courseService.save(course)?.then(() => {
-                                this.logger.info("Course created successfully: " + row.course_name);
+                                this.logger.info(Messages.IMPORT_COURSE_SUCCESS + ": " + row.course_name);
                             })
                             .catch((error: any) => {
-                                this.logger.error("Error creating course: " + error.message);
+                                this.logger.error(Messages.IMPORT_COURSE_FAILED + ": " + row.course_name + " - " + error.message);
                             });
                         }
                     }
@@ -112,6 +112,49 @@ export class ClassroomController extends BaseController {
         }
     }
 
+    @httpPost("/course-class-upload-csv", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN]), uploadMiddleware.single("file"))
+    public async uploadCourseClassCSV(request: Request, response: Response): Promise<void> {
+        if (!request.file) {
+            response.status(HttpCode.BAD_REQUEST).send({ message: Messages.FILE_NOT_FOUND, status: HttpCode.BAD_REQUEST });
+        }
+        try {
+            const filePath: any = request.file?.path;
+            fs.createReadStream(filePath)
+                .pipe(require("csv-parser")())
+                .on("data", async (row: any) => {
+                    console.log("row", row);
+                    // let courseClassExist = await this.courseClassService.getCourseClassByCode(row.class_code);
+                    // if (courseClassExist) {
+                        // this.logger.error(Messages.COURSE_EXISTED + ": " + row.class_code);
+                    // } else {
+                        // let courseClass = this.courseClassService.create();
+                        // if (courseClass) {
+                        //     courseClass.classCode = row.class_code;
+                        //     courseClass.className = row.class_name;
+                        //     courseClass.semester = row.semester;
+                        //     courseClass.group = row.group;
+                        //     courseClass.startDate = row.start_date;
+                        //     courseClass.endDate = row.end_date;
+                        //     courseClass.schedule = JSON.parse(row.schedule);
+                        //     this.courseClassService.save(courseClass)?.then(() => {
+                        //         this.logger.info(Messages.IMPORT_COURSE_SUCCESS + ": " + row.class_name);
+                        //     })
+                        //     .catch((error: any) => {
+                        //         this.logger.error(Messages.IMPORT_COURSE_FAILED + ": " + row.class_name + " - " + error.message);
+                        //     });
+                        // }
+                    // }
+
+                })
+                .on("end", () => {
+                    fs.unlinkSync(filePath);
+                });
+            response.status(HttpCode.IMPORT_SUCCESS).cookie("messages", { message: Messages.IMPORT_COURSE_SUCCESS }).send({ status: HttpCode.IMPORT_SUCCESS });
+        } catch (error: any) {
+            this.logger.error(error);
+            response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
+        }
+    }
 
     // Lớp học
     @httpGet(RouteHelper.CLASSES, verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN, Permission.ONLY_TEACHER]))
@@ -142,6 +185,8 @@ export class ClassroomController extends BaseController {
             let teacherList = await this.userService.getAllTeacher();
             let semesterList = await this.courseClassService.getSemesterList();
             if (classes) {
+                
+                    
                 const dayOrder = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
                 const dayMap: any = {
                     monday: "Thứ 2",
@@ -200,7 +245,7 @@ export class ClassroomController extends BaseController {
             if (course) {
                 response.status(HttpCode.SUCCESSFUL).json(course);
             } else {
-                response.status(HttpCode.NOT_FOUND).send({ message: "Course not found", status: HttpCode.NOT_FOUND });
+                response.status(HttpCode.NOT_FOUND).send({ message: Messages.COURSE_NOT_FOUND, status: HttpCode.NOT_FOUND });
             }
         } catch (error: any) {
             this.logger.error(error);
@@ -217,9 +262,9 @@ export class ClassroomController extends BaseController {
         let url: string = request.body.url;
         let oldCourse = await this.courseService.findById(courseId,["department"]);
         try {
-            if (!name) this.errors = {...this.errors, courseName: "Course name is required" };
-            if (!code) this.errors = {...this.errors, courseCode: "Course code is required" };
-            if (!credit) this.errors = {...this.errors, credit: "Credit is required" };
+            if (!name) this.errors = {...this.errors, courseName: Messages.COURSE_NAME_REQUIRED };
+            if (!code) this.errors = {...this.errors, courseCode: Messages.COURSE_CODE_REQUIRED };
+            if (!credit) this.errors = {...this.errors, credit: Messages.COURSE_CREDITS_REQUIRED };
 
             if (this.errors) {
                 return response.status(HttpCode.SUCCESSFUL).send({ errors: this.errors });
@@ -235,7 +280,7 @@ export class ClassroomController extends BaseController {
                 this.courseService.save(newCourse);
             }
 
-            return response.status(HttpCode.SUCCESSFUL).cookie("messages", { message: "Edit course successfullyyyyyyyyyyyyyyyyyyyyyy", course: newCourse}).send({ url: url });
+            return response.status(HttpCode.SUCCESSFUL).cookie("messages", { message: Messages.UPDATE_COURSE_SUCCESS, course: newCourse}).send({ url: url });
             
         } catch (error: any) {
             this.logger.error(error);
@@ -251,9 +296,9 @@ export class ClassroomController extends BaseController {
             let course = await this.courseService.findById(courseId);
             if (course) {
                 await this.courseService.delete(courseId);
-                return response.status(HttpCode.SUCCESSFUL).cookie("messages", { message: "Delete course successfullyyyyyyyyyyyyyyyyyyyyyy", user: course.courseName}).redirect(RouteHelper.CLASSROOM + RouteHelper.COURSES + url);
+                return response.status(HttpCode.SUCCESSFUL).cookie("messages", { message: Messages.DELETE_COURSE_SUCCESS, user: course.courseName}).redirect(RouteHelper.CLASSROOM + RouteHelper.COURSES + url);
             } else {
-                return response.status(HttpCode.NOT_FOUND).send({ message: "Course not found", status: HttpCode.NOT_FOUND });
+                return response.status(HttpCode.NOT_FOUND).send({ message: Messages.COURSE_NOT_FOUND, status: HttpCode.NOT_FOUND });
             }
         } catch (error: any) {
             this.logger.error(error);
@@ -268,9 +313,9 @@ export class ClassroomController extends BaseController {
         let credit: number = request.body.credit;
         let url: string = request.body.url;
         try {
-            if (!name) this.errors = {...this.errors, courseName: "Course name is required" };
-            if (!code) this.errors = {...this.errors, courseCode: "Course code is required" };
-            if (!credit) this.errors = {...this.errors, credit: "Credit is required" };
+            if (!name) this.errors = {...this.errors, courseName: Messages.COURSE_NAME_REQUIRED };
+            if (!code) this.errors = {...this.errors, courseCode: Messages.COURSE_CODE_REQUIRED };
+            if (!credit) this.errors = {...this.errors, credit: Messages.COURSE_CREDITS_REQUIRED };
 
             if (this.errors) {
                 return response.status(HttpCode.SUCCESSFUL).send({ errors: this.errors });
@@ -278,7 +323,7 @@ export class ClassroomController extends BaseController {
             // check if course already exists
             let courseExist = await this.courseService.getCourseByCode(code);
             if (courseExist) {
-                this.errors = {...this.errors, courseCode: "Course code already exists" };
+                this.errors = {...this.errors, courseCode: Messages.COURSE_EXISTED };
                 return response.status(HttpCode.SUCCESSFUL).send({ errors: this.errors });
             }
             let course = {
@@ -288,10 +333,12 @@ export class ClassroomController extends BaseController {
             if (course) {
                 this.courseService.save(course);
             }
-            return response.status(HttpCode.SUCCESSFUL).cookie("messages", { message: "Create course successfullyyyyyyyyyyyyyyyyyyyyyy", course: course}).send({ url: url });
+            return response.status(HttpCode.SUCCESSFUL).cookie("messages", { message: Messages.CREATE_COURSE_SUCCESS, course: course}).send({ url: url });
         } catch (error: any) {
             this.logger.error(error);
             response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
         }
     }
+
+
 }

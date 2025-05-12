@@ -20,7 +20,7 @@ function uploadCSV() {
 
     // Gửi tệp đến API backend
     $.ajax({
-        url: "/classroom/class-upload-csv",
+        url: "/classroom/course-class-upload-csv",
         type: "POST",
         data: formData,
         processData: false,

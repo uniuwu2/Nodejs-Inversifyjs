@@ -2,7 +2,7 @@ import { controller, httpGet, httpPost } from "inversify-express-utils";
 import { Request, Response } from "express";
 import { inject } from "inversify";
 import { BaseController } from "./base-controller";
-import { HttpCode, Permission, RoleService, RouteHelper, TYPES, UserPermission, UserService, DepartmentService, EncryptHelper } from "@inversifyjs/application";
+import { HttpCode, Permission, RoleService, RouteHelper, TYPES, UserPermission, UserService, DepartmentService, EncryptHelper, Messages } from "@inversifyjs/application";
 import { checkPermissions, verifyAuthTokenRouter } from "@inversifyjs/infrastructure";
 
 @controller(RouteHelper.SIGNUP)
@@ -78,12 +78,11 @@ export class SignupController extends BaseController {
         try {
             this.logger.info(`body: ${JSON.stringify(request.body)}`);
 
-            if (!firstName) this.errors = {...this.errors, firstName: "First name is required" };
-            if (!lastName) this.errors = {...this.errors, lastName: "Last name is required" };
+            if (!firstName) this.errors = {...this.errors, firstName: Messages.USER_FIRST_NAME_REQUIRED };
+            if (!lastName) this.errors = {...this.errors, lastName: Messages.USER_LAST_NAME_REQUIRED };
             // if (!phoneNumber) this.errors = {...this.errors, phoneNumber: "Phone number is required" };
-            if ((password || confirmPassword) && password?.length < 6) this.errors = {...this.errors, password: "Password must be at least 6 characters" };
-            if ((password || confirmPassword) && confirmPassword?.toLowerCase() !== password?.toLowerCase()) this.errors = {...this.errors, confirmPassword: "Password and confirm password do not match" };
-            if (!roleId || isNaN(roleId)) this.errors = {...this.errors, roleId: "Role is required" };
+            if ((password || confirmPassword) && password?.length < 6) this.errors = {...this.errors, password: Messages.USER_PASSWORD_MUST_BE_6_CHARACTERS };
+            if ((password || confirmPassword) && confirmPassword?.toLowerCase() !== password?.toLowerCase()) this.errors = {...this.errors, confirmPassword: Messages.USER_PASSWORD_MISMATCH };
             
             if (this.errors) {
                 return response.status(HttpCode.BAD_REQUEST).render(this.routeHelper.getRenderPage(RouteHelper.SIGNUP), { errorValidator: this.errors, user: { id: userId, ...request.body }, roles, departments });
@@ -104,7 +103,7 @@ export class SignupController extends BaseController {
 
             await this.userService.save(newUser);
 
-            return response.cookie("messsage", "User updated successfully").status(HttpCode.CREATED).redirect(RouteHelper.USER_PROFILE + "/" + userId);
+            return response.cookie("messsage", Messages.USER_UPDATE_SUCCESS).status(HttpCode.CREATED).redirect(RouteHelper.USER_PROFILE + "/" + userId);
         } catch (error: any) {
             this.logger.error(error);
             return response.status(HttpCode.BAD_REQUEST).render(this.routeHelper.getRenderPage(RouteHelper.INTERNAL_SERVER_ERROR));

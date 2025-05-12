@@ -1,4 +1,4 @@
-import { HttpCode, RouteHelper, TYPES, UserPermission, UserService, Variables } from "@inversifyjs/application";
+import { HttpCode, Messages, RouteHelper, TYPES, UserPermission, UserService, Variables } from "@inversifyjs/application";
 import { controller, httpGet, httpPost } from "inversify-express-utils";
 import { BaseController } from "./base-controller";
 import { uploadMiddleware, verifyAuthTokenRouter } from "@inversifyjs/infrastructure";
@@ -58,8 +58,7 @@ export class UserProfileController extends BaseController {
 
 
             if (!request.file) {
-                console.log("File not found");
-                return this.index(request, response, "Please select an image");
+                return this.index(request, response, Messages.IMAGE_NOT_FOUND);
             }
 
             // Check file type
@@ -67,7 +66,7 @@ export class UserProfileController extends BaseController {
                 await fs.unlink(path.join(this.imgDir, request.file?.filename), (err: any) => {
                     if (err) throw err;
                 });
-                return this.index(request, response, "Image size is too large");
+                return this.index(request, response, Messages.IMAGE_SIZE_TOO_LARGE);
             }
 
             // // Remove Old Path When imagePath field is exists
@@ -97,7 +96,7 @@ export class UserProfileController extends BaseController {
                 
                 await this.userService.save(user);
             }
-            return response.cookie("messages", "User updated successfully").redirect(RouteHelper.USER_PROFILE + "/" + userId);
+            return response.cookie("messages", Messages.UPLOAD_IMAGE_SUCCESS).redirect(RouteHelper.USER_PROFILE + "/" + userId);
 
         } catch (error: any) {
             this.logger.error(error);
