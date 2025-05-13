@@ -122,29 +122,34 @@ export class ClassroomController extends BaseController {
             fs.createReadStream(filePath)
                 .pipe(require("csv-parser")())
                 .on("data", async (row: any) => {
-                    console.log("row", row);
-                    // let courseClassExist = await this.courseClassService.getCourseClassByCode(row.class_code);
-                    // if (courseClassExist) {
-                        // this.logger.error(Messages.COURSE_EXISTED + ": " + row.class_code);
-                    // } else {
-                        // let courseClass = this.courseClassService.create();
-                        // if (courseClass) {
-                        //     courseClass.classCode = row.class_code;
-                        //     courseClass.className = row.class_name;
-                        //     courseClass.semester = row.semester;
-                        //     courseClass.group = row.group;
-                        //     courseClass.startDate = row.start_date;
-                        //     courseClass.endDate = row.end_date;
-                        //     courseClass.schedule = JSON.parse(row.schedule);
-                        //     this.courseClassService.save(courseClass)?.then(() => {
-                        //         this.logger.info(Messages.IMPORT_COURSE_SUCCESS + ": " + row.class_name);
-                        //     })
-                        //     .catch((error: any) => {
-                        //         this.logger.error(Messages.IMPORT_COURSE_FAILED + ": " + row.class_name + " - " + error.message);
-                        //     });
-                        // }
-                    // }
+                    // console.log("row", row);
+                    let courseId = await this.courseService.getCourseByCode(row.course_code);
+                    if (!courseId) {
+                        this.logger.error(Messages.COURSE_NOT_FOUND + ": " + row.course_code);
+                        return;
+                    }
+                    let teacherId = await this.userService.getTeacherByEmail(row.teacher_email);
+                    if (!teacherId) {
+                        this.logger.error(Messages.TEACHER_NOT_FOUND + ": " + row.teacher_email);
+                        return;
+                    }
+                    let courseClass = this.courseClassService.create();
+                    if (courseClass) {
+                        courseClass.group = row.group;
+                        courseClass.classSchedule = JSON.parse(row.class_schedule);
+                        courseClass.maxStudent = Number(row.max_student);
+                        courseClass.semester = row.semester;
+                        courseClass.courseId = Number(courseId.id);
+                        courseClass.teacherId = Number(teacherId.id);
+                        courseClass.currentStudent = Number(row.current_student);
 
+                        this.courseClassService.save(courseClass)?.then(() => {
+                            this.logger.info(Messages.IMPORT_COURSE_SUCCESS + ": " + row.course_code);
+                        })
+                        .catch((error: any) => {
+                            this.logger.error(Messages.IMPORT_COURSE_FAILED + ": " + row.course_code + " - " + error.message);
+                        });
+                    }
                 })
                 .on("end", () => {
                     fs.unlinkSync(filePath);
@@ -170,9 +175,8 @@ export class ClassroomController extends BaseController {
         let group: any = request.query.groupSelect || Variables.ALL;
         let semester: any = request.query.semesterSelect || Variables.ALL;
         let name: any = (request.query.searchField as string)?.trim() || "";
-        // console.log("name", name);
         let page: any = request.query.page || 1;
-        let sortBy: any = request.query.sortBy || "id";
+        let sortBy: any = request.query.sortBy;
         let sort: any = request.query.sort || "ASC";
         try {
             // người đăng nhập hiện tại
@@ -181,7 +185,7 @@ export class ClassroomController extends BaseController {
                 teacher = userId;
             }
             let classes = await this.courseClassService.showCourseClassList(teacher, course, group, semester, name, page, this.limitedItem, sortBy, sort);
-            let courseList = await this.courseService.findAll();;
+            let courseList = await this.courseService.findAll();
             let teacherList = await this.userService.getAllTeacher();
             let semesterList = await this.courseClassService.getSemesterList();
             if (classes) {
@@ -209,9 +213,8 @@ export class ClassroomController extends BaseController {
                 classes.list.forEach((item: any) => {
                     item.schedule = sortClassSchedule(item.classSchedule);
                 });
-
                 response.render(this.routeHelper.getRenderPage(RouteHelper.CLASSES), {
-                    classes: classes.list,
+                    courseClasses: classes.list,
                     courseSelect: course,
                     groupSelect: group,
                     semesterSelect: semester,

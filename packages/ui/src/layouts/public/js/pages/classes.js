@@ -60,21 +60,25 @@ function sortTypeSwitch() {
     else sort.value = "ASC";
 }
 
-// Filter by Teacher
-let teacher = document.getElementById("teacherSelect");
-if (teacher) {
-    teacher.addEventListener("change", function () {
-        document.getElementById("search-form").submit();
+$(document).ready(function () {
+    $("#teacherSelect").select2({
+        placeholder: "Chọn giáo viên",
     });
-}
 
-// Filter by Course
-let course = document.getElementById("courseSelect");
-if (course) {
-    course.addEventListener("change", function () {
-        document.getElementById("search-form").submit();
+    $("#courseSelect").select2({
+        placeholder: "Chọn khóa học",
     });
-}
+});
+
+$('#teacherSelect').on('change', function (e) {
+  const selectedValue = $(this).val();
+  document.getElementById("search-form").submit();
+});
+
+$('#courseSelect').on('change', function (e) {
+  const selectedValue = $(this).val();
+  document.getElementById("search-form").submit();
+});
 
 // Filter by Semester
 let semester = document.getElementById("semesterSelect");

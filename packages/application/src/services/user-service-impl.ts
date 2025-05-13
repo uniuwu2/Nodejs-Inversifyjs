@@ -98,6 +98,13 @@ export class UserServiceImpl extends AbstractService<User, UserRepository> imple
         return undefined;
     }
 
+    public getTeacherByEmail(email: string): Promise<User> | undefined {
+        if (this.repository) {
+            return this.repository.findOneByFieldName({ email, roleId: 2 });
+        }
+        return undefined;
+    }
+
     public getRepositoryName(): string {
         return "UserRepositoryImpl";
     }

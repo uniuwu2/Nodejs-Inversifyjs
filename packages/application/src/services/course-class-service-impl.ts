@@ -72,8 +72,8 @@ export class CourseClassServiceImpl extends AbstractService<CourseClass, CourseC
             return {
                 list: result.list,
                 total: result.count,
-                page: page,
-                pageSize: limit,
+                page: result.page,
+                pageSize: result.pageSize,
             };
         }) as Promise<{
             list: CourseClass[];
