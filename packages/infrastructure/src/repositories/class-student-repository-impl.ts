@@ -1,15 +1,15 @@
-import { CourseClass, User } from "@inversifyjs/domain";
+import { ClassStudent } from "@inversifyjs/domain";
 import { injectable } from "inversify";
 import { AbstractRepository } from "./abstract-repository";
-import { CourseClassRepository } from "./course-class-repository.interface";
+import { ClassStudentRepository } from "./class-student-repository.interface";
 
 /**
  * User Repository
  */
 @injectable()
-export class CourseClassRepositoryImpl extends AbstractRepository<CourseClass> implements CourseClassRepository {
+export class ClassStudentRepositoryImpl extends AbstractRepository<ClassStudent> implements ClassStudentRepository {
     public getEntityType(): any {
-        return CourseClass;
+        return ClassStudent;
     }
 
     public createQueryBuilder(alias: string) {
@@ -18,6 +18,6 @@ export class CourseClassRepositoryImpl extends AbstractRepository<CourseClass> i
     }
 
     public getRepositoryName(): string {
-        return "CourseClassRepositoryImpl";
+        return "ClassStudentRepositoryImpl";
     }
 }

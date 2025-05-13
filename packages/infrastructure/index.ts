@@ -16,6 +16,8 @@ import { CourseClassRepository } from "./src/repositories/course-class-repositor
 import { CourseClassRepositoryImpl } from "./src/repositories/course-class-repository-impl";
 import { DepartmentRepository } from "./src/repositories/department-repository.interface";
 import { DepartmentRepositoryImpl } from "./src/repositories/department-repository-impl";
+import { ClassStudentRepository } from "./src/repositories/class-student-repository.interface";
+import { ClassStudentRepositoryImpl } from "./src/repositories/class-student-repository-impl";
 export { 
     LoggerMod, 
     Logger,
@@ -37,5 +39,7 @@ export {
     CourseClassRepository,
     CourseClassRepositoryImpl,
     DepartmentRepository,
-    DepartmentRepositoryImpl
+    DepartmentRepositoryImpl,
+    ClassStudentRepository,
+    ClassStudentRepositoryImpl
 };

@@ -110,7 +110,7 @@
                       <td><%= classItem.id %></td>
                       <td><%= classItem.course.courseName %></td>
                       <td><%= classItem.group %></td>
-                      <td><%= classItem.teacher.lastName + " " + classItem.teacher.firstName %></td>
+                      <td><%= classItem.teacher.firstName + " " + classItem.teacher.lastName %></td>
                       <td><%= classItem.semester %></td>
                       <td><%= classItem.currentStudent %></td>
                       <td><%= classItem.maxStudent %></td>
@@ -121,6 +121,25 @@
                         </div>
                         <% }) %>
                       </td>
+                      <td>
+                              <ul class="list-inline m-0">
+                                <li class="list-inline-item">
+                                  <button class="p-0 btn btn-link" type="button">
+                                    <a href="/classroom/class-detail/<%= classItem.id %>" class="px-2 text-primary" data-bs-toggle="tooltip"
+                                      data-bs-placement="top" title="Edit">
+                                      <i class="ti ti-pencil font-size-20"></i>
+                                    </a>
+                                  </button>
+                                </li>
+                                <li class="list-inline-item">
+                                  <form id="form-delete"></form>
+                                  <button type="button" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    title="Delete" id="sa-params-<%= classItem.id %>"
+                                    class="p-0 btn btn-link waves-effect waves-light text-danger">
+                                    <i class="ti ti-trash font-size-20"></i>
+                                  </button>
+                                </li>
+                            </td>
 
                     </tr>
                     <% }) %>

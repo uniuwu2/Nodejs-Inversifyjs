@@ -1,6 +1,6 @@
 import { controller, httpGet, httpPost } from "inversify-express-utils";
 import { BaseController } from "./base-controller";
-import { CourseClassService, CourseService, DepartmentService, HttpCode, Messages, Permission, RouteHelper, TYPES, UserService, Variables } from "@inversifyjs/application";
+import { ClassStudentService, CourseClassService, CourseService, DepartmentService, HttpCode, Messages, Permission, RouteHelper, TYPES, UserService, Variables } from "@inversifyjs/application";
 import { inject } from "inversify";
 import { checkPermissions, uploadMiddleware, verifyAuthTokenRouter } from "@inversifyjs/infrastructure";
 import * as fs from "fs";
@@ -12,25 +12,28 @@ export class ClassroomController extends BaseController {
     private courseClassService!: CourseClassService;
     private userService!: UserService;
     private departmentService!: DepartmentService;
+    private classStudentService!: ClassStudentService
     public constructor(
-        @inject(TYPES.CourseService) _courseService: CourseService, 
-        @inject(TYPES.CourseClassService) _courseClassService: CourseClassService, 
+        @inject(TYPES.CourseService) _courseService: CourseService,
+        @inject(TYPES.CourseClassService) _courseClassService: CourseClassService,
         @inject(TYPES.UserService) _userService: UserService,
-        @inject(TYPES.DepartmentService) _departmentService: DepartmentService
+        @inject(TYPES.DepartmentService) _departmentService: DepartmentService,
+        @inject(TYPES.ClassStudentService) _classStudentService: ClassStudentService
     ) {
         super();
         this.courseService = _courseService;
         this.courseClassService = _courseClassService;
         this.userService = _userService;
         this.departmentService = _departmentService;
+        this.classStudentService = _classStudentService;
     }
 
     // Môn học
-    @httpGet(RouteHelper.COURSES, verifyAuthTokenRouter,checkPermissions([Permission.ONLY_ADMIN]))
+    @httpGet(RouteHelper.COURSES, verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN]))
     public async getCourses(request: any, response: any): Promise<void> {
         let successMessage: string = "";
         if (request.cookies.messages) {
-            successMessage = "「"+ request.cookies.messages.message + "」";
+            successMessage = "「" + request.cookies.messages.message + "」";
             response.clearCookie("messages");
         }
 
@@ -92,15 +95,16 @@ export class ClassroomController extends BaseController {
                             if (departments?.length === 0) {
                                 course.departmentId = 0;
                             }
-                            this.courseService.save(course)?.then(() => {
-                                this.logger.info(Messages.IMPORT_COURSE_SUCCESS + ": " + row.course_name);
-                            })
-                            .catch((error: any) => {
-                                this.logger.error(Messages.IMPORT_COURSE_FAILED + ": " + row.course_name + " - " + error.message);
-                            });
+                            this.courseService
+                                .save(course)
+                                ?.then(() => {
+                                    this.logger.info(Messages.IMPORT_COURSE_SUCCESS + ": " + row.course_name);
+                                })
+                                .catch((error: any) => {
+                                    this.logger.error(Messages.IMPORT_COURSE_FAILED + ": " + row.course_name + " - " + error.message);
+                                });
                         }
                     }
-
                 })
                 .on("end", () => {
                     fs.unlinkSync(filePath);
@@ -143,18 +147,126 @@ export class ClassroomController extends BaseController {
                         courseClass.teacherId = Number(teacherId.id);
                         courseClass.currentStudent = Number(row.current_student);
 
-                        this.courseClassService.save(courseClass)?.then(() => {
-                            this.logger.info(Messages.IMPORT_COURSE_SUCCESS + ": " + row.course_code);
-                        })
-                        .catch((error: any) => {
-                            this.logger.error(Messages.IMPORT_COURSE_FAILED + ": " + row.course_code + " - " + error.message);
-                        });
+                        this.courseClassService
+                            .save(courseClass)
+                            ?.then(() => {
+                                this.logger.info(Messages.IMPORT_COURSE_SUCCESS + ": " + row.course_code);
+                            })
+                            .catch((error: any) => {
+                                this.logger.error(Messages.IMPORT_COURSE_FAILED + ": " + row.course_code + " - " + error.message);
+                            });
                     }
                 })
                 .on("end", () => {
                     fs.unlinkSync(filePath);
                 });
             response.status(HttpCode.IMPORT_SUCCESS).cookie("messages", { message: Messages.IMPORT_COURSE_SUCCESS }).send({ status: HttpCode.IMPORT_SUCCESS });
+        } catch (error: any) {
+            this.logger.error(error);
+            response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
+        }
+    }
+
+    // Trả về thông tin course được chọn
+    @httpGet("/course/info/:id", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN, Permission.ONLY_TEACHER]))
+    public async getCourseInfo(request: any, response: any): Promise<void> {
+        let courseId = request.params.id;
+        try {
+            let course = await this.courseService.findById(courseId, ["department"]);
+            if (course) {
+                response.status(HttpCode.SUCCESSFUL).json(course);
+            } else {
+                response.status(HttpCode.NOT_FOUND).send({ message: Messages.COURSE_NOT_FOUND, status: HttpCode.NOT_FOUND });
+            }
+        } catch (error: any) {
+            this.logger.error(error);
+            response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
+        }
+    }
+
+    @httpPost("/course/:id/edit", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN]), uploadMiddleware.single("file"))
+    public async editCourse(request: any, response: any): Promise<void> {
+        let courseId = Number(request.params.id);
+        let name: string = request.body.courseName;
+        let code: string = request.body.courseCode;
+        let credit: number = request.body.credit;
+        let url: string = request.body.url;
+        let oldCourse = await this.courseService.findById(courseId, ["department"]);
+        try {
+            if (!name) this.errors = { ...this.errors, courseName: Messages.COURSE_NAME_REQUIRED };
+            if (!code) this.errors = { ...this.errors, courseCode: Messages.COURSE_CODE_REQUIRED };
+            if (!credit) this.errors = { ...this.errors, credit: Messages.COURSE_CREDITS_REQUIRED };
+
+            if (this.errors) {
+                return response.status(HttpCode.SUCCESSFUL).send({ errors: this.errors });
+            }
+
+            delete request.body.id;
+
+            let newCourse = {
+                id: courseId,
+                ...request.body,
+            };
+            if (newCourse) {
+                this.courseService.save(newCourse);
+            }
+
+            return response.status(HttpCode.SUCCESSFUL).cookie("messages", { message: Messages.UPDATE_COURSE_SUCCESS, course: newCourse }).send({ url: url });
+        } catch (error: any) {
+            this.logger.error(error);
+            response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
+        }
+    }
+
+    @httpPost("/course/:id/delete", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN]))
+    public async deleteCourse(request: any, response: any): Promise<void> {
+        let courseId = Number(request.params.id);
+        let url = request.body.href || "";
+        try {
+            let course = await this.courseService.findById(courseId);
+            if (course) {
+                await this.courseService.delete(courseId);
+                return response
+                    .status(HttpCode.SUCCESSFUL)
+                    .cookie("messages", { message: Messages.DELETE_COURSE_SUCCESS, user: course.courseName })
+                    .redirect(RouteHelper.CLASSROOM + RouteHelper.COURSES + url);
+            } else {
+                return response.status(HttpCode.NOT_FOUND).send({ message: Messages.COURSE_NOT_FOUND, status: HttpCode.NOT_FOUND });
+            }
+        } catch (error: any) {
+            this.logger.error(error);
+            response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
+        }
+    }
+
+    @httpPost("/course/create", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN]))
+    public async createCourse(request: any, response: any): Promise<void> {
+        let name: string = request.body.courseName;
+        let code: string = request.body.courseCode;
+        let credit: number = request.body.credit;
+        let url: string = request.body.url;
+        try {
+            if (!name) this.errors = { ...this.errors, courseName: Messages.COURSE_NAME_REQUIRED };
+            if (!code) this.errors = { ...this.errors, courseCode: Messages.COURSE_CODE_REQUIRED };
+            if (!credit) this.errors = { ...this.errors, credit: Messages.COURSE_CREDITS_REQUIRED };
+
+            if (this.errors) {
+                return response.status(HttpCode.SUCCESSFUL).send({ errors: this.errors });
+            }
+            // check if course already exists
+            let courseExist = await this.courseService.getCourseByCode(code);
+            if (courseExist) {
+                this.errors = { ...this.errors, courseCode: Messages.COURSE_EXISTED };
+                return response.status(HttpCode.SUCCESSFUL).send({ errors: this.errors });
+            }
+            let course = {
+                ...request.body,
+            };
+
+            if (course) {
+                this.courseService.save(course);
+            }
+            return response.status(HttpCode.SUCCESSFUL).cookie("messages", { message: Messages.CREATE_COURSE_SUCCESS, course: course }).send({ url: url });
         } catch (error: any) {
             this.logger.error(error);
             response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
@@ -169,7 +281,7 @@ export class ClassroomController extends BaseController {
             successMessage = "「" + request.cookies.messages.user + "」" + request.cookies.messages.message;
             response.clearCookie("messages");
         }
-        
+
         let teacher: any = request.query.teacherSelect || Variables.ALL;
         let course: any = request.query.courseSelect || Variables.ALL;
         let group: any = request.query.groupSelect || Variables.ALL;
@@ -189,8 +301,6 @@ export class ClassroomController extends BaseController {
             let teacherList = await this.userService.getAllTeacher();
             let semesterList = await this.courseClassService.getSemesterList();
             if (classes) {
-                
-                    
                 const dayOrder = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
                 const dayMap: any = {
                     monday: "Thứ 2",
@@ -199,17 +309,17 @@ export class ClassroomController extends BaseController {
                     thursday: "Thứ 5",
                     friday: "Thứ 6",
                     saturday: "Thứ 7",
-                    sunday: "Chủ nhật"
+                    sunday: "Chủ nhật",
                 };
-                function sortClassSchedule(schedule: Record<string, string[]>): { day: string, label: string, times: string[] }[] {
+                function sortClassSchedule(schedule: Record<string, string[]>): { day: string; label: string; times: string[] }[] {
                     return Object.entries(schedule)
-                      .sort(([a], [b]) => dayOrder.indexOf(a) - dayOrder.indexOf(b))
-                      .map(([day, times]) => ({
-                        day,
-                        label: dayMap[day],
-                        times
-                      }));
-                  }
+                        .sort(([a], [b]) => dayOrder.indexOf(a) - dayOrder.indexOf(b))
+                        .map(([day, times]) => ({
+                            day,
+                            label: dayMap[day],
+                            times,
+                        }));
+                }
                 classes.list.forEach((item: any) => {
                     item.schedule = sortClassSchedule(item.classSchedule);
                 });
@@ -236,112 +346,38 @@ export class ClassroomController extends BaseController {
             this.logger.error(error);
             response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
         }
-        
     }
 
-    // Trả về thông tin course được chọn
-    @httpGet("/course/info/:id", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN, Permission.ONLY_TEACHER]))
-    public async getCourseInfo(request: any, response: any): Promise<void> {
-        let courseId = request.params.id;
+    @httpGet("/class-detail/:id", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN, Permission.ONLY_TEACHER]))
+    public async getClassInfo(request: any, response: any): Promise<void> {
+        let classId = request.params.id;
         try {
-            let course = await this.courseService.findById(courseId,["department"]);
-            if (course) {
-                response.status(HttpCode.SUCCESSFUL).json(course);
-            } else {
-                response.status(HttpCode.NOT_FOUND).send({ message: Messages.COURSE_NOT_FOUND, status: HttpCode.NOT_FOUND });
-            }
+            let courseClass = await this.courseClassService.findById(classId, ["course", "teacher"]);
+            // console.log("courseClass", courseClass);
+
+            response.render(this.routeHelper.getRenderPage(RouteHelper.CLASS_DETAIL), {
+                courseClass: courseClass,
+                classId: classId,
+            });
         } catch (error: any) {
             this.logger.error(error);
             response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
         }
     }
 
-    @httpPost("/course/:id/edit", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN]), uploadMiddleware.single("file"))
-    public async editCourse(request: any, response: any): Promise<void> {
-        let courseId = Number(request.params.id);
-        let name: string = request.body.courseName;
-        let code: string = request.body.courseCode;
-        let credit: number = request.body.credit;
-        let url: string = request.body.url;
-        let oldCourse = await this.courseService.findById(courseId,["department"]);
-        try {
-            if (!name) this.errors = {...this.errors, courseName: Messages.COURSE_NAME_REQUIRED };
-            if (!code) this.errors = {...this.errors, courseCode: Messages.COURSE_CODE_REQUIRED };
-            if (!credit) this.errors = {...this.errors, credit: Messages.COURSE_CREDITS_REQUIRED };
+    @httpGet("/class/info/:id", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN, Permission.ONLY_TEACHER]))
+    public async getClassInfoById(request: any, response: any): Promise<void> {
+        let classId = request.params.id;
+        let page =request.query.page || 1;
+        let searchField = request.query.searchField || "";
+        let sortBy = request.query.sortBy;
+        let sort = request.query.sort || "ASC";
 
-            if (this.errors) {
-                return response.status(HttpCode.SUCCESSFUL).send({ errors: this.errors });
-            }
+        let classStudent = await this.classStudentService.findStudentsByCourseClassId(searchField, classId, page, this.limitedItem, sortBy, sort);
+        console.log("classStudent", classStudent);
 
-            delete request.body.id;
-
-            let newCourse = {
-                id: courseId,
-                ...request.body,
-            }
-            if (newCourse) {
-                this.courseService.save(newCourse);
-            }
-
-            return response.status(HttpCode.SUCCESSFUL).cookie("messages", { message: Messages.UPDATE_COURSE_SUCCESS, course: newCourse}).send({ url: url });
-            
-        } catch (error: any) {
-            this.logger.error(error);
-            response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
-        }
+        // response.status(HttpCode.SUCCESSFUL).json({
+        //     classStudent: classStudent,
+        // });
     }
-
-    @httpPost("/course/:id/delete", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN]))
-    public async deleteCourse(request: any, response: any): Promise<void> {
-        let courseId = Number(request.params.id);
-        let url = request.body.href || "";
-        try {
-            let course = await this.courseService.findById(courseId);
-            if (course) {
-                await this.courseService.delete(courseId);
-                return response.status(HttpCode.SUCCESSFUL).cookie("messages", { message: Messages.DELETE_COURSE_SUCCESS, user: course.courseName}).redirect(RouteHelper.CLASSROOM + RouteHelper.COURSES + url);
-            } else {
-                return response.status(HttpCode.NOT_FOUND).send({ message: Messages.COURSE_NOT_FOUND, status: HttpCode.NOT_FOUND });
-            }
-        } catch (error: any) {
-            this.logger.error(error);
-            response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
-        }
-    }
-
-    @httpPost("/course/create", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN]))
-    public async createCourse(request: any, response: any): Promise<void> {
-        let name: string = request.body.courseName;
-        let code: string = request.body.courseCode;
-        let credit: number = request.body.credit;
-        let url: string = request.body.url;
-        try {
-            if (!name) this.errors = {...this.errors, courseName: Messages.COURSE_NAME_REQUIRED };
-            if (!code) this.errors = {...this.errors, courseCode: Messages.COURSE_CODE_REQUIRED };
-            if (!credit) this.errors = {...this.errors, credit: Messages.COURSE_CREDITS_REQUIRED };
-
-            if (this.errors) {
-                return response.status(HttpCode.SUCCESSFUL).send({ errors: this.errors });
-            }
-            // check if course already exists
-            let courseExist = await this.courseService.getCourseByCode(code);
-            if (courseExist) {
-                this.errors = {...this.errors, courseCode: Messages.COURSE_EXISTED };
-                return response.status(HttpCode.SUCCESSFUL).send({ errors: this.errors });
-            }
-            let course = {
-                ...request.body,
-            }
-
-            if (course) {
-                this.courseService.save(course);
-            }
-            return response.status(HttpCode.SUCCESSFUL).cookie("messages", { message: Messages.CREATE_COURSE_SUCCESS, course: course}).send({ url: url });
-        } catch (error: any) {
-            this.logger.error(error);
-            response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
-        }
-    }
-
-
 }

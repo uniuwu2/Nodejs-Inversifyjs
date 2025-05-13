@@ -18,6 +18,8 @@ import {
     CourseClassRepositoryImpl,
     DepartmentRepository,
     DepartmentRepositoryImpl,
+    ClassStudentRepository,
+    ClassStudentRepositoryImpl
 } from "@inversifyjs/infrastructure"; 
 import { 
     UserService,
@@ -32,6 +34,8 @@ import {
     CourseClassServiceImpl,
     DepartmentService,
     DepartmentServiceImpl,
+    ClassStudentService,
+    ClassStudentServiceImpl
  } from "@inversifyjs/application";    
 
 /** import controller */
@@ -58,4 +62,6 @@ export const referenceDataIoCModule = new ContainerModule((bind) => {
     bind<CourseClassService>(TYPES.CourseClassService).to(CourseClassServiceImpl).inSingletonScope();
     bind<DepartmentRepository>(TYPES.Repository).to(DepartmentRepositoryImpl).inSingletonScope();
     bind<DepartmentService>(TYPES.DepartmentService).to(DepartmentServiceImpl).inSingletonScope();
+    bind<ClassStudentRepository>(TYPES.Repository).to(ClassStudentRepositoryImpl).inSingletonScope();
+    bind<ClassStudentService>(TYPES.ClassStudentService).to(ClassStudentServiceImpl).inSingletonScope();
 });

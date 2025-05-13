@@ -1,4 +1,4 @@
-import { CourseClass } from "@inversifyjs/domain";
+import { CourseClass, User } from "@inversifyjs/domain";
 import { CourseClassRepository } from "@inversifyjs/infrastructure";
 import { injectable } from "inversify";
 import { AbstractService } from "./abstract-service";
@@ -31,14 +31,14 @@ export class CourseClassServiceImpl extends AbstractService<CourseClass, CourseC
         // }
 
         if (sortBy) {
-            if (sortBy === 'courseName') {
+            if (sortBy === "courseName") {
                 this.order = { course: { courseName: sort } };
-            } else if (sortBy === 'teacherName') {
+            } else if (sortBy === "teacherName") {
                 this.order = {
                     teacher: {
                         lastName: sort,
-                        firstName: sort
-                    }
+                        firstName: sort,
+                    },
                 };
             } else {
                 this.order = { [sortBy]: sort };
@@ -64,11 +64,7 @@ export class CourseClassServiceImpl extends AbstractService<CourseClass, CourseC
         if (name && name !== Variables.ALL) {
             where.push({ course: { courseName: Like(`%${name}%`) } });
         }
-        return this.repository?.findAndCount(
-            ["course","teacher"], 
-            (name || teacher || course || group || semester) && where, 
-            page && { take: limit, page: page }, 
-            sortBy && this.order)?.then((result: any) => {
+        return this.repository?.findAndCount(["course", "teacher"], (name || teacher || course || group || semester) && where, page && { take: limit, page: page }, sortBy && this.order)?.then((result: any) => {
             return {
                 list: result.list,
                 total: result.count,
@@ -94,7 +90,7 @@ export class CourseClassServiceImpl extends AbstractService<CourseClass, CourseC
                 return result.map((item: any) => item.semester);
             });
     }
-    
+
     public getRepositoryName(): string {
         return "CourseClassRepositoryImpl";
     }

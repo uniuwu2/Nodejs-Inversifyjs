@@ -31,4 +31,7 @@ export class Messages {
     public static readonly USER_PASSWORD_MUST_BE_6_CHARACTERS = "User password must be at least 6 characters!";
     public static readonly USER_PASSWORD_MISMATCH = "User password and confirm password do not match!";
     public static readonly TEACHER_NOT_FOUND = "Teacher not found!";
+
+    //Course Class
+    public static readonly CLASS_NOT_FOUND = "Class not found!";
 }
