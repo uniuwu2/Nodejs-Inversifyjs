@@ -22,31 +22,83 @@ export class ClassStudentServiceImpl extends AbstractService<ClassStudent, Class
         pageSize: number;
     }> | undefined {
         if (sortBy) {
-            this.order = { [sortBy]: sort };
+            if (sortBy === "firstName") {
+                this.order = { student: { firstName: sort } };
+            } else if (sortBy === "lastName") {
+                this.order = { student: { lastName: sort } };
+            } else if (sortBy === "email") {
+                this.order = { student: { email: sort } };
+            } else if (sortBy === "studentNumber") {
+                this.order = { student: { student: { studentNumber: sort } } };
+            } else {
+                this.order = { [sortBy]: sort };
+            }
         }
+
 
         let where: any = [];
-        if (courseClassId && courseClassId !== Variables.ALL) {
-            where.push({ courseClass: { id: courseClassId } });
-        }
-        if (name && name !== Variables.ALL) {
-            where.push({ student: { firstName: Like(`%${name}%`) } });
-        }
 
+        if (name !== null && name !== "") {
+            const like = Like(`%${name}%`);
+            const nameFilter = [
+                { student: { firstName: like } },
+                { student: { lastName: like } },
+                { student: { email: like } },
+                { student: { student: { student_number: like } } },
+            ];
+
+            if (courseClassId && courseClassId !== Variables.ALL) {
+                nameFilter.forEach((filter: any) => {
+                    where.push({
+                        ...filter,
+                        courseClass: { id: courseClassId },
+                    });
+                });
+            }
+        } else {
+            if (courseClassId && courseClassId !== Variables.ALL) {
+                where.push({ courseClass: { id: courseClassId } });
+            }
+        }
+        
         return this.repository?.findAndCount(
-            ["student, courseClass"],
-            where,
-            page && { take: limit, page: page }, 
+            ["student", "courseClass", "student.student"],
+            (name || courseClassId) && where,
+            page && { take: limit, page: page },
             sortBy && this.order)?.then((result: any) => {
-            return {
-                list: result[0],
-                total: result[1],
-                page: page,
-                pageSize: limit,
-            };
-        });
+                return {
+                    list: result.list,
+                    total: result.count,
+                    page: result.page,
+                    pageSize: Number(result.pageSize),
+                };
+            }) as Promise<{
+                list: ClassStudent[];
+                total: number;
+                page: number;
+                pageSize: number;
+            }>;
     }
-    
+
+    public findByCourseClassId(courseClassId: any, studentArray?: any): Promise<ClassStudent[]> | undefined {
+        if (this.repository != undefined) {
+            if (!studentArray) {
+                return this.repository.findAll(
+                    [],
+                    { courseClass: { id: courseClassId } },
+                );
+            }
+            return this.repository.findAll(
+                [],
+                {
+                    courseClass: { id: courseClassId },
+                    student: { id: studentArray },
+                },
+            );
+        }
+        return undefined;
+    }
+
     public getRepositoryName(): string {
         return "ClassStudentRepositoryImpl";
     }

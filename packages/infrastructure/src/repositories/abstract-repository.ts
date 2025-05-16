@@ -245,6 +245,18 @@ export abstract class AbstractRepository<E extends GenericEntity> implements Gen
         return Promise.resolve(true);
     }
 
+    public find(
+        relations?: string[],
+        where?: any,
+        order?: any,
+        take?: number,
+    ): Promise<E[]> | undefined {
+        if (this.repository != undefined) {
+            return this.repository.find({ relations, where, order, take });
+        }
+        return undefined;
+    }
+
     public abstract getEntityType(): any;
     public abstract getRepositoryName(): string;
 }

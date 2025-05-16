@@ -34,4 +34,11 @@ export class Messages {
 
     //Course Class
     public static readonly CLASS_NOT_FOUND = "Class not found!";
+    public static readonly DELETE_STUDENT_SUCCESS = "Delete student successfully!";
+    public static readonly DELETE_CLASS_SUCCESS = "Delete class successfully!";
+
+    // Student
+    public static readonly STUDENT_NOT_FOUND = "Student not found!";
+    public static readonly ADD_STUDENT_SUCCESS = "Add student successfully!";
+
 }

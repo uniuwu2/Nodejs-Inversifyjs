@@ -1,30 +1,50 @@
 <div class="page-content container mt-4">
     <div class="card shadow-sm">
         <div class="card-header bg-primary text-white">
-            <h4 class="mb-0 text-white"><%= courseClass.course.courseName %></h4>
+            <h4 class="mb-0 text-white">
+                <%= courseClass.course.courseName %>
+            </h4>
         </div>
         <div class="card-body">
             <div class="row mb-3">
-                <div class="col-md-6"><strong>Mã môn học:</strong> <%= courseClass.course.courseCode %></div>
-                <div class="col-md-6"><strong>Học kỳ:</strong> <%= courseClass.semester %></div>
+                <div class="col-md-6"><strong>Mã môn học:</strong>
+                    <%= courseClass.course.courseCode %>
+                </div>
+                <div class="col-md-6"><strong>Học kỳ:</strong>
+                    <%= courseClass.semester %>
+                </div>
             </div>
 
             <div class="row mb-3">
-                <div class="col-md-6"><strong>Nhóm:</strong> <%= courseClass.group %></div>
-                <div class="col-md-6"><strong>Số lượng sinh viên:</strong> <%= courseClass.currentStudent %> / <%= courseClass.maxStudent %></div>
+                <div class="col-md-6"><strong>Nhóm:</strong>
+                    <%= courseClass.group %>
+                </div>
+                <div class="col-md-6"><strong>Số lượng sinh viên:</strong>
+                    <%= courseClass.currentStudent %>/
+                        <%= courseClass.maxStudent %>
+                </div>
             </div>
 
             <div class="row mb-3">
-                <div class="col-md-6"><strong>Giảng viên:</strong> <%= courseClass.teacher.firstName %> <%= courseClass.teacher.lastName %></div>
-                <div class="col-md-6"><strong>Email giảng viên:</strong> <%= courseClass.teacher.email %></div>
+                <div class="col-md-6"><strong>Giảng viên:</strong>
+                    <%= courseClass.teacher.firstName %>
+                        <%= courseClass.teacher.lastName %>
+                </div>
+                <div class="col-md-6"><strong>Email giảng viên:</strong>
+                    <%= courseClass.teacher.email %>
+                </div>
             </div>
 
             <div class="row">
                 <div class="col-md-12">
                     <strong>Lịch học:</strong>
                     <ul class="mb-0">
-                        <% Object.entries(courseClass.classSchedule).forEach(([day, times]) => { %>
-                        <li><%= day.charAt(0).toUpperCase() + day.slice(1) %>: <%= times.join(', ') %></li>
+                        <% Object.entries(courseClass.classSchedule).forEach(([day, times])=> { %>
+                            <li>
+                                <%= day.charAt(0).toUpperCase() + day.slice(1) %>
+                                    :
+                                    <%= times.join(', ') %>
+                        </li>
                         <% }); %>
                     </ul>
                 </div>
@@ -38,21 +58,37 @@
             <div class="row align-items-center mb-3 gap-3">
                 <div class="mb-3 mb-md-0">
                     <div class="position-relative mt-3 mb-3">
-                        <input type="text" class="form-control" placeholder="Search..." id="searchField" name="searchField" value="<%= locals?.searchField %>" autofocus />
+                        <input type="text" class="form-control"
+                            placeholder="Search..." id="searchField"
+                            name="searchField"
+                            value="<%= locals?.searchField %>"
+                            autofocus />
                     </div>
                 </div>
                 <div class="table-responsive pe-0">
+                    <div class="justify-content-between mb-3">
+                        <div>
+                            <button class="btn btn-danger" id="deleteCheckedButton">Xoá</button>
+                            <button type="button" 
+                                class="btn btn-primary waves-effect waves-light <%= locals?.errorValidator && 'open-modal'%> modal-open"
+                                data-bs-toggle="modal"
+                                data-bs-target="#addStudentModal">Thêm sinh viên</button>
+                        </div>
+                    </div>
                     <table class="table table-nowrap align-middle">
                         <thead class="table-light">
                             <tr>
                                 <th>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="selectAllCheckbox">
+                                        <input class="form-check-input"
+                                            type="checkbox"
+                                            id="selectAllCheckbox">
                                     </div>
                                 </th>
                                 <th>STT</th>
                                 <th>Họ</th>
                                 <th>Tên</th>
+                                <th>MSSV</th>
                                 <th>Email</th>
                                 <th>Điện thoại</th>
                                 <th>Lớp</th>

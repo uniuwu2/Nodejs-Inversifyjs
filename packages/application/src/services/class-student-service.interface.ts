@@ -8,11 +8,13 @@ export interface ClassStudentService extends GenericService<ClassStudent> {
         page: any,
         limit: number,
         sortBy: any,
-        sort: any
+        sort: any,
     ): Promise<{
         list: ClassStudent[];
         total: number;
         page: number;
         pageSize: number;
     }> | undefined;
+
+    findByCourseClassId(courseClassId: any, studentArray?: any) : Promise<ClassStudent[]> | undefined;
 }

@@ -24,4 +24,5 @@ export interface UserService extends GenericService<User> {
         | undefined;
     getAllTeacher(): Promise<User[]> | undefined;
     getTeacherByEmail(email: string): Promise<User> | undefined;
+    findStudentBySelect2(search: string, departmentId?: number, currentStudentIdList?: number[]): Promise<User[]> | undefined;
 }

@@ -52,6 +52,7 @@ $(function () {
 
   // Kiểm tra trang hiện tại và thêm class "active" vào menu tương ứng
   var currentPage = window.location.pathname.split("/").pop();
+  var url = new URL(window.location);
   let chooseMenu = document.querySelectorAll(".sidebar-item.sidebar-"+currentPage);
   if (chooseMenu.length > 0) {
     chooseMenu.forEach((item) => {

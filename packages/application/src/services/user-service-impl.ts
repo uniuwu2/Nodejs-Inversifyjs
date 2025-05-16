@@ -4,7 +4,7 @@ import { injectable } from "inversify";
 import { AbstractService } from "./abstract-service";
 import { UserService } from "./user-service.interface";
 import { Variables } from "../constants/variables";
-import { Like } from "typeorm";
+import { Brackets, Like } from "typeorm";
 @injectable()
 export class UserServiceImpl extends AbstractService<User, UserRepository> implements UserService {
     public findByEmail(email: string): Promise<User> | undefined {
@@ -101,6 +101,34 @@ export class UserServiceImpl extends AbstractService<User, UserRepository> imple
     public getTeacherByEmail(email: string): Promise<User> | undefined {
         if (this.repository) {
             return this.repository.findOneByFieldName({ email, roleId: 2 });
+        }
+        return undefined;
+    }
+
+    public findStudentBySelect2(search: string, departmentId?: number, currentStudentIdList?: number[]): Promise<User[]> | undefined {
+        if (this.repository) {
+            search = search?.trim();
+            let query = this.repository
+                .createQueryBuilder("user")
+                .select(["user.id", "user.firstName", "user.lastName", "st.student_number"])
+                .leftJoin("user.student", "st", "st.student_id = user.id")
+                .where('user.roleId = :roleId', { roleId: 4 });
+            if (departmentId) {
+                query = query.andWhere("user.departmentId = :departmentId", { departmentId });
+            }
+            if (currentStudentIdList && currentStudentIdList.length > 0) {
+                query = query.andWhere("user.id NOT IN (:...currentStudentIdList)", { currentStudentIdList });
+            }
+            query = query.andWhere(
+                new Brackets((qb: any) => {
+                    qb.where("LOWER(user.firstName) LIKE :search", { search: `%${search.toLowerCase()}%` })
+                        .orWhere("LOWER(user.lastName) LIKE :search", { search: `%${search.toLowerCase()}%` })
+                        .orWhere("LOWER(CONCAT(user.firstName, ' ', user.lastName)) LIKE :search", { search: `%${search.toLowerCase()}%` })
+                        .orWhere("st.student_number LIKE :search", { search: `%${search}%` });
+                })
+            );
+
+            return query.getMany();
         }
         return undefined;
     }

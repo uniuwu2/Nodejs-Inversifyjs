@@ -64,7 +64,12 @@ export class CourseClassServiceImpl extends AbstractService<CourseClass, CourseC
         if (name && name !== Variables.ALL) {
             where.push({ course: { courseName: Like(`%${name}%`) } });
         }
-        return this.repository?.findAndCount(["course", "teacher"], (name || teacher || course || group || semester) && where, page && { take: limit, page: page }, sortBy && this.order)?.then((result: any) => {
+        return this.repository?.findAndCount(
+            ["course", "teacher"], 
+            (name || teacher || course || group || semester) && where, 
+            page && { take: limit, page: page }, 
+            sortBy && this.order)?.then((result: any) => {
+
             return {
                 list: result.list,
                 total: result.count,

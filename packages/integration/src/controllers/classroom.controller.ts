@@ -5,6 +5,8 @@ import { inject } from "inversify";
 import { checkPermissions, uploadMiddleware, verifyAuthTokenRouter } from "@inversifyjs/infrastructure";
 import * as fs from "fs";
 import { Response, Request } from "express";
+import { In, Like, Not } from "typeorm";
+import { ClassStudent } from "@inversifyjs/domain";
 
 @controller(RouteHelper.CLASSROOM)
 export class ClassroomController extends BaseController {
@@ -126,7 +128,6 @@ export class ClassroomController extends BaseController {
             fs.createReadStream(filePath)
                 .pipe(require("csv-parser")())
                 .on("data", async (row: any) => {
-                    // console.log("row", row);
                     let courseId = await this.courseService.getCourseByCode(row.course_code);
                     if (!courseId) {
                         this.logger.error(Messages.COURSE_NOT_FOUND + ": " + row.course_code);
@@ -353,11 +354,39 @@ export class ClassroomController extends BaseController {
         let classId = request.params.id;
         try {
             let courseClass = await this.courseClassService.findById(classId, ["course", "teacher"]);
-            // console.log("courseClass", courseClass);
+            let departmentList = await this.departmentService.findAll();
+            // let studentList = await this.userService.findAll(["student"], { roleId: 4 }, { lastName: "ASC", firstName: "ASC" });
+            let currentStudentList = await this.classStudentService.findByCourseClassId(classId);
 
+            let currentStudentIdList: any = [];
+            if (currentStudentList) {
+                currentStudentList.forEach((student: any) => {
+                    currentStudentIdList.push(student.studentId);
+                });
+            }
+            let currentSeletStudentList: any = [];
+            if (currentStudentIdList.length > 0) {
+                currentSeletStudentList = await this.userService.find(
+                    ["student"],
+                    {
+                        roleId: 4,
+                        id: Not(In(currentStudentIdList))
+                    },
+                    { lastName: "ASC", firstName: "ASC" },
+                );
+            }
+            let studentList = await this.userService.find(
+                ["student"],
+                { roleId: 4 },
+                { lastName: "ASC", firstName: "ASC" },
+                this.limitedItem,
+            );
             response.render(this.routeHelper.getRenderPage(RouteHelper.CLASS_DETAIL), {
                 courseClass: courseClass,
                 classId: classId,
+                departmentList: departmentList,
+                studentList: studentList,
+                currentSeletStudentList: currentSeletStudentList,
             });
         } catch (error: any) {
             this.logger.error(error);
@@ -368,16 +397,186 @@ export class ClassroomController extends BaseController {
     @httpGet("/class/info/:id", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN, Permission.ONLY_TEACHER]))
     public async getClassInfoById(request: any, response: any): Promise<void> {
         let classId = request.params.id;
-        let page =request.query.page || 1;
         let searchField = request.query.searchField || "";
-        let sortBy = request.query.sortBy;
-        let sort = request.query.sort || "ASC";
+        let page: any = request.query.page || 1;
+        let sortBy: any = request.query.sortBy;
+        let sort: any = request.query.sort || "ASC";
+        try {
 
-        let classStudent = await this.classStudentService.findStudentsByCourseClassId(searchField, classId, page, this.limitedItem, sortBy, sort);
-        console.log("classStudent", classStudent);
+            let classStudent = await this.classStudentService.findStudentsByCourseClassId(searchField, classId, page, this.limitedItem, sortBy, sort);
+            if (classStudent?.list.length == 0 && page > 1) {
+                classStudent = await this.classStudentService.findStudentsByCourseClassId(searchField, classId, 1, this.limitedItem, sortBy, sort);
+            }
+            if (classStudent) {
+                response.status(HttpCode.SUCCESSFUL).json({
+                    classStudent: classStudent,
+                    limit: this.limitedItem,
+                    total: classStudent.total,
+                    page: classStudent.pageSize,
+                    pageSize: classStudent.pageSize,
+                    lastPage: Math.ceil(classStudent.total / this.limitedItem),
+                    sort,
+                    searchField,
+                });
+            }
+        } catch (error: any) {
+            this.logger.error(error);
+            response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
+        }
+    }
 
-        // response.status(HttpCode.SUCCESSFUL).json({
-        //     classStudent: classStudent,
-        // });
+    @httpPost("/class/:classId/student/delete", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN, Permission.ONLY_TEACHER]))
+    public async deleteStudentFromClass(request: any, response: any): Promise<void> {
+        let classId = Number(request.params.classId);
+        let studentIdArray = request.body.ids;
+
+        try {
+            let courseClass = await this.courseClassService.findById(classId);
+            if (courseClass) {
+                if (studentIdArray.length > 0 && studentIdArray[0] === "all") {
+                    let classStudent = await this.classStudentService.findByCourseClassId(classId);
+                    if (classStudent) {
+                        classStudent.forEach(async (student: any) => {
+                            await this.classStudentService.delete(student.id);
+                        });
+                    }
+                }
+                studentIdArray.forEach(async (studentId: any) => {
+                    let classStudent = await this.classStudentService.findByCourseClassId(classId, studentId);
+                    if (classStudent) {
+                        classStudent.forEach(async (student: any) => {
+                            await this.classStudentService.delete(student.id);
+                        });
+                    }
+                });
+                return response
+                    .status(HttpCode.SUCCESSFUL)
+                    .cookie("messages", { message: Messages.DELETE_STUDENT_SUCCESS, user: studentIdArray.length })
+                    .json({ status: HttpCode.SUCCESSFUL, user: studentIdArray.length });
+            }
+
+        } catch (error: any) {
+            this.logger.error(error);
+            response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
+        }
+    }
+
+    @httpGet("/class/student/search", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN, Permission.ONLY_TEACHER]))
+    public async searchStudent(request: any, response: any): Promise<void> {
+        let search = request.query.keyword || "";
+        let departmentId = request.query.departmentId || "ALL";
+        let classId = request.query.classId || "ALL";
+        try {
+            let currentStudentList = await this.classStudentService.findByCourseClassId(classId);
+            let currentStudentIdList: any = [];
+            if (currentStudentList) {
+                currentStudentList.forEach((student: any) => {
+                    currentStudentIdList.push(student.studentId);
+                });
+            }
+            if (departmentId === Variables.ALL) {
+                departmentId = undefined;
+            }
+            let studentList = await this.userService.findStudentBySelect2(search, departmentId, currentStudentIdList);
+            if (studentList) {
+                response.status(HttpCode.SUCCESSFUL).json({
+                    studentList: studentList,
+                });
+            } else {
+                response.status(HttpCode.NOT_FOUND).json({ message: Messages.STUDENT_NOT_FOUND, status: HttpCode.NOT_FOUND });
+            }
+        } catch (error: any) {
+            this.logger.error(error);
+            response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
+        }
+    }
+
+    @httpGet("/class/student/department", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN, Permission.ONLY_TEACHER]))
+    public async getDepartment(request: any, response: any): Promise<void> {
+        let departmentId = request.query.departmentId || "ALL";
+        try {
+            if (departmentId === Variables.ALL) {
+                let studentList = await this.userService.find(["student"], { roleId: 4 }, { lastName: "ASC", firstName: "ASC" });
+                if (studentList) {
+                    response.status(HttpCode.SUCCESSFUL).json({
+                        studentList: studentList,
+                    });
+                }
+            } else {
+                let studentList = await this.userService.find(["student"], { roleId: 4, departmentId: departmentId }, { lastName: "ASC", firstName: "ASC" });
+                if (studentList) {
+                    response.status(HttpCode.SUCCESSFUL).json({
+                        studentList: studentList,
+                    });
+                }
+            }
+        } catch (error: any) {
+            this.logger.error(error);
+            response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
+        }
+    }
+
+    @httpPost("/class/:classId/student/add", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN, Permission.ONLY_TEACHER]))
+    public async addStudentToClass(request: any, response: any): Promise<void> {
+        let classId = Number(request.params.classId);
+        let studentIdArray = request.body.studentId || [];
+        try {
+            let classStudents: ClassStudent[] = [];
+            if (studentIdArray.length === 0) {
+                return response.status(HttpCode.BAD_REQUEST).send({ message: Messages.STUDENT_NOT_FOUND, status: HttpCode.BAD_REQUEST });
+            }
+            if (studentIdArray.length > 0 && studentIdArray[0] === "all") {
+                studentIdArray.forEach(async (studentId: any) => {
+                    if (studentId !== "all") {
+                        let classStudent = new ClassStudent();
+                        classStudent.courseClassId = classId;
+                        classStudent.studentId = studentId;
+                        classStudents.push(classStudent);
+                    }
+                });
+                this.classStudentService.saveMulti(classStudents);
+                return response
+                    .status(HttpCode.SUCCESSFUL)
+                    .cookie("messages", { message: Messages.ADD_STUDENT_SUCCESS, user: studentIdArray.length })
+                    .json({ status: HttpCode.SUCCESSFUL, user: studentIdArray.length });
+            }
+            if (studentIdArray.length > 0) {
+                studentIdArray.forEach(async (studentId: any) => {
+                    let classStudent = new ClassStudent();
+                    classStudent.courseClassId = classId;
+                    classStudent.studentId = studentId;
+                    classStudents.push(classStudent);
+                });
+                this.classStudentService.saveMulti(classStudents);
+                return response
+                    .status(HttpCode.SUCCESSFUL)
+                    .cookie("messages", { message: Messages.ADD_STUDENT_SUCCESS, user: studentIdArray.length })
+                    .json({ status: HttpCode.SUCCESSFUL, user: studentIdArray.length });
+            }
+        } catch (error: any) {
+            this.logger.error(error);
+            response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
+        }
+    }
+
+    @httpPost("/class/:id/delete", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN]))
+    public async deleteClass(request: any, response: any): Promise<void> {
+        let classId = Number(request.params.id);
+        let url = request.body.href || "";
+        try {
+            let courseClass = await this.courseClassService.findById(classId);
+            if (courseClass) {
+                await this.courseClassService.delete(classId);
+                return response
+                    .status(HttpCode.SUCCESSFUL)
+                    .cookie("messages", { message: Messages.DELETE_CLASS_SUCCESS, user: courseClass.id })
+                    .redirect(RouteHelper.CLASSROOM + RouteHelper.CLASSES + url);
+            } else {
+                return response.status(HttpCode.NOT_FOUND).send({ message: Messages.CLASS_NOT_FOUND, status: HttpCode.NOT_FOUND });
+            }
+        } catch (error: any) {
+            this.logger.error(error);
+            response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
+        }
     }
 }

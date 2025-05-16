@@ -1,0 +1,53 @@
+<div class="modal fade" id="addStudentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="modalName" class="modal-title">
+                    <span id="modalTitle">Thêm sinh viên</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <span class="form-label">Khoa</span>
+                        <select class="form-select" id="addDepartment" name="addDepartment">
+                            <option value="ALL" selected>Tất cả</option>
+                            <% if (departmentList?.length> 0) { departmentList.forEach(department => { %>
+                                <option value="<%= department.id %>">
+                                    <%= department.departmentName %>
+                                </option>
+                                <% }); } else { %>
+                                    <option value="1">Department 1</option>
+                                    <option value="2">Department 2</option>
+                                    <option value="3">Department 3</option>
+                                    <option value="4">Department 4</option>
+                                    <% } %>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <span class="form-label">Sinh viên</span>
+                        <select class="form-select" id="addStudent" name="addStudent[]" style="width: 100%" multiple="multiple">
+                            <option value="all">Tất cả</option>
+                            <% if (currentSeletStudentList?.length> 0) { currentSeletStudentList.forEach(student => { %>
+                                <option value="<%= student.id %>">
+                                    <%= student.firstName + " " + student.lastName + " - " + student.student.student_number %>
+                                </option>
+                                <% }); } else { %>
+                                    <option value="1">Student 1</option>
+                                    <option value="2">Student 2</option>
+                                    <option value="3">Student 3</option>
+                                    <option value="4">Student 4</option>
+                                    <% } %>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" id="addStudetnBtn" class="btn btn-primary">Thêm môn học</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
