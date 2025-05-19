@@ -23,7 +23,8 @@ export class RouteHelper {
     public static readonly USER_PROFILE: string = "/profile";
     public static readonly SIGNUP: string = "/signup";
     public static readonly CLASS_DETAIL: string = "/class-detail";
-    
+    public static readonly SESSION_CLASS: string = "/session-class";
+
 
     private routeMap: Map<string, string> = new Map<string, string>();
 
@@ -43,6 +44,7 @@ export class RouteHelper {
         this.routeMap.set(RouteHelper.USER_PROFILE, "profile/index");
         this.routeMap.set(RouteHelper.SIGNUP, "signup/index");
         this.routeMap.set(RouteHelper.CLASS_DETAIL, "class-detail/index");
+        this.routeMap.set(RouteHelper.SESSION_CLASS, "session-class/index");
     }
 
     /**

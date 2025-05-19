@@ -1,0 +1,33 @@
+<!-- Modal tạo buổi học -->
+<div class="modal fade" id="createSessionModal" tabindex="-1" aria-labelledby="createSessionLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form class="modal-content" action="/sessions/create" method="POST">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createSessionLabel">Tạo buổi học mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="title" class="form-label">Tên buổi học</label>
+                    <input type="text" class="form-control" id="title" name="title" required />
+                </div>
+                <div class="mb-3">
+                    <label for="start" class="form-label">Thời gian bắt đầu</label>
+                    <input type="datetime-local" class="form-control" id="start" name="start" required />
+                </div>
+                <div class="mb-3">
+                    <label for="end" class="form-label">Thời gian kết thúc</label>
+                    <input type="datetime-local" class="form-control" id="end" name="end" />
+                </div>
+                <div class="mb-3">
+                    <label for="location" class="form-label">Phòng học</label>
+                    <input type="text" class="form-control" id="location" name="location" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-success">Tạo</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+            </div>
+        </form>
+    </div>
+</div>

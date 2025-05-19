@@ -46,6 +46,7 @@ import "./controllers/logout.controller";
 import "./controllers/classroom.controller";
 import "./controllers/user-profile.controller";
 import "./controllers/signup.controller";
+import "./controllers/session-class.controller";
 export const referenceDataIoCModule = new ContainerModule((bind) => {
     bind<Logger>(TYPES.Logger).to(LoggerMod).inSingletonScope();
     bind<DataSourceConnection>(TYPES.DataSourceConnect).to(DataSourceConnection).inSingletonScope();
