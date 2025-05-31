@@ -5,7 +5,6 @@ const buttons = document.querySelectorAll("#page-link");
 buttons.forEach((button) => {
     button.addEventListener("click", function () {
         currentPage.value = this.value;
-        console.log(currentPage.value);
     });
 });
 

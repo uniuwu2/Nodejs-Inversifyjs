@@ -96,6 +96,17 @@ export class CourseClassServiceImpl extends AbstractService<CourseClass, CourseC
             });
     }
 
+    public findAllClassesByTeacherId(teacherId: number): Promise<CourseClass[]> | undefined {
+        if (!this.repository) return undefined;
+        return this.repository
+            .createQueryBuilder("course_class")
+            .leftJoinAndSelect("course_class.course", "course")
+            .leftJoinAndSelect("course_class.teacher", "teacher")
+            .where("course_class.teacherId = :teacherId", { teacherId })
+            .orderBy("course.course_name", "ASC")
+            .getMany();
+    }
+
     public getRepositoryName(): string {
         return "CourseClassRepositoryImpl";
     }

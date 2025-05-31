@@ -1,0 +1,63 @@
+<!-- Modal -->
+<div class="modal fade" id="editEventModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Chỉnh sửa buổi học</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Button xem chi tiết buổi học -->
+                
+                <input type="hidden" id="eventId">
+                <input type="hidden" id="courseId">
+                <input type="hidden" id="teacherId">
+                <input type="hidden" id="courseClassId">
+                <div class="mb-2">
+                    <label>Môn học</label>
+                    <input type="text" class="form-control" id="subject">
+                </div>
+                <div class="mb-2">
+                    <label>Giáo viên</label>
+                    <input type="text" class="form-control" id="teacher" readonly>
+                </div>
+                <div class="mb-2">
+                    <label>Phòng</label>
+                    <input type="text" class="form-control" id="room">
+                </div>
+                <div class="mb-2">
+                    <label>Thời gian bắt đầu</label>
+                    <input type="time" class="form-control" id="startTime">
+                </div>
+                <div class="mb-2">
+                    <label>Thời gian kết thúc</label>
+                    <input type="time" class="form-control" id="endTime">
+                </div>
+                <div class="mb-2">
+                    <label>Ghi chú</label>
+                    <input type="text" class="form-control" id="reason">
+                </div>
+                <!-- Đánh dấu là học bù -->
+                <div class="mb-2 form-check">
+                    <input type="checkbox" class="form-check-input" id="isMakeup">
+                    <label class="form-check-label" for="isMakeup">Học bù</label>
+                </div>
+                <!-- Đồng bộ phòng học với các buổi còn lại -->
+                <div class="mb-2 form-check">
+                    <input type="checkbox" class="form-check-input" id="syncRoom">
+                    <label class="form-check-label" for="syncRoom">Đồng bộ phòng học với các buổi còn lại</label>
+                </div>
+                <!-- Đánh dấu huỷ buổi học -->
+                <div class="mb-2 form-check">
+                    <input type="checkbox" class="form-check-input" id="isCancelled">
+                    <label class="form-check-label" for="isCancelled">Huỷ buổi học</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="btn btn-info" id="viewDetails">Xem chi tiết</a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="submit" class="btn btn-primary" id="saveChanges">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+</div>

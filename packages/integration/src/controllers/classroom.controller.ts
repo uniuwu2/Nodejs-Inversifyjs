@@ -32,7 +32,7 @@ export class ClassroomController extends BaseController {
 
     // Môn học
     @httpGet(RouteHelper.COURSES, verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN]))
-    public async getCourses(request: any, response: any): Promise<void> {
+    public async getCourses(request: Request, response: Response): Promise<void> {
         let successMessage: string = "";
         if (request.cookies.messages) {
             successMessage = "「" + request.cookies.messages.message + "」";
@@ -170,8 +170,8 @@ export class ClassroomController extends BaseController {
 
     // Trả về thông tin course được chọn
     @httpGet("/course/info/:id", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN, Permission.ONLY_TEACHER]))
-    public async getCourseInfo(request: any, response: any): Promise<void> {
-        let courseId = request.params.id;
+    public async getCourseInfo(request: Request, response: Response): Promise<void> {
+        let courseId = Number(request.params.id);
         try {
             let course = await this.courseService.findById(courseId, ["department"]);
             if (course) {
@@ -186,7 +186,7 @@ export class ClassroomController extends BaseController {
     }
 
     @httpPost("/course/:id/edit", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN]), uploadMiddleware.single("file"))
-    public async editCourse(request: any, response: any): Promise<void> {
+    public async editCourse(request: Request, response: Response) {
         let courseId = Number(request.params.id);
         let name: string = request.body.courseName;
         let code: string = request.body.courseCode;
@@ -220,7 +220,7 @@ export class ClassroomController extends BaseController {
     }
 
     @httpPost("/course/:id/delete", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN]))
-    public async deleteCourse(request: any, response: any): Promise<void> {
+    public async deleteCourse(request: Request, response: Response) {
         let courseId = Number(request.params.id);
         let url = request.body.href || "";
         try {
@@ -241,7 +241,7 @@ export class ClassroomController extends BaseController {
     }
 
     @httpPost("/course/create", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN]))
-    public async createCourse(request: any, response: any): Promise<void> {
+    public async createCourse(request: Request, response: Response) {
         let name: string = request.body.courseName;
         let code: string = request.body.courseCode;
         let credit: number = request.body.credit;
@@ -350,8 +350,8 @@ export class ClassroomController extends BaseController {
     }
 
     @httpGet("/class-detail/:id", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN, Permission.ONLY_TEACHER]))
-    public async getClassInfo(request: any, response: any): Promise<void> {
-        let classId = request.params.id;
+    public async getClassInfo(request: Request, response: Response): Promise<void> {
+        let classId = Number(request.params.id);
         try {
             let courseClass = await this.courseClassService.findById(classId, ["course", "teacher"]);
             let departmentList = await this.departmentService.findAll();
@@ -395,7 +395,7 @@ export class ClassroomController extends BaseController {
     }
 
     @httpGet("/class/info/:id", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN, Permission.ONLY_TEACHER]))
-    public async getClassInfoById(request: any, response: any): Promise<void> {
+    public async getClassInfoById(request: Request, response: Response): Promise<void> {
         let classId = request.params.id;
         let searchField = request.query.searchField || "";
         let page: any = request.query.page || 1;
@@ -426,7 +426,7 @@ export class ClassroomController extends BaseController {
     }
 
     @httpPost("/class/:classId/student/delete", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN, Permission.ONLY_TEACHER]))
-    public async deleteStudentFromClass(request: any, response: any): Promise<void> {
+    public async deleteStudentFromClass(request: Request, response: Response) {
         let classId = Number(request.params.classId);
         let studentIdArray = request.body.ids;
 
@@ -573,6 +573,22 @@ export class ClassroomController extends BaseController {
                     .redirect(RouteHelper.CLASSROOM + RouteHelper.CLASSES + url);
             } else {
                 return response.status(HttpCode.NOT_FOUND).send({ message: Messages.CLASS_NOT_FOUND, status: HttpCode.NOT_FOUND });
+            }
+        } catch (error: any) {
+            this.logger.error(error);
+            response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
+        }
+    }
+
+    @httpGet("/teacher/:id/classes", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN, Permission.ONLY_TEACHER]))
+    public async getTeacherClasses(request: Request, response: Response): Promise<void> {
+        let teacherId = Number(request.params.id);
+        try {
+            let courseClasses = await this.courseClassService.findAllClassesByTeacherId(teacherId);
+            if (courseClasses) {
+                response.status(HttpCode.SUCCESSFUL).json(courseClasses);
+            } else {
+                response.status(HttpCode.NOT_FOUND).send({ message: Messages.CLASS_NOT_FOUND, status: HttpCode.NOT_FOUND });
             }
         } catch (error: any) {
             this.logger.error(error);

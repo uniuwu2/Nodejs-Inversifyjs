@@ -18,6 +18,8 @@ import { DepartmentRepository } from "./src/repositories/department-repository.i
 import { DepartmentRepositoryImpl } from "./src/repositories/department-repository-impl";
 import { ClassStudentRepository } from "./src/repositories/class-student-repository.interface";
 import { ClassStudentRepositoryImpl } from "./src/repositories/class-student-repository-impl";
+import { SessionClassRepository } from "./src/repositories/session-class-repository.interface";
+import { SessionClassRepositoryImpl } from "./src/repositories/session-class-repository-impl";
 export { 
     LoggerMod, 
     Logger,
@@ -41,5 +43,7 @@ export {
     DepartmentRepository,
     DepartmentRepositoryImpl,
     ClassStudentRepository,
-    ClassStudentRepositoryImpl
+    ClassStudentRepositoryImpl,
+    SessionClassRepository,
+    SessionClassRepositoryImpl,
 };

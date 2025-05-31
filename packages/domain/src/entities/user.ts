@@ -8,6 +8,7 @@ import { CourseClass } from "./course_class";
 import { ClassStudent } from "./class_student";
 import { Attendance } from "./attendance";
 import { Department } from "./department";
+import { SessionClass } from "./session_class";
 
 @Entity("user")
 export class User extends GenericEntity {
@@ -70,4 +71,8 @@ export class User extends GenericEntity {
     @ManyToOne(() => Department, (department) => department.user)
     @JoinColumn([{ name: "department_id", referencedColumnName: "id" }])
     public department!: Department;
+
+    @OneToMany(() => SessionClass, (sessionClass) => sessionClass.teacher)
+    public sessionClass: SessionClass[] | null = null;
+    
 }

@@ -12,4 +12,5 @@ export const TYPES = {
     DepartmentService: Symbol.for("DepartmentService"),
     RouteHelper: Symbol.for("RouteHelper"),
     ClassStudentService: Symbol.for("ClassStudentService"),
+    SessionClassService: Symbol.for("SessionClassService"),
 };

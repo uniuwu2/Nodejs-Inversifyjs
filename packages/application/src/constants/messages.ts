@@ -41,4 +41,13 @@ export class Messages {
     public static readonly STUDENT_NOT_FOUND = "Student not found!";
     public static readonly ADD_STUDENT_SUCCESS = "Add student successfully!";
 
+
+    // Session Class
+    public static readonly EDIT_SESSION_CLASS_SUCCESS = "Edit session class successfully!";
+    public static readonly SESSION_CLASS_EXISTED = "Session class already existed!";
+    public static readonly CREATE_SESSION_CLASS_SUCCESS = "Create session class successfully!";
+    public static readonly STUDENT_EXISTED_IN_SESSION = "Student already existed in session class!";
+    public static readonly STUDENT_NOT_EXISTED_IN_SESSION = "Student not existed in session class!";
+    public static readonly ADD_STUDENT_TO_SESSION_SUCCESS = "Add student to session class successfully!";
+    public static readonly STUDENT_EXISTED_IN_CLASS = "Student already existed in class!";
 }

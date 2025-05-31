@@ -1,184 +1,313 @@
-
-//   const calendarEl = document.getElementById("calendar");
-
-//   const calendar = new FullCalendar.Calendar(calendarEl, {
-//     initialView: "dayGridMonth",
-//     locale: "vi", // Tiếng Việt
-//     headerToolbar: {
-//       left: "prev,next today",
-//       center: "title",
-//       right: "dayGridMonth,timeGridWeek,timeGridDay"
-//     },
-//     events: [
-//       {
-//         id: "1",
-//         title: "Toán - Tiết 1",
-//         start: "2025-05-19T08:00:00",
-//         url: "/session/1",
-//         color: "#28a745"
-//       },
-//       {
-//         id: "2",
-//         title: "Lý - Tiết 2",
-//         start: "2025-05-20T10:00:00",
-//         url: "/session/2",
-//         color: "#dc3545"
-//       }
-//     ]
-//   });
-
-//   calendar.render();
-// });
-
-// console.log(courseClasses);
-
-
 const startDate = new Date("2025-05-19T00:00:00");
-// const dayMap = {
-//   "monday": 1,
-//   "tuesday": 2,
-//   "wednesday": 3,
-//   "thursday": 4,
-//   "friday": 5,
-//   "saturday": 6,
-//   "sunday": 0
-// };
 
+const dayOrder = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
 
-const dayOrder = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
-const dayMap = {
-  monday: "Thứ 2",
-  tuesday: "Thứ 3",
-  wednesday: "Thứ 4",
-  thursday: "Thứ 5",
-  friday: "Thứ 6",
-  saturday: "Thứ 7",
-  sunday: "Chủ nhật",
-};
-function sortClassSchedule(schedule) {
-  return Object.entries(schedule)
-    .sort(([a], [b]) => dayOrder.indexOf(a) - dayOrder.indexOf(b))
-    .map(([day, times]) => ({
-      day,
-      label: dayMap[day],
-      times,
-    }));
+const sessionClasses = []; // sẽ chứa các event hiển thị trên calendar
+const teacherColorMap = {};
+
+function getRandomColor() {
+    const randomColor = Math.floor(Math.random() * 16777215).toString(16);
+    return `#${randomColor.padStart(6, "0")}`;
+}
+function getColorForTeacher(teacherId) {
+    if (!teacherColorMap[teacherId]) {
+        teacherColorMap[teacherId] = getRandomColor();
+    }
+    return teacherColorMap[teacherId];
 }
 
-// Hàm phân tích class_schedule và tạo session_class
+function sortClassSchedule(schedule) {
+    return Object.entries(schedule)
+        .sort(([a], [b]) => dayOrder.indexOf(a) - dayOrder.indexOf(b))
+        .map(([day, times]) => ({ day, times }));
+}
+function toLocalDateString(date) {
+    const year = date.getFullYear();
+    const month = `${date.getMonth() + 1}`.padStart(2, "0");
+    const day = `${date.getDate()}`.padStart(2, "0");
+    return `${year}-${month}-${day}`;
+}
+function padTime(t) {
+    return t
+        .split(":")
+        .map((s) => s.padStart(2, "0"))
+        .join(":");
+}
+// console.log(courseClasses)
 function generateSessionClasses(course) {
-  let sessionCount = 0;
-  let currentDate = new Date(startDate);
-  const sessions = [];
+    const sessions = [];
+    course.forEach((sessionClass) => {
+        let teacherColor = getColorForTeacher(sessionClass.teacherId);
+        if (sessionClass.status == 0) {
+            teacherColor = "#000"; // Màu đen cho các lớp đã hủy
+        }
+        sessions.push({
+            title: "",
+            start: `${sessionClass.sessionDate}T${sessionClass.sessionStartTime}`,
+            end: `${sessionClass.sessionDate}T${sessionClass.sessionEndTime}`,
+            display: "block",
+            backgroundColor: teacherColor,
+            borderColor: teacherColor,
+            extendedProps: {
+                sessionId: sessionClass.id,
+                courseId: sessionClass.courseClass.course.id,
+                teacherId: sessionClass.teacherId,
+                teacher: `${sessionClass.teacher.firstName} ${sessionClass.teacher.lastName}`,
+                courseName: sessionClass.courseClass.course.courseName,
+                courseCode: sessionClass.courseClass.course.courseCode,
+                day: sessionClass.sessionDate,
+                startTime: sessionClass.sessionStartTime,
+                endTime: sessionClass.sessionEndTime,
+                room: sessionClass.room,
+                courseClassId: sessionClass.courseClass.id,
+                status: sessionClass.status, // 0: đã hủy, 1: bình thường, 2: bù
+                reason: sessionClass.reason || "",
+            },
+        });
+    });
+    // const schedule = course.classSchedule;
+    // const sortedSchedule = sortClassSchedule(schedule);
+    // const classDays = sortedSchedule.map((item) => item.day);
 
-  while (sessionCount < course.sessionNumber) {
-    const schedule = course.classSchedule;
-    const sortedSchedule = sortClassSchedule(schedule);
-    const session = sortedSchedule.map((daySchedule) => {
-      const day = daySchedule.day;
-      const times = daySchedule.times;
+    // while (sessionCount < course.sessionNumber) {
+    //     const dayName = dayOrder[currentDate.getDay()];
+    //     if (classDays.includes(dayName)) {
+    //         const timeSlots = schedule[dayName];
+    //         for (const time of timeSlots) {
+    //             if (sessionCount >= course.sessionNumber) break;
 
-      const dayIndex = dayOrder.indexOf(day);
-      const dayOffset = (dayIndex + 7) % 7;
-      const sessionDate = new Date(currentDate);
-      sessionDate.setDate(currentDate.getDate() + dayOffset);
-      // set start time
-      const startTime = times.split("-")[0];
-      const [startHour, startMinute] = startTime.split(":").map(Number);
-      sessionDate.setHours(startHour, startMinute, 0, 0);
-      // set end time
-      const endTime = times.split("-")[1];
-      const [endHour, endMinute] = endTime.split(":").map(Number);
+    //             const [startTime, endTime] = time.split("-").map((t) => padTime(t));
+    //             const dateStr = toLocalDateString(currentDate);
+    //             const teacherColor = getColorForTeacher(course.teacherId);
+    //             sessions.push({
+    //                 title: "",
+    //                 start: `${dateStr}T${startTime}`,
+    //                 end: `${dateStr}T${endTime}`,
+    //                 display: "block",
+    //                 backgroundColor: teacherColor,
+    //                 borderColor: teacherColor,
+    //                 extendedProps: {
+    //                     sessionId: course.id,
+    //                     courseId: course.course.id,
+    //                     teacherId: course.teacherId,
+    //                     teacher: `${course.teacher.firstName} ${course.teacher.lastName}`,
+    //                     courseName: course.course.courseName,
+    //                     courseCode: course.course.courseCode,
+    //                     sessionNumber: sessionCount + 1,
+    //                     day: dateStr,
+    //                     startTime: startTime,
+    //                     endTime: endTime,
+    //                     room: "",
+    //                 },
+    //             });
 
-      
-      
-      console.log(sessionDate);
+    //             sessionCount++;
+    //         }
+    //     }
+    //     currentDate.setDate(currentDate.getDate() + 1);
+    // }
+
+    return sessions;
+}
+
+function initializeSessions() {
+    if (!Array.isArray(courseClasses)) {
+        console.error("courseClasses không hợp lệ");
+        return;
+    }
+
+    // for (const course of courseClasses) {
+    //     const sessions = generateSessionClasses(course);
+    //     sessionClasses.push(...sessions);
+    // }
+    let test = generateSessionClasses(courseClasses);
+    sessionClasses.push(...test);
+}
+document.addEventListener("DOMContentLoaded", function () {
+    const calendarEl = document.getElementById("calendar");
+    if (!calendarEl) {
+        console.error("Không tìm thấy phần tử #calendar.");
+        return;
+    }
+
+    if (typeof FullCalendar === "undefined") {
+        console.error("FullCalendar chưa được tải.");
+        return;
+    }
+    initializeSessions();
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: "dayGridMonth",
+        locale: "vi",
+        headerToolbar: {
+            left: "prev,next today",
+            center: "title",
+            right: "dayGridMonth,dayGridWeek,dayGridDay",
+        },
+        events: sessionClasses,
+        height: "auto",
+        eventDidMount: function (info) {
+            const { extendedProps } = info.event;
+            const { courseName, courseCode, sessionNumber, teacher } = extendedProps;
+
+            info.el.innerHTML = `
+                <div class="event-content">
+                    <strong>${courseName} (${courseCode})</strong><br>
+                    <span>${teacher}</span><br>
+                    <span>${extendedProps.startTime} - ${extendedProps.endTime}</span><br>
+                    <span>Phòng: ${extendedProps.room}</span><br>
+                </div>
+            `;
+        },
+        eventClick: function (info) {
+            const { extendedProps } = info.event;
+            const { sessionId, courseId, teacherId, courseName, courseCode, sessionNumber, teacher } = extendedProps;
+            const props = info.event.extendedProps;
+            document.getElementById("eventId").value = props.sessionId;
+            document.getElementById("courseId").value = props.courseId;
+            document.getElementById("teacherId").value = props.teacherId;
+            document.getElementById("courseClassId").value = props.courseClassId;
+            document.getElementById("teacher").value = `${props.teacher}`;
+            document.getElementById("subject").value = props.courseName;
+            document.getElementById("room").value = props.room;
+            document.getElementById("startTime").value = props.startTime;
+            document.getElementById("endTime").value = props.endTime;
+            document.getElementById("reason").value = props.reason || "";
+            if (props.status === 2) {
+                document.getElementById("isMakeup").checked = true;
+                document.getElementById("isCancelled").disabled = true;
+            } else if (props.status === 0) {
+                document.getElementById("isCancelled").checked = true;
+                document.getElementById("isMakeup").disabled = true;
+            }
+
+            let detailButton = document.getElementById("viewDetails");
+            if (detailButton) {
+                detailButton.href = `/session-class/schedule/detail/${props.sessionId}`;
+            }
+
+            new bootstrap.Modal(document.getElementById("editEventModal")).show();
+        },
     });
 
-    // console.log(session);
-    sessionCount++;
-  }
-}
-generateSessionClasses(courseClasses[0]);
+    calendar.render();
 
-// Tạo session_class cho tất cả course_class
-// function initializeSessions() {
-//   if (!courseClasses || !Array.isArray(courseClasses)) {
-//     console.error("Dữ liệu courseClasses không hợp lệ hoặc không được truyền từ server:", courseClasses);
-//     courseClasses = []; // Gán giá trị mặc định để tránh lỗi
-//   }
+    $("#saveChanges").click(function (e) {
+        let eventId = document.getElementById("eventId").value;
+        let makeUpCheckbox = document.getElementById("isMakeup");
+        let syncRoomCheckbox = document.getElementById("syncRoom");
+        let isCancelledCheckbox = document.getElementById("isCancelled");
+        let isMakeup = makeUpCheckbox.checked ? 1 : 0;
+        let syncRoom = syncRoomCheckbox.checked ? 1 : 0;
+        let isCancelled = isCancelledCheckbox.checked ? 1 : 0;
+        let room = document.getElementById("room").value;
+        let startTime = document.getElementById("startTime").value;
+        let endTime = document.getElementById("endTime").value;
+        let teacherId = document.getElementById("teacherId").value;
+        let courseId = document.getElementById("courseId").value;
+        let courseClassId = document.getElementById("courseClassId").value;
+        let reason = document.getElementById("reason").value;
+        $.ajax({
+            url: "/session-class/schedule/" + eventId + "/edit",
+            type: "POST",
+            data: {
+                eventId: eventId,
+                room: room,
+                startTime: startTime,
+                endTime: endTime,
+                isMakeup: isMakeup,
+                syncRoom: syncRoom,
+                isCancelled: isCancelled,
+                teacherId: teacherId,
+                courseId: courseId,
+                courseClassId: courseClassId,
+                reason: reason,
+            },
+            success: function (response) {
+                if (response.code === 200) {
+                    location.reload();
+                }
+            },
+            error: function (error) {
+                console.error("Lỗi khi cập nhật:", error);
+            },
+        });
+    });
 
-//   sessionClasses = [];
-//   for (const course of courseClasses) {
-//     const sessions = generateSessionClasses(course);
-//     sessionClasses.push(...sessions);
-//   }
-// }
-// // Khởi tạo FullCalendar
-// document.addEventListener("DOMContentLoaded", function () {
-//   const calendarEl = document.getElementById("calendar");
-//   if (!calendarEl) {
-//     console.error("Không tìm thấy phần tử #calendar trong DOM.");
-//     return;
-//   }
+    $("#isMakeup").change(function () {
+        if ($(this).is(":checked")) {
+            $("#isCancelled").prop("disabled", true);
+        } else {
+            $("#isCancelled").prop("disabled", false);
+        }
+    });
 
-//   if (typeof FullCalendar === "undefined") {
-//     console.error("FullCalendar không được tải. Vui lòng kiểm tra kết nối CDN hoặc tệp script.");
-//     return;
-//   }
+    $("#isCancelled").change(function () {
+        if ($(this).is(":checked")) {
+            $("#isMakeup").prop("disabled", true);
+        } else {
+            $("#isMakeup").prop("disabled", false);
+        }
+    });
 
-//   initializeSessions();
+    // Xử lý môn học theo giáo viên đã chọn
+    const subjectWrapper = document.getElementById("subjectSelectWrapper");
+    const subjectSelect = document.getElementById("createsubject");
+    const teacherSelect = document.getElementById("createTeacher");
 
-//   calendar = new FullCalendar.Calendar(calendarEl, {
-//     initialView: "dayGridMonth",
-//     locale: "vi",
-//     headerToolbar: {
-//       left: "prev,next today",
-//       center: "title",
-//       right: "dayGridMonth,timeGridWeek,timeGridDay"
-//     },
-//     eventContent: function (arg) {
-//       const event = arg.event;
-//       let status = "";
-//       if (event.extendedProps.isMakeup) status += " (Học bù)";
-//       if (event.extendedProps.isCancelled) status += " (Hủy)";
-//       return {
-//         html: `
-//           <div>
-//             <b>${event.title}</b><br>
-//             <small>${event.extendedProps.teacher} - Phòng: ${event.extendedProps.room || "Chưa xác định"}${status}</small>
-//           </div>
-//         `
-//       };
-//     },
-//     eventClick: function (info) {
-//       const options = [
-//         "Đánh dấu học bù",
-//         "Hủy buổi học",
-//         "Thoát"
-//       ];
-//       const choice = prompt(`Chọn hành động cho ${info.event.title}:\n${options.join("\n")}\nNhập số (0, 1, 2):`);
-//       const index = parseInt(choice || "2");
 
-//       if (index === 0) {
-//         info.event.setExtendedProp("isMakeup", true);
-//         info.event.setExtendedProp("isCancelled", false);
-//         info.event.setProp("color", "#28a745");
-//       } else if (index === 1) {
-//         info.event.setExtendedProp("isCancelled", true);
-//         info.event.setExtendedProp("isMakeup", false);
-//         info.event.setProp("color", "#6c757d");
-//       }
-//       calendar.refetchEvents();
-//     },
-//     events: function (fetchInfo, successCallback) {
-//       successCallback(sessionClasses);
-//     },
-//     height: "auto",
-//     slotMinTime: "07:00:00",
-//     slotMaxTime: "18:00:00"
-//   });
+    async function loadSubjects(teacherId) {
+        if (!teacherId) {
+            subjectWrapper.style.display = "none";
+            return;
+        }
 
-//   calendar.render();
+        try {
+            const res = await fetch(`/classroom/teacher/${teacherId}/classes`);
+            const subjects = await res.json();
 
-// });
+            // 1. Reset lại select
+            if ($(subjectSelect).hasClass("select2-hidden-accessible")) {
+                $(subjectSelect).select2("destroy");
+            }
+
+            subjectSelect.innerHTML = '<option value="">Chọn môn học</option>';
+
+            // 2. Gắn dữ liệu mới
+            subjects.forEach((sub) => {
+                const opt = document.createElement("option");
+                opt.value = sub.course?.id || "";
+                opt.textContent = sub.course?.courseName || "Không rõ tên";
+                subjectSelect.appendChild(opt);
+            });
+
+            // 3. Hiển thị nếu có môn học
+            if (subjects.length > 0) {
+                subjectWrapper.style.display = "block";
+            } else {
+                subjectWrapper.style.display = "none";
+            }
+
+        } catch (err) {
+            console.error("Lỗi khi lấy môn học:", err);
+            subjectWrapper.style.display = "none";
+        }
+    }
+
+    // Nếu là Admin → chọn giáo viên mới load môn học
+    if (teacherSelect) {
+        teacherSelect.addEventListener("change", function () {
+            const teacherId = this.value;
+            loadSubjects(teacherId);
+        });
+
+        // Nếu admin mở modal và có sẵn giáo viên đầu tiên → tự load luôn
+        if (teacherSelect.value) {
+            loadSubjects(teacherSelect.value);
+        }
+    }
+
+    // Nếu là giáo viên → tự động load môn học theo `user.id`
+    if (!teacherSelect && window.currentTeacherId) {
+        loadSubjects(window.currentTeacherId);
+    }
+});

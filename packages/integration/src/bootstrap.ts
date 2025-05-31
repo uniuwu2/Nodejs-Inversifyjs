@@ -79,7 +79,14 @@ export async function bootstrap(container: Container, appPort: any, appPath: any
             app.use(bodyParser.urlencoded({ extended: true }));
             app.use(bodyParser.json());
             // app.use(helmet());
-            app.use(cors());
+            
+            // Enable CORS
+            app.use(cors({
+                origin: ['http://localhost:8081', 'exp://localhost:8081'],
+                methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+                allowedHeaders: ['Content-Type', 'Authorization'],
+                credentials: true
+            }));
             app.options("*", cors());
 
             app.on("close", function () {

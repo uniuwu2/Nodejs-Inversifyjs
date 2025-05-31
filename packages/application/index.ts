@@ -1,6 +1,7 @@
 import { TYPES } from "./src/constants/types";
 import { HttpCode } from "./src/constants/http-code";
 import { Variables } from "./src/constants/variables";
+import { SessionClassStatus } from "./src/constants/session-class-status";
 import { GenericService } from "./src/services/generic-service.interface";
 import { UserService } from "./src/services/user-service.interface";
 import { UserServiceImpl } from "./src/services/user-service-impl";
@@ -22,6 +23,8 @@ import { DepartmentServiceImpl } from "./src/services/department-service-impl";
 import { Messages } from "./src/constants/messages";
 import { ClassStudentService } from "./src/services/class-student-service.interface";
 import { ClassStudentServiceImpl } from "./src/services/class-student-service-impl";
+import { SessionClassService } from "./src/services/session-class.interface";
+import { SessionClassServiceImpl } from "./src/services/session-class-impl";
 export {
     TYPES,
     HttpCode,
@@ -46,5 +49,8 @@ export {
     DepartmentServiceImpl,
     ClassStudentService,
     ClassStudentServiceImpl,
+    SessionClassService,
+    SessionClassServiceImpl,
     Messages,
+    SessionClassStatus,
 }

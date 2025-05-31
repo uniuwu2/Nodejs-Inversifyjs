@@ -29,12 +29,15 @@ export class ClassStudentServiceImpl extends AbstractService<ClassStudent, Class
             } else if (sortBy === "email") {
                 this.order = { student: { email: sort } };
             } else if (sortBy === "studentNumber") {
-                this.order = { student: { student: { studentNumber: sort } } };
+                this.order = { student: { student: { student_number: sort } } };
+            } else if (sortBy === "phone") {
+                this.order = { student: { phoneNumber: sort } };
+            } else if (sortBy === "class") {
+                this.order = { student: { student: { student_class: sort } } };
             } else {
                 this.order = { [sortBy]: sort };
             }
         }
-
 
         let where: any = [];
 
@@ -95,6 +98,20 @@ export class ClassStudentServiceImpl extends AbstractService<ClassStudent, Class
                     student: { id: studentArray },
                 },
             );
+        }
+        return undefined;
+    }
+
+    public findStudentByCourseClassId(courseClassId: any, studentId: any): Promise<ClassStudent> | undefined {
+        if (this.repository != undefined) {
+            
+        }
+        return undefined;
+    }
+
+    public deleteByCourseClassId(courseClassId: any): Promise<void> | undefined {
+        if (this.repository != undefined) {
+           
         }
         return undefined;
     }

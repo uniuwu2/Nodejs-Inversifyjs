@@ -1,0 +1,22 @@
+/* Cải thiện giao diện sự kiện trong FullCalendar */
+.fc-event {
+    padding: 4px 6px;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    border-radius: 6px;
+    white-space: normal !important;
+    word-break: break-word;
+}
+
+/* Đảm bảo nội dung không bị ẩn khi xuống dòng */
+.fc .fc-timegrid-event {
+    max-height: none !important;
+}
+
+/* Nếu là chế độ tuần */
+.fc-timegrid-event .fc-event-title {
+    white-space: normal !important;
+}
+.fc-event-time {
+  display: none !important;
+}

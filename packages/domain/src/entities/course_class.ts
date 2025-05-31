@@ -26,6 +26,12 @@ export class CourseClass extends GenericEntity {
     @Column("int", { name: "session_number" })
     public sessionNumber: number = 0;
 
+    @Column("date", { name: "start_date" })
+    public startDate: Date = new Date();
+    
+    @Column("date", { name: "end_date" })
+    public endDate: Date = new Date();
+
     @Column("int", { name: "course_id"})
     public courseId: number = 0;
     @ManyToOne(() => Course, (course) => course.course)

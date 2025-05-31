@@ -34,4 +34,5 @@ export interface CourseClassService extends GenericService<CourseClass> {
     //     page: number;
     //     pageSize: number;
     // }> | undefined;
+    findAllClassesByTeacherId(teahcerId: number): Promise<CourseClass[]> | undefined;
 }
