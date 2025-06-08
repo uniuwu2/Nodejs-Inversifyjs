@@ -47,19 +47,30 @@ $(function () {
 
     // Lấy user hiện tại từ cookie hoặc biến JS được inject server-side
     const currentUserId = window.currentUserId || 1; // fallback là admin (1)
-    socket.emit("register", currentUserId); // Đăng ký socket theo userId
+    console.log("[app.js] Đăng ký socket với userId:", currentUserId, "(kiểu:", typeof currentUserId, ")");
+    socket.emit("register", String(currentUserId)); // Đăng ký socket theo userId (string)
 
     // Hứng thông báo gửi đến
+    /** @param {Message} data */
     socket.on("noti", (data) => {
-        Swal.fire({
-            icon: "info",
-            title: "Thông báo mới",
-            text: data.message,
-            timer: 3000,
-        });
+        console.log("[app.js] Received notification:", data);
+        // Thêm thông báo vào vùng notification-list trên header
+        const notiList = document.getElementById("notification-list");
+        if (notiList) {
+            const notiItem = document.createElement("div");
+            notiItem.className = "dropdown-item";
+            notiItem.textContent = data.message || "Có thông báo mới!";
+            notiList.prepend(notiItem);
+        }
+        // Phát âm thanh thông báo
+        if (userInteracted) {
+            const audio = new Audio("../../sounds/notification.mp3");
+            audio.play();
+        }
+        // Có thể thêm hiệu ứng, badge, v.v. nếu muốn
     });
 
-    // Ví dụ: Hàm gửi noti từ admin đến userId = 2
+    // Ví dụ: Hàm gửi // noti từ admin đến userId =//  2
     window.sendNotificationToUser2 = function () {
         socket.emit("sendNoti", {
             toUserId: 2,
@@ -67,19 +78,17 @@ $(function () {
         });
     };
 
-//     const socket = io(); // Tự động kết nối socket.io
-
-// const currentUserId = "2"; // Đây là user 2
-socket.emit("register", currentUserId);
-
-socket.on("noti", (data) => {
-    console.log("Nhận được noti:", data);
-    Swal.fire({
-        icon: "info",
-        title: "Thông báo mới",
-        text: data.message,
-        timer: 3000,
-    });
 });
 
+/**
+ * @typedef {Object} Message
+ * @property {string} message - The notification message
+ * @property {number} [toUserId] - Optional user ID to send to
+ */
+
+let userInteracted = false;
+window.addEventListener('click', function onceUserInteracts() {
+    userInteracted = true;
+    // Sau lần đầu click, có thể bỏ listener nếu muốn
+    window.removeEventListener('click', onceUserInteracts);
 });

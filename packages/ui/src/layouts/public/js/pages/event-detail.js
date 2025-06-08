@@ -395,6 +395,14 @@ if (addStudentBtn) {
                     students: studentIds,
                     eventId: eventId,
                 });
+                // Gửi thông báo đến từng sinh viên được thêm vào buổi học
+                studentIds.forEach((studentId) => {
+                    console.log("[event-detail.js] Gửi noti tới userId:", String(studentId));
+                    (window.socket || socket).emit("sendNoti", {
+                        toUserId: String(studentId),
+                        message: "Bạn vừa được thêm vào buổi học!",
+                    });
+                });
                 // fetch(`/events/event/addStudents`, {
                 //     method: "POST",
                 //     headers: {
@@ -436,3 +444,16 @@ if (addStudentBtn) {
 //         timer: 4000,
 //     });
 // });
+
+// Lắng nghe thông báo realtime nếu trang này được mở bởi sinh viên
+if (window.socket) {
+    window.socket.on("noti", function(data) {
+        console.log("[event-detail.js] Nhận thông báo:", data);
+        Swal.fire({
+            icon: "info",
+            title: "Thông báo mới",
+            text: data.message,
+            timer: 3000,
+        });
+    });
+}
