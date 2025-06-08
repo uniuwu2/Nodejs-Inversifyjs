@@ -173,23 +173,24 @@ function deleteCheckedStudents() {
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({ 
-                        ids: selectedIds ,
+                    body: JSON.stringify({
+                        ids: selectedIds,
                         sessionId: sessionId,
                         courseClassId: courseClassId,
                     }),
                 })
                     .then((res) => res.json())
                     .then((res) => {
-                        if (res.status === 200) {
+                        if (res.code === 200) {
+                            checkAll.checked = false;
                             Swal.fire({
                                 icon: "success",
                                 title: "Đã xoá " + selectedIds.length + " sinh viên",
                                 showConfirmButton: false,
                                 timer: 3000,
+                            }).then(() => {
+                                window.location.reload();
                             });
-                            checkAll.checked = false;
-                            location.reload();
                         } else {
                             Swal.fire({
                                 icon: "error",
@@ -341,7 +342,7 @@ if (addStudentBtn) {
                 })
                     .then((res) => res.json())
                     .then((res) => {
-                        if (res.status === 200) {
+                        if (res.code === 200) {
                             Swal.fire({
                                 icon: "success",
                                 title: `Đã thêm ${selectedStudents.length} sinh viên`,
@@ -363,3 +364,63 @@ if (addStudentBtn) {
         });
     });
 }
+
+$(document).ready(function () {
+    let studentList = document.querySelectorAll(".edit-student-status");
+    if (studentList) {
+        studentList.forEach((student) => {
+            $(`#${student.id}`).click(function () {
+                let id = student.id.split("-")[2];
+                let editBtn = document.getElementById(`edit-student-${id}`);
+                editBtn.classList.add("modal-openning");
+                let studentStatusSelect = document.getElementById('studentStatusSelect');
+                let studentNote = document.getElementById('studentNote'); 
+                let oldData = document.getElementById(`studentRow-${id}`).children;
+                Array.from(oldData).forEach((data) => {
+                    if (data.className.includes("student-status")) {
+                        let status = data.getAttribute("data-status");
+                        studentStatusSelect.value = status;
+                    }
+                    if (data.className.includes("student-note")) {
+                        studentNote.value = data.innerText;
+                    }
+                });
+                $("#editStudentStatus").attr("data-id", id);
+            });
+        });
+
+        $("#editStudentStatus").click(function () {
+            let id = $(this).attr("data-id");
+            $.ajax({
+                url: "/session-class/session/student/edit-status",
+                type: "POST",
+                data: {
+                    id: id,
+                    sessionId: sessionId,
+                    status: $("#studentStatusSelect").val(),
+                    note: $("#studentNote").val(),
+                    url: window.location.href,
+                },
+                success: function (response) {
+                    if (response.code === 200) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Cập nhật trạng thái thành công",
+                            showConfirmButton: false,
+                            timer: 3000,
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: response.message,
+                            showConfirmButton: false,
+                            timer: 3000,
+                        });
+                    }
+                },
+            });
+        });
+    }
+});

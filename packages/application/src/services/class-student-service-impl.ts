@@ -3,7 +3,7 @@ import { ClassStudentRepository } from "@inversifyjs/infrastructure";
 import { injectable } from "inversify";
 import { AbstractService } from "./abstract-service";
 import { ClassStudentService } from "./class-student-service.interface";
-import { Like } from "typeorm";
+import { Brackets, Like } from "typeorm";
 import { Variables } from "../constants/variables";
 
 @injectable()
@@ -63,7 +63,7 @@ export class ClassStudentServiceImpl extends AbstractService<ClassStudent, Class
                 where.push({ courseClass: { id: courseClassId } });
             }
         }
-        
+
         return this.repository?.findAndCount(
             ["student", "courseClass", "student.student"],
             (name || courseClassId) && where,
@@ -104,18 +104,25 @@ export class ClassStudentServiceImpl extends AbstractService<ClassStudent, Class
 
     public findStudentByCourseClassId(courseClassId: any, studentId: any): Promise<ClassStudent> | undefined {
         if (this.repository != undefined) {
-            
+
         }
         return undefined;
     }
 
     public deleteByCourseClassId(courseClassId: any): Promise<void> | undefined {
         if (this.repository != undefined) {
-           
+
         }
         return undefined;
     }
-
+    public getStudentSchedule(studentId: string): Promise<any> | undefined {
+            if (this.repository != undefined) {
+                return this.repository.find(['courseClass', 'courseClass.sessionClass', 'courseClass.course', 'courseClass.teacher'], {
+                    studentId: studentId,
+                });
+            }
+            return undefined;
+        }
     public getRepositoryName(): string {
         return "ClassStudentRepositoryImpl";
     }

@@ -35,4 +35,5 @@ export interface ClassStudentService extends GenericService<ClassStudent> {
         studentId: any,
     ): Promise<ClassStudent> | undefined;
     deleteByCourseClassId(courseClassId: any): Promise<void> | undefined;
+    getStudentSchedule(studentId: string): Promise<any> | undefined;
 }

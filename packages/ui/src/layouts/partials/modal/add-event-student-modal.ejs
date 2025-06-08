@@ -1,0 +1,36 @@
+<div class="modal fade" id="addEventStudentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="modalName" class="modal-title">
+                    <span id="modalTitle">Thêm sinh viên</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="student-select">Chọn sinh viên</label>
+                        <div class="dropdown">
+                            <input type="text" class="form-control" id="student-select" placeholder="Chọn sinh viên"
+                                autocomplete="off">
+                            <div class="dropdown-menu w-100" id="studentDropdownMenu"></div>
+                        </div>
+
+                        <!-- Khu vực hiển thị sinh viên đã chọn -->
+                        <div class="mt-2 d-flex flex-wrap gap-1" id="selectedStudentsContainer"></div>
+
+                        <!-- Hidden input để submit danh sách ID -->
+                        <input type="hidden" name="selected_student_ids" id="selected_student_ids" />
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" id="addStudetnBtn" class="btn btn-primary">Thêm sinh viên</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

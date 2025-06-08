@@ -4,6 +4,7 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "@types/qrcode": "^1.5.5"
+    "@types/qrcode": "^1.5.5",
+    "@types/ws": "^8.18.1"
   }
 }

@@ -1,4 +1,4 @@
-<div class="page-content container">
+<div>
     <div class="card shadow-sm">
         <div class="card-header bg-primary text-white">
             <h4 class="mb-0 text-white">
@@ -126,16 +126,19 @@
                             <th scope="col" role="button" id="sort-by-class">Lớp <% if(sortBy==="className" )
                                 { iconSort() } else { %> <i class="ti ti-arrows-sort"></i>
                             <% } %></i></th>
+                            <th>Trạng thái</th>
+                            <th>Ghi chú</th>
+                            <th>Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
                         <% if (students.length === 0) { %>
                             <tr>
-                                <td colspan="8" class="text-center">Không có sinh viên nào trong lớp học này.</td>
+                                <td colspan="10" class="text-center">Không có sinh viên nào trong lớp học này.</td>
                             </tr>
                         <% } %>
                         <% students.forEach((student, index) => { %>
-                            <tr>
+                            <tr id="studentRow-<%= student.id %>">
                                 <td>
                                     <div class="form-check">
                                         <input class="form-check-input"
@@ -146,12 +149,32 @@
                                     </div>
                                 </td>
                                 <td><%= index + 1 %></td>
-                                <td><%= student.student.firstName %></td>
-                                <td><%= student.student.lastName %></td>
-                                <td><%= student.student.student.student_number %></td>
-                                <td><%= student.student.email %></td>
-                                <td><%= student.student.phoneNumber %></td>
-                                <td>190150201</td>
+                                <td><%= student.firstName %></td>
+                                <td><%= student.lastName %></td>
+                                <td><%= student.student.student_number %></td>
+                                <td><%= student.email %></td>
+                                <td><%= student.phoneNumber %></td>
+                                <td><%= student.student.student_class %></td>
+                                <% if (student.status == null || student.status == 0) { %>
+                                    <td class="text-danger student-status" data-status="0">Chưa điểm danh</td>
+                                <% } else if (student.status == 1) { %>
+                                    <td class="text-success student-status" data-status="1">Đã điểm danh</td>
+                                <% } else if (student.status == 3) { %>
+                                    <td class="text-secondary student-status" data-status="3">Trễ</td>
+                                <% } else if (student.status == 2) { %>
+                                    <td class="text-warning student-status" data-status="2">Vắng</td>
+                                <% } %>
+                                <td class="student-note"><%= student.note || '' %></td>
+                                <td class="text-center justify-content-center align-items-center" style="display: grid;">
+                                    <div class="d-flex flex-wrap align-items-center justify-content-end gap-2">
+                                        <button type="button"
+                                            class="p-0 btn btn-link edit-student-status <%= locals?.errorValidatorEdit && 'open-modal' %>"
+                                            data-bs-placement="top"
+                                            title="Edit" id="edit-student-<%= student.id %>"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#editSessionStudentStatus"><i class="ti ti-pencil font-size-20"></i></button>
+                                    </div>
+                                </td>
                             </tr>
                         <% }); %>
                     </tbody>

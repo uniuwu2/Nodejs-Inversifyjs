@@ -16,5 +16,5 @@ export class Attendance extends GenericEntity {
 
     @ManyToOne(() => SessionClass, (sessionClass) => sessionClass.attendance)
     @JoinColumn([{ name: "session_id", referencedColumnName: "id" }])
-    public sessionClass: SessionClass | null = null;
+    public sessionClass!: SessionClass;
 }

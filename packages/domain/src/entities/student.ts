@@ -7,11 +7,10 @@ export class Student extends GenericEntity {
     @Column("varchar", { name: "student_number", length: 255 })
     public student_number: string = "";
 
-    @Column("int", { name: "student_id" })
-    public studentId: number = 0;
+    @Column("varchar", { name: "student_class", length: 255 })
+    public student_class: string = "";
 
     @OneToOne(() => User, (user) => user.student)
     @JoinColumn({ name: "student_id" , referencedColumnName: "id" })
-    public user: User | null = null;
-
+    public user!: User;
 }

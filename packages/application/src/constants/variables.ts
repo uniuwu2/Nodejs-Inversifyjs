@@ -23,4 +23,5 @@ export class Variables {
     ];
 
     public static readonly UPLOAD_IMAGE_MAX: number = 1024 * 1024 * 5; // 5MB
+    public static readonly ONE_WEEK_AGO = 7;
 }

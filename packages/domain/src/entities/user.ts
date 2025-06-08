@@ -9,6 +9,7 @@ import { ClassStudent } from "./class_student";
 import { Attendance } from "./attendance";
 import { Department } from "./department";
 import { SessionClass } from "./session_class";
+import { Activity } from "./activity";
 
 @Entity("user")
 export class User extends GenericEntity {
@@ -49,13 +50,13 @@ export class User extends GenericEntity {
     public role!: Role;
 
     @OneToOne(() => Student, (student) => student.user)
-    public student: Student | null = null;
+    public student!: Student;
 
     @OneToOne(() => Staff, (student) => student.user)
     public staff: Student | null = null;
 
-    @OneToOne(() => Student, (student) => student.user)
-    public activity: Student | null = null;
+    @OneToMany(() => Activity, (activity) => activity.user)
+    public activity!: Activity[];
 
     @OneToMany(() => ActivityStudent, (activityStudent) => activityStudent.student)
     public activityStudent!: ActivityStudent[];

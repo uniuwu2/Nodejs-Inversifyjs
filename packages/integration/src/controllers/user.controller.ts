@@ -100,15 +100,7 @@ export class UserController extends BaseController {
                             if (departments?.length === 0) {
                                 user.departmentId = null;
                             }
-                            this.userService.save(user)?.then((user: any) => {
-                                let student = this.studentService.create();
-                                if (student) {
-                                    student.student_number = row.student_number;
-                                    student.studentId = user.id;
-                                    this.studentService.save(student);
-                                    this.logger.info("Student created successfully");
-                                }
-                            });
+                            await this.userService.save(user);
                         }
                     }
                 })

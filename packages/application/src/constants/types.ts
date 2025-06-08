@@ -13,4 +13,7 @@ export const TYPES = {
     RouteHelper: Symbol.for("RouteHelper"),
     ClassStudentService: Symbol.for("ClassStudentService"),
     SessionClassService: Symbol.for("SessionClassService"),
+    AttendanceService: Symbol.for("AttendanceService"),
+    ActivityService: Symbol.for("ActivityService"),
+    ActivityStudentService: Symbol.for("ActivityStudentService"),
 };

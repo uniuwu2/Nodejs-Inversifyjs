@@ -57,4 +57,11 @@ export interface GenericRepository<E> {
         order?: any,
         take?: number,
     ): Promise<E[]> | undefined;
+    findOne(
+        relations?: string[],
+        where?: any,
+        order?: any,
+    ): Promise<E> | undefined;
+    updateById(id: number, fieldName: any): Promise<E> | undefined;
+    deleteById(id: number): Promise<E> | undefined;
 }

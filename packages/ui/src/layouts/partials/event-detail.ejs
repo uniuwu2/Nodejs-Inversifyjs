@@ -1,0 +1,196 @@
+<h1 class="mb-4">Chi tiết sự kiện</h1>
+<div>
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0 text-white">
+                <%= event.activityName %>
+            </h4>
+        </div>
+        <script>
+            const eventId = <%= event.id %>;
+            const studentsNotInEvent = <%- JSON.stringify(studentsNotInEvent) %>;
+            const currentUser = <%= currentUser %>;
+        </script>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-6"><strong>Ngày bắt đầu:</strong>
+                    <%= event.activityDate.toLocaleDateString('vi-VN', { year: 'numeric' , month: '2-digit' ,
+                        day: '2-digit' }) %>
+                </div>
+                <div class="col-md-6"><strong>Thời gian:</strong>
+                    <%= event.startTime %> - <%= event.endTime %>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-6"><strong>Địa điểm:</strong>
+                    <%= event.location %>
+                </div>
+                <div class="col-md-6"><strong>Trạng thái:</strong>
+                    <span class="badge bg-<%= event.status === 1 ? 'success' : 'danger' %>">
+                        <%= event.status===1 ? 'Đang diễn ra' : 'Đã kết thúc' %>
+                    </span>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-6"><strong>Người phụ trách:</strong>
+                    <%= event.user.firstName %>
+                        <%= event.user.lastName %>
+                </div>
+                <div class="col-md-6"><strong>Email người phụ trách:</strong>
+                    <%= event.user.email %>
+                </div>
+
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-6"><strong>Thông tin sự kiện:</strong>
+                    <%= event.activityDescription %>
+                </div>
+                <div class="col-md-6"><strong>Số lượng sinh viên tham gia:</strong>
+                    <%= event.currentStudent %> / <%= event.maxStudent %>
+                </div>
+            </div>
+        </div>
+        <hr />
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0 text-white">Danh sách sinh viên</h4>
+        </div>
+
+        <form action="/events/event/<%= event.id %>" class="card-body" method="GET" id="search-form">
+            <div class="row align-items-center mb-3 gap-3">
+                <div class="mb-3 mb-md-0">
+                    <div class="position-relative">
+                        <input type="text" class="form-control" placeholder="Search..." id="searchField"
+                            name="searchField">
+                    </div>
+                </div>
+            </div>
+            <div class="card-body pt-0 pb-0 ps-0">
+                <button type="button" class="btn btn-primary waves-effect waves-light me-2" data-bs-toggle="modal"
+                    data-bs-target="#qrEventCodeModal">Tạo mã điểm danh</button>
+                <button type="button" class="btn btn-secondary waves-effect waves-light me-2" data-bs-toggle="modal"
+                    data-bs-target="#addEventStudentModal">Thêm sinh viên</button>
+                <button type="button" class="btn btn-danger" id="deleteCheckedButtonSession"
+                    onclick="deleteCheckedStudents()">
+                    Xóa sinh viên đã chọn
+                </button>
+
+            </div>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <input hidden type="text" id="sortBy" name="sortBy" value="<%= sortBy %>" />
+                            <input hidden type="text" id="sort" name="sort" value="<%= sort %>" />
+                            <% function iconSort() { if(sort==="ASC" ) { %>
+                                <i class="ti ti-arrow-narrow-up"></i>
+                                <% } else if (sort==="DESC" ) { %>
+                                    <i class="ti ti-arrow-narrow-down"></i>
+                                    <% }} %>
+                                        <th>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="selectAllCheckbox">
+                                            </div>
+                                        </th>
+                                        <th scope="col" role="button" id="sort-by-firstName">Họ<%
+                                                if(sortBy==="firstName" ) { iconSort() } else { %> <i
+                                                    class="ti ti-arrows-sort"></i>
+                                                <% } %></i></th>
+                                        <th scope="col" role="button" id="sort-by-lastName">Tên <%
+                                                if(sortBy==="lastName" ) { iconSort() } else { %> <i
+                                                    class="ti ti-arrows-sort"></i>
+                                                <% } %></i></th>
+                                        <th scope="col" role="button" id="sort-by-studentNumber">Mã sinh viên <%
+                                                if(sortBy==="studentNumber" ) { iconSort() } else { %> <i
+                                                    class="ti ti-arrows-sort"></i>
+                                                <% } %></i></th>
+                                        <th scope="col" role="button" id="sort-by-email">Email <% if(sortBy==="email" )
+                                                { iconSort() } else { %> <i class="ti ti-arrows-sort"></i>
+                                                <% } %></i></th>
+                                        <th scope="col" role="button" id="sort-by-class">Lớp <% if(sortBy==="class" ) {
+                                                iconSort() } else { %> <i class="ti ti-arrows-sort"></i>
+                                                <% } %></i></th>
+
+                                        <th scope="col" role="button" id="sort-by-phoneNumber">Số điện thoại <%
+                                                if(sortBy==="phoneNumber" ) { iconSort() } else { %> <i
+                                                    class="ti ti-arrows-sort"></i>
+                                                <% } %></i></th>
+                                        <th scope="col" role="button" id="sort-by-attendanceCheck">Trạng thái điểm danh
+                                            <% if(sortBy==="attendanceCheck" ) { iconSort() } else { %> <i
+                                                    class="ti ti-arrows-sort"></i>
+                                                <% } %></i>
+                                        </th>
+
+                                        <th scope="col" role="button">Ghi chú</th>
+                                        <th scope="col" role="button">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (students?.length===0) { %>
+                            <tr>
+                                <td colspan="10" class="text-center">Không có sinh viên nào trong lớp học này.</td>
+                            </tr>
+                            <% } else { %>
+                                <% students.forEach(student=> { %>
+                                    <tr id="studentRow-<%= student.student.id %>">
+                                        <td>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="studentIds"
+                                                    value="<%= student.student.id %>"
+                                                    id="studentCheckbox-<%= student.student.id %>">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <%= student.student.firstName %>
+                                        </td>
+                                        <td>
+                                            <%= student.student.lastName %>
+                                        </td>
+                                        <td>
+                                            <%= student.student.student.student_number %>
+                                        </td>
+                                        <td>
+                                            <%= student.student.email %>
+                                        </td>
+                                        <td>
+                                            <%= student.student.student.student_class %>
+                                        </td>
+                                        <td>
+                                            <%= student.student.phoneNumber %>
+                                        </td>
+                                        <% if (student.attendanceCheck==null || student.attendanceCheck==0) { %>
+                                            <td class="text-danger student-status" data-status="0">Chưa điểm danh</td>
+                                            <% } else if (student.attendanceCheck==1) { %>
+                                                <td class="text-success student-status" data-status="1">Đã điểm danh
+                                                </td>
+                                                <% } else if (student.attendanceCheck==3) { %>
+                                                    <td class="text-secondary student-status" data-status="3">Trễ</td>
+                                                    <% } else if (student.attendanceCheck==2) { %>
+                                                        <td class="text-warning student-status" data-status="2">Vắng
+                                                        </td>
+                                                        <% } %>
+                                                            <td class="student-note">
+                                                                <%= student.note || '' %>
+                                                            </td>
+                                                            <td class="text-center justify-content-center align-items-center"
+                                                                style="display: grid;">
+                                                                <div
+                                                                    class="d-flex flex-wrap align-items-center justify-content-end gap-2">
+                                                                    <button type="button"
+                                                                        class="p-0 btn btn-link edit-student-status <%= locals?.errorValidatorEdit && 'open-modal' %>"
+                                                                        data-bs-placement="top" title="Edit"
+                                                                        id="edit-student-<%= student.student.id %>"
+                                                                        data-bs-toggle="modal"
+                                                                        data-bs-target="#editEventStudentStatus"><i
+                                                                            class="ti ti-pencil font-size-20"></i></button>
+                                                                </div>
+                                                            </td>
+                                    </tr>
+                                    <% }) %>
+                                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+            <%- include("../partials/bottom-of-table", {page, limit, list: students, lastPage, total}) %>
+        </form>
+    </div>
+</div>

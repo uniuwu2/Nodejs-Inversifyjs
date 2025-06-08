@@ -21,7 +21,13 @@ import {
     ClassStudentRepository,
     ClassStudentRepositoryImpl,
     SessionClassRepository,
-    SessionClassRepositoryImpl
+    SessionClassRepositoryImpl,
+    AttendanceRepository,
+    AttendanceRepositoryImpl,
+    ActivityRepository,
+    ActivityRepositoryImpl,
+    ActivityStudentRepository,
+    ActivityStudentRepositoryImpl
 } from "@inversifyjs/infrastructure"; 
 import { 
     UserService,
@@ -39,7 +45,13 @@ import {
     ClassStudentService,
     ClassStudentServiceImpl,
     SessionClassService,
-    SessionClassServiceImpl
+    SessionClassServiceImpl,
+    AttendanceService,
+    AttendanceServiceImpl,
+    ActivityService,
+    ActivityServiceImpl,
+    ActivityStudentService,
+    ActivityStudentServiceImpl
  } from "@inversifyjs/application";    
 
 /** import controller */
@@ -52,6 +64,7 @@ import "./controllers/user-profile.controller";
 import "./controllers/signup.controller";
 import "./controllers/session-class.controller";
 import "./controllers/api.controller";
+import "./controllers/event.controller";
 export const referenceDataIoCModule = new ContainerModule((bind) => {
     bind<Logger>(TYPES.Logger).to(LoggerMod).inSingletonScope();
     bind<DataSourceConnection>(TYPES.DataSourceConnect).to(DataSourceConnection).inSingletonScope();
@@ -72,4 +85,10 @@ export const referenceDataIoCModule = new ContainerModule((bind) => {
     bind<ClassStudentService>(TYPES.ClassStudentService).to(ClassStudentServiceImpl).inSingletonScope();
     bind<SessionClassRepository>(TYPES.Repository).to(SessionClassRepositoryImpl).inSingletonScope();
     bind<SessionClassService>(TYPES.SessionClassService).to(SessionClassServiceImpl).inSingletonScope();
+    bind<AttendanceRepository>(TYPES.Repository).to(AttendanceRepositoryImpl).inSingletonScope();
+    bind<AttendanceService>(TYPES.AttendanceService).to(AttendanceServiceImpl).inSingletonScope();
+    bind<ActivityRepository>(TYPES.Repository).to(ActivityRepositoryImpl).inSingletonScope();
+    bind<ActivityService>(TYPES.ActivityService).to(ActivityServiceImpl).inSingletonScope();
+    bind<ActivityStudentRepository>(TYPES.Repository).to(ActivityStudentRepositoryImpl).inSingletonScope();
+    bind<ActivityStudentService>(TYPES.ActivityStudentService).to(ActivityStudentServiceImpl).inSingletonScope();
 });

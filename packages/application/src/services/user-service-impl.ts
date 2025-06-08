@@ -4,7 +4,7 @@ import { injectable } from "inversify";
 import { AbstractService } from "./abstract-service";
 import { UserService } from "./user-service.interface";
 import { Variables } from "../constants/variables";
-import { Brackets, Like } from "typeorm";
+import { Brackets, In, Like } from "typeorm";
 @injectable()
 export class UserServiceImpl extends AbstractService<User, UserRepository> implements UserService {
     public findByEmail(email: string): Promise<User> | undefined {
@@ -31,6 +31,30 @@ export class UserServiceImpl extends AbstractService<User, UserRepository> imple
         }
         return undefined;
     }
+
+    public createFromReactNative(
+        name: string,
+        email: string,
+        picture: string,
+        givenName: string,
+        familyName: string
+    ): Promise<User> | undefined {
+        if (this.repository != undefined) {
+            let user = this.repository.create();
+            if (user) {
+                user.email = email;
+                user.firstName = givenName;
+                user.lastName = familyName;
+                user.roleId = 4; // Assuming 4 is the role ID for students
+                user.active = 1;
+                user.oauthId = null; // No OAuth ID for React Native login
+                user.oauthProvider = null; // No OAuth provider for React Native login
+                user.departmentId = null; // Assuming no department for now
+                return this.repository.save(user);
+            }
+        }
+        return undefined;
+    }    
 
     public findStudentByTeacherId(teacherId: number): Promise<User[]> | undefined {
         if (!this.repository) return undefined;
@@ -76,7 +100,10 @@ export class UserServiceImpl extends AbstractService<User, UserRepository> imple
             { firstName: Like(`%${firstName}%`), ...(roleId !== Variables.ALL && { roleId: roleId }), ...(valid !== Variables.ALL && { active: valid }) },
             { lastName: Like(`%${firstName}%`), ...(roleId !== Variables.ALL && { roleId: roleId }), ...(valid !== Variables.ALL && { active: valid }) },
         ];
-        return this.repository?.findAndCount(["role"], (name || roleId) && this.where, page && { take: limitedItem, page }, sortBy && this.order)?.then((item: any) => {
+        return this.repository?.findAndCount(["role"], 
+            (name || roleId) && this.where,
+            page && { take: limitedItem, page }, 
+            sortBy && this.order)?.then((item: any) => {
             return {
                 list: item.list,
                 total: item.count,
@@ -101,6 +128,13 @@ export class UserServiceImpl extends AbstractService<User, UserRepository> imple
     public getTeacherByEmail(email: string): Promise<User> | undefined {
         if (this.repository) {
             return this.repository.findOneByFieldName({ email, roleId: 2 });
+        }
+        return undefined;
+    }
+
+    public getStaffList(): Promise<User[]> | undefined {
+        if (this.repository) {
+            return this.repository.findByFieldName({ roleId: In([1,3])}); // Assuming 1 is super admin and 3 is staff
         }
         return undefined;
     }
@@ -131,6 +165,11 @@ export class UserServiceImpl extends AbstractService<User, UserRepository> imple
             return query.getMany();
         }
         return undefined;
+    }
+
+    public createQueryBuilder(alias: string) {
+        if (!this.repository) throw new Error("Repository not initialized");
+        return this.repository.createQueryBuilder(alias);
     }
 
     public getRepositoryName(): string {

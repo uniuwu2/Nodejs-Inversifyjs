@@ -1,6 +1,7 @@
 import { TYPES } from "./src/constants/types";
 import { HttpCode } from "./src/constants/http-code";
 import { Variables } from "./src/constants/variables";
+import { DateTimeHelper } from "./src/helpers/datetime-helper";
 import { SessionClassStatus } from "./src/constants/session-class-status";
 import { GenericService } from "./src/services/generic-service.interface";
 import { UserService } from "./src/services/user-service.interface";
@@ -25,11 +26,18 @@ import { ClassStudentService } from "./src/services/class-student-service.interf
 import { ClassStudentServiceImpl } from "./src/services/class-student-service-impl";
 import { SessionClassService } from "./src/services/session-class.interface";
 import { SessionClassServiceImpl } from "./src/services/session-class-impl";
+import { AttendanceService } from "./src/services/attendance-service.interface";
+import { AttendanceServiceImpl } from "./src/services/attendance-service-impl";
+import { ActivityService } from "./src/services/activity-service.interface";
+import { ActivityServiceImpl } from "./src/services/activity-service-impl";
+import { ActivityStudentService } from "./src/services/activity-student-service.interface";
+import { ActivityStudentServiceImpl } from "./src/services/activity-student-service-impl";
 export {
     TYPES,
     HttpCode,
     Variables,
     GenericService,
+    DateTimeHelper,
     UserService,
     RouteHelper,
     UserServiceImpl,
@@ -53,4 +61,10 @@ export {
     SessionClassServiceImpl,
     Messages,
     SessionClassStatus,
+    AttendanceService,
+    AttendanceServiceImpl,
+    ActivityService,
+    ActivityServiceImpl,
+    ActivityStudentService,
+    ActivityStudentServiceImpl
 }

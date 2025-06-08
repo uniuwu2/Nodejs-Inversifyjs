@@ -1,14 +1,14 @@
 import { controller, httpGet, httpPost } from "inversify-express-utils";
 import { BaseController } from "./base-controller";
-import { ClassStudentService, CourseClassService, CourseService, DepartmentService, HttpCode, Messages, Permission, RouteHelper, SessionClassService, TYPES, UserService, Variables } from "@inversifyjs/application";
+import { AttendanceService, ClassStudentService, CourseClassService, CourseService, DepartmentService, HttpCode, Messages, Permission, RouteHelper, SessionClassService, TYPES, UserService, Variables } from "@inversifyjs/application";
 import { Request, Response } from "express";
 import { verify } from "crypto";
 import { verifyAuthTokenRouter } from "@inversifyjs/infrastructure";
 import { inject } from "inversify";
-import { SessionClass, User } from "@inversifyjs/domain";
+import { Attendance, SessionClass, User } from "@inversifyjs/domain";
 import * as QRCode from "qrcode";
 import * as jwt from "jsonwebtoken";
-import { In } from "typeorm";
+import { Brackets, In } from "typeorm";
 const JWT_SECRET = process.env.TOKEN_KEY || "mydevsecretkey123456";
 
 @controller(RouteHelper.SESSION_CLASS)
@@ -17,12 +17,14 @@ export class SessionClassController extends BaseController {
     private sessionClassService!: SessionClassService;
     private userService!: UserService;
     private classStudentService!: ClassStudentService;
+    private attendanceService!: AttendanceService;
 
     constructor(
         @inject(TYPES.CourseClassService) courseClassService: CourseClassService,
         @inject(TYPES.SessionClassService) sessionClassService: SessionClassService,
         @inject(TYPES.UserService) userService: UserService,
-        @inject(TYPES.ClassStudentService) classStudentService: ClassStudentService
+        @inject(TYPES.ClassStudentService) classStudentService: ClassStudentService,
+        @inject(TYPES.AttendanceService) attendanceService: AttendanceService
 
     ) {
         super();
@@ -30,7 +32,7 @@ export class SessionClassController extends BaseController {
         this.sessionClassService = sessionClassService;
         this.userService = userService;
         this.classStudentService = classStudentService;
-
+        this.attendanceService = attendanceService;
     }
 
     @httpGet("/", verifyAuthTokenRouter)
@@ -339,9 +341,38 @@ export class SessionClassController extends BaseController {
             // Tạo QR code dạng data URL
             const qrImageUrl = await QRCode.toDataURL(attendanceUrl);
 
-            // Lấy danh sách sinh viên trong lớp học cùng nhóm
-            let studentList = await this.classStudentService.findStudentsByCourseClassId(name, courseClass.id, page, this.limitedItem, sortBy, sort);
 
+            const attendance = await this.attendanceService.findOne([], {
+                sessionId: sessionId,
+            })
+            const attendanceList: {
+                student_id: number;
+                status: string | null;
+                note: string;
+            }[] = attendance?.studentAttendance || [];
+
+            // Lấy ra tất cả student_id trong attendanceList
+            let studentIds = attendanceList.map((s) => s.student_id);
+            // // Nếu có name filter, lọc danh sách studentIds theo tên/email/student_number
+            if (name.trim()) {
+                const keyword = `%${name.toLowerCase()}%`;
+
+                const filteredUsers = await this.userService
+                    .createQueryBuilder("user")
+                    .leftJoinAndSelect("user.student", "student")
+                    .where("user.id IN (:...studentIds)", { studentIds })
+                    .andWhere(
+                        new Brackets(qb => {
+                            qb.where("LOWER(user.firstName) LIKE :keyword", { keyword })
+                                .orWhere("LOWER(user.lastName) LIKE :keyword", { keyword })
+                                .orWhere("LOWER(user.email) LIKE :keyword", { keyword })
+                                .orWhere("student.student_number LIKE :keyword", { keyword });
+                        })
+                    )
+                    .getMany();
+
+                studentIds = filteredUsers.map((u: { id: any; }) => u.id);
+            }
             // Lấy danh sách sinh viên trong cùng lớp có thể khác nhóm
             let courseId = courseClass.course?.id || 0;
             let studentsInCourse = await this.classStudentService.findAll(["student", "courseClass", "courseClass.course", "student.student"], {
@@ -351,30 +382,102 @@ export class SessionClassController extends BaseController {
                     },
                 }
             });
-            // Lọc ra những sinh viên không có trong lớp hiện tại
-            let studentsNotInSession = studentsInCourse?.filter((student: any) => {
-                return !studentList?.list.some((s: any) => s.studentId === student.student.id);
-            });
-            
 
-            if (studentList) {
-                response.render(this.routeHelper.getRenderPage(RouteHelper.SESSION_CLASS_DETAIL), {
+            let studentsInSession = await this.attendanceService.findAll([], {
+                sessionId: sessionId,
+            });
+
+            if (!studentsInSession || studentsInSession.length === 0) {
+                studentsInSession = [];
+            }
+
+            let studentsInSessionIds = [];
+            if (studentsInSession.length > 0) {
+                studentsInSessionIds = studentsInSession[0].studentAttendance.map((attendance: any) => attendance.student_id);
+            }
+
+            // Lọc ra danh sách sinh viên trong buổi học
+            let studentsNotInSession = studentsInCourse?.filter((student: any) => {
+                return !studentsInSessionIds.includes(student.student.id);
+            });
+
+            if (!attendance?.studentAttendance || attendance?.studentAttendance.length === 0) {
+                // Nếu không có sinh viên nào trong buổi học, trả về danh sách rỗng
+                return response.render(this.routeHelper.getRenderPage(RouteHelper.SESSION_CLASS_DETAIL), {
                     sessionClass: sessionClass,
                     courseClass: courseClass,
-                    students: studentList.list,
-                    total: studentList.total,
-                    page: studentList.pageSize,
+                    students: [],
+                    total: 0,
+                    page: page,
                     limit: this.limitedItem,
                     searchField: name,
-                    lastPage: Math.ceil(studentList.total / this.limitedItem),
+                    lastPage: 0,
                     sortBy,
                     sort,
                     qrImageUrl: qrImageUrl,
-                    qrExpiresIn: 60, // 60 giây
+                    qrExpiresIn: 30, // 60 giây
                     studentsInCourse: studentsInCourse,
                     studentsNotInSession: studentsNotInSession,
                 });
             }
+            // Query lại userRepo lấy user đã lọc, áp dụng phân trang + sort
+            const qb = this.userService
+                .createQueryBuilder("user")
+                .leftJoinAndSelect("user.student", "student")
+                .where("user.id IN (:...studentIds)", { studentIds });
+
+            // Xử lý sortBy
+            let orderColumn = "";
+            switch (sortBy) {
+                case "firstName":
+                    orderColumn = "user.firstName";
+                    break;
+                case "lastName":
+                    orderColumn = "user.lastName";
+                    break;
+                case "email":
+                    orderColumn = "user.email";
+                    break;
+                case "studentNumber":
+                    orderColumn = "student.student_number";
+                    break;
+                default:
+                    orderColumn = "user.firstName";
+                    break;
+            }
+            qb.orderBy(orderColumn, sort.toUpperCase() === "DESC" ? "DESC" : "ASC");
+            // Phân trang
+            qb.skip((page - 1) * this.limitedItem).take(this.limitedItem);
+
+            const [students, total] = await qb.getManyAndCount();
+
+            // Ghép thông tin điểm danh (status, note) từ attendanceList vào
+            const resultList = students.map((student: any) => {
+                const attendanceInfo = attendanceList.find((a: any) => a.student_id === student.id);
+                return {
+                    ...student,
+                    status: attendanceInfo ? attendanceInfo.status : null,
+                    note: attendanceInfo ? attendanceInfo.note : null,
+                };
+            });
+
+
+            response.render(this.routeHelper.getRenderPage(RouteHelper.SESSION_CLASS_DETAIL), {
+                sessionClass: sessionClass,
+                courseClass: courseClass,
+                students: resultList,
+                total: total,
+                page: page,
+                limit: this.limitedItem,
+                searchField: name,
+                lastPage: Math.ceil(total / this.limitedItem),
+                sortBy,
+                sort,
+                qrImageUrl: qrImageUrl,
+                qrExpiresIn: 60, // 60 giây
+                studentsInCourse: studentsInCourse,
+                studentsNotInSession: studentsNotInSession,
+            });
         } catch (error: any) {
             this.logger.error(error);
             return response.status(HttpCode.BAD_REQUEST).render(this.routeHelper.getRenderPage(RouteHelper.NOT_FOUND));
@@ -392,49 +495,53 @@ export class SessionClassController extends BaseController {
 
         const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "30s" });
 
-        const attendanceUrl = `http://localhost:9999/api/v1/attendance/${token}`;
+        const attendanceUrl = `https://3577-2402-800-63b7-a742-f89a-6e98-2647-ca94.ngrok-free.app/api/v1/attendance/${token}`;
         return response.json({ token, url: attendanceUrl });
     }
 
     @httpPost("/session/:classId/student/add", verifyAuthTokenRouter)
     public async addStudentToSession(request: Request, response: Response) {
         try {
-            let studentIds = request.body.students; // Mảng ID sinh viên
-            let sessionId = Number(request.body.sessionId);
-            let courseClassId = Number(request.body.courseClassId);
-            // Kiểm tra xem sinh viên này có trong lớp học này không
-            let sessionClass = await this.classStudentService.findAll(["student", "courseClass"], {
-                courseClassId: courseClassId,
-                studentId: In(studentIds),
+            const studentIds: number[] = request.body.students;
+            const sessionId = Number(request.body.sessionId);
+            const attendance = await this.attendanceService.findOne([], {
+                sessionId: sessionId
             });
-            if (sessionClass && sessionClass.length > 0) {
-                // Sinh viên đã có trong lớp học này
-                return response.status(HttpCode.BAD_REQUEST).json({
-                    code: HttpCode.BAD_REQUEST,
-                    message: Messages.STUDENT_EXISTED_IN_CLASS,
+
+            if (!attendance) {
+                return response.status(HttpCode.NOT_FOUND).json({
+                    code: HttpCode.NOT_FOUND,
+                    message: "Buổi học không tồn tại",
                 });
             }
-            // Lưu danh sách sinh viên vào buổi học
-            let sessionStudents: any[] = [];
-            for (let i = 0; i < studentIds.length; i++) {
-                let sessionStudent = {
-                    courseClassId: courseClassId,
-                    studentId: studentIds[i],
-                    addByClass: 0, // 0: Thêm từ buổi học, 1: Thêm từ lớp học
-                };
-                sessionStudents.push(sessionStudent);
-            }
-            if (sessionStudents.length > 0) {
-                await this.classStudentService.saveMulti(sessionStudents);
-            }
-            return response.status(HttpCode.SUCCESSFUL).json({
-                status: HttpCode.SUCCESSFUL,
-                message: Messages.ADD_STUDENT_TO_SESSION_SUCCESS,
-                sessionId: sessionId,
-                courseClassId: courseClassId,
-                students: sessionStudents,
-            }); 
+            let currentList = attendance.studentAttendance || [];
 
+            // Loại bỏ những studentId đã tồn tại
+            const existingIds = currentList.map((s: any) => s.student_id);
+            const newStudents = studentIds.filter(id => !existingIds.includes(id));
+            if (newStudents.length === 0) {
+                return response.status(HttpCode.BAD_REQUEST).json({
+                    code: HttpCode.BAD_REQUEST,
+                    message: "Tất cả sinh viên đã có trong buổi học",
+                });
+            }
+            // Tạo danh sách mới cần thêm
+            const newEntries = newStudents.map(id => ({
+                student_id: id,
+                status: null,
+                note: "",
+            }));
+            // Gộp danh sách cũ + mới
+            const updatedList = [...currentList, ...newEntries];
+            attendance.studentAttendance = updatedList;
+            // Cập nhật lại attendance
+            await this.attendanceService.save(attendance)
+            return response.status(HttpCode.SUCCESSFUL).json({
+                code: HttpCode.SUCCESSFUL,
+                message: "Thêm sinh viên vào buổi học thành công",
+                added: newEntries.length,
+                sessionId: sessionId,
+            });
         } catch (error: any) {
             this.logger.error(error);
             return response.status(HttpCode.BAD_REQUEST).render(this.routeHelper.getRenderPage(RouteHelper.NOT_FOUND));
@@ -445,28 +552,107 @@ export class SessionClassController extends BaseController {
     public async deleteStudentFromSession(request: Request, response: Response) {
         try {
             let studentIds = request.body.ids;
-            console.log("studentIds", studentIds);
             let sessionId = Number(request.body.sessionId);
             let courseClassId = Number(request.body.courseClassId);
-            // Kiểm tra xem sinh viên này có trong buổi học này không
-            let sessionClass = await this.classStudentService.findAll(["student", "courseClass"], {
-                courseClassId: courseClassId,
-                studentId: In(studentIds),
-            });
-            if (!sessionClass || sessionClass.length === 0) {
-                // Sinh viên không có trong buổi học này
+
+            if (!sessionId) {
                 return response.status(HttpCode.BAD_REQUEST).json({
                     code: HttpCode.BAD_REQUEST,
-                    message: Messages.STUDENT_NOT_EXISTED_IN_SESSION,
+                    message: "Missing sessionId",
                 });
             }
-            // Xóa sinh viên khỏi buổi học
-            if (studentIds && studentIds == "all") {
-                // Xóa tất cả sinh viên khỏi buổi học
-                await this.classStudentService.deleteByCourseClassId(courseClassId);
-            } else {
-                
+
+            const attendance = await this.attendanceService.findOne([], {
+                sessionId: sessionId
+            });
+
+            if (!attendance) {
+                return response.status(HttpCode.NOT_FOUND).json({
+                    code: HttpCode.NOT_FOUND,
+                    message: "Attendance record not found for this session",
+                });
             }
+
+            let currentList: {
+                student_id: number;
+                status: string | null;
+                note: string;
+            }[] = attendance.studentAttendance || [];
+            if (studentIds == "all") {
+                // Xóa toàn bộ sinh viên khỏi mảng
+                attendance.studentAttendance = [];
+            } else if (Array.isArray(studentIds)) {
+                // Xóa theo danh sách id
+                const idsToDelete = studentIds.map((id: any) => Number(id));
+                attendance.studentAttendance = currentList.filter(
+                    s => !idsToDelete.includes(s.student_id)
+                );
+            } else {
+                return response.status(HttpCode.BAD_REQUEST).json({
+                    code: HttpCode.BAD_REQUEST,
+                    message: "Invalid studentIds",
+                });
+            }
+
+            await this.attendanceService.save(attendance);
+            return response.status(HttpCode.SUCCESSFUL).json({
+                code: HttpCode.SUCCESSFUL,
+                message: "Student(s) removed from session attendance successfully",
+            });
+
+        } catch (error: any) {
+            this.logger.error(error);
+            return response.status(HttpCode.BAD_REQUEST).render(this.routeHelper.getRenderPage(RouteHelper.NOT_FOUND));
+        }
+    }
+
+    @httpPost("/session/student/edit-status", verifyAuthTokenRouter)
+    public async editStudentStatusInSession(request: Request, response: Response) {
+        try {
+            const sessionId = Number(request.body.sessionId);
+            const studentId = Number(request.body.id);
+            const status = request.body.status;
+            const note = request.body.note;
+
+            if (!sessionId || !studentId) {
+                return response.status(HttpCode.BAD_REQUEST).json({
+                    code: HttpCode.BAD_REQUEST,
+                    message: "Missing sessionId or studentId",
+                });
+            }
+
+            const attendance = await this.attendanceService.findOne([], {
+                sessionId: sessionId
+            });
+
+            if (!attendance) {
+                return response.status(HttpCode.NOT_FOUND).json({
+                    code: HttpCode.NOT_FOUND,
+                    message: "Attendance record not found for this session",
+                });
+            }
+
+            // Tìm sinh viên trong danh sách điểm danh
+            const studentAttendance = attendance.studentAttendance.find((s: any) => s.student_id === studentId);
+            if (!studentAttendance) {
+                return response.status(HttpCode.NOT_FOUND).json({
+                    code: HttpCode.NOT_FOUND,
+                    message: "Student not found in this session attendance",
+                });
+            }
+            // // Cập nhật trạng thái và ghi chú
+            studentAttendance.status = status;
+            studentAttendance.note = note;
+
+            await this.attendanceService.save(attendance);
+
+            return response.status(HttpCode.SUCCESSFUL).json({
+                code: HttpCode.SUCCESSFUL,
+                message: "Student status updated successfully",
+                studentId: studentId,
+                status: status,
+                note: note,
+            });
         } catch (error: any) {
             this.logger.error(error);
             return response.status(HttpCode.BAD_REQUEST).render(this.routeHelper.getRenderPage(RouteHelper.NOT_FOUND));

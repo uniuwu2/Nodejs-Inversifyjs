@@ -65,48 +65,6 @@ function generateSessionClasses(course) {
             },
         });
     });
-    // const schedule = course.classSchedule;
-    // const sortedSchedule = sortClassSchedule(schedule);
-    // const classDays = sortedSchedule.map((item) => item.day);
-
-    // while (sessionCount < course.sessionNumber) {
-    //     const dayName = dayOrder[currentDate.getDay()];
-    //     if (classDays.includes(dayName)) {
-    //         const timeSlots = schedule[dayName];
-    //         for (const time of timeSlots) {
-    //             if (sessionCount >= course.sessionNumber) break;
-
-    //             const [startTime, endTime] = time.split("-").map((t) => padTime(t));
-    //             const dateStr = toLocalDateString(currentDate);
-    //             const teacherColor = getColorForTeacher(course.teacherId);
-    //             sessions.push({
-    //                 title: "",
-    //                 start: `${dateStr}T${startTime}`,
-    //                 end: `${dateStr}T${endTime}`,
-    //                 display: "block",
-    //                 backgroundColor: teacherColor,
-    //                 borderColor: teacherColor,
-    //                 extendedProps: {
-    //                     sessionId: course.id,
-    //                     courseId: course.course.id,
-    //                     teacherId: course.teacherId,
-    //                     teacher: `${course.teacher.firstName} ${course.teacher.lastName}`,
-    //                     courseName: course.course.courseName,
-    //                     courseCode: course.course.courseCode,
-    //                     sessionNumber: sessionCount + 1,
-    //                     day: dateStr,
-    //                     startTime: startTime,
-    //                     endTime: endTime,
-    //                     room: "",
-    //                 },
-    //             });
-
-    //             sessionCount++;
-    //         }
-    //     }
-    //     currentDate.setDate(currentDate.getDate() + 1);
-    // }
-
     return sessions;
 }
 
