@@ -10,8 +10,7 @@ export class Role extends GenericEntity {
     @Column("varchar", { name: "role_description", length: 255 })
     public roleDescription: string = "";
 
-    //One user to one role, One role to many users
     @OneToMany(() => User, (user) => user.role)
-    public user: User[] | null = null;
+    public user!: User[];
   
 }

@@ -1,0 +1,59 @@
+<div class="modal fade" id="editCourseModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="modalName" class="modal-title">
+                    <span id="modalTitle">Chỉnh sửa môn học</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-body">
+
+                    <div class="mb-3">
+                        <label for="courseName" class="form-label">Tên môn học</label>
+                        <input type="text" class="form-control" id="editCourseName" value="<%= locals?.courseName || '' %>" placeholder="Nhập tên môn học" />
+                        <% if (locals.errorValidatorEdit && locals.errorValidatorEdit.courseName) { %>
+                        <div class="invalid-feedback d-block"><%= locals.errorValidatorEdit.courseName %></div>
+                        <% } %>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="courseCode" class="form-label">Mã môn</label>
+                        <input type="text" class="form-control" id="editCourseCode" value="<%= locals?.courseCode || '' %>" placeholder="Nhập mã môn" />
+                        <% if (locals.errorValidatorEdit && locals.errorValidatorEdit.courseCode) { %>
+                        <div class="invalid-feedback d-block"><%= locals.errorValidatorEdit.courseCode %></div>
+                        <% } %>
+                    </div>
+
+                    <div class="mb-3">
+                        <span class="form-label">Khoa</span>
+                        <select class="form-select" id="editCourseDepartment" name="editCourseDepartment">
+                            <% if (departmentList?.length > 0) { departmentList.forEach(department => { %>
+                            <option value="<%= department.id %>"><%= department.departmentName %></option>
+                            <% }); } else { %>
+                            <option value="1">Department 1</option>
+                            <option value="2">Department 2</option>
+                            <option value="3">Department 3</option>
+                            <option value="4">Department 4</option>
+                            <% } %>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="credit" class="form-label">Tín chỉ</label>
+                        <input type="number" class="form-control" id="editCredit" value="<%= locals?.credit || '' %>" placeholder="Nhập số tín chỉ" />
+                        <% if (locals.errorValidatorEdit && locals.errorValidatorEdit.credit) { %>
+                        <div class="invalid-feedback d-block"><%= locals.errorValidatorEdit.credit %></div>
+                        <% } %>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" id="saveCourseBtn" class="btn btn-primary">Lưu thay đổi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

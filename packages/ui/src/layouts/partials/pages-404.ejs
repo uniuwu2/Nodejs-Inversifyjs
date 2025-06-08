@@ -1,22 +1,241 @@
-<div class="min-vh-100" style="background: url(/images/bg-2.png) top">
-    <div class="bg-overlay bg-light"></div>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+    </title>
+    <style>
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #64fcd9;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: #64fcd9;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 800px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .error-content {
+            text-align: center;
+            width: 100%;
+        }
+
+        .error-code {
+            font-size: 8rem;
+            font-weight: 900;
+            color: #000000;
+            margin-bottom: 3rem;
+            letter-spacing: -0.05em;
+        }
+
+        .face {
+            margin: 4rem 0;
+            position: relative;
+        }
+
+        .eyebrows {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .eyebrow {
+            width: 4rem;
+            height: 0.8rem;
+            background: #333333;
+            border-radius: 2rem;
+            transform-origin: center;
+        }
+
+        .eyebrow.left {
+            transform: rotate(-15deg);
+        }
+
+        .eyebrow.right {
+            transform: rotate(15deg);
+        }
+
+        .eyes {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .eye {
+            width: 5rem;
+            height: 5rem;
+            background: #ffffff;
+            border: 3px solid #333333;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .pupil {
+            width: 0.8rem;
+            height: 0.8rem;
+            background: #000000;
+            border-radius: 50%;
+        }
+
+        .mouth {
+            width: 3rem;
+            height: 0.3rem;
+            background: #333333;
+            margin: 0 auto;
+            border-radius: 0.15rem;
+        }
+
+        .home-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #333333;
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-top: 4rem;
+            padding: 0.5rem 0;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .home-link:hover {
+            border-bottom-color: #333333;
+            transform: translateY(-2px);
+        }
+
+        .arrow {
+            font-size: 1.4rem;
+            transition: transform 0.3s ease;
+        }
+
+        .home-link:hover .arrow {
+            transform: translateX(-4px);
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                border-radius: 0;
+                padding: 1rem;
+            }
+
+            .error-code {
+                font-size: 6rem;
+                margin-bottom: 2rem;
+            }
+
+            .eyebrows {
+                gap: 2rem;
+            }
+
+            .eyebrow {
+                width: 3rem;
+                height: 0.6rem;
+            }
+
+            .eyes {
+                gap: 1.5rem;
+            }
+
+            .eye {
+                width: 4rem;
+                height: 4rem;
+            }
+
+            .pupil {
+                width: 0.6rem;
+                height: 0.6rem;
+            }
+
+            .mouth {
+                width: 2.5rem;
+            }
+
+            .home-link {
+                font-size: 1.1rem;
+                margin-top: 3rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .error-code {
+                font-size: 4.5rem;
+            }
+
+            .eyebrows {
+                gap: 1.5rem;
+            }
+
+            .eyebrow {
+                width: 2.5rem;
+                height: 0.5rem;
+            }
+
+            .eyes {
+                gap: 1rem;
+            }
+
+            .eye {
+                width: 3.5rem;
+                height: 3.5rem;
+            }
+
+            .mouth {
+                width: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
     <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="text-center py-5 mt-5">
-                    <div class="position-relative">
-                        <h1 class="error-title error-text mb-0">404</h1>
-                        <h4 class="error-subtitle text-uppercase mb-0">ページが見つかりません</h4>
+        <div class="error-content">
+            <h1 class="error-code">404</h1>
+
+            <div class="face">
+                <div class="eyebrows">
+                    <div class="eyebrow left"></div>
+                    <div class="eyebrow right"></div>
+                </div>
+
+                <div class="eyes">
+                    <div class="eye left">
+                        <div class="pupil"></div>
                     </div>
-                    <div class="mt-4 text-center">
-                        <a class="btn btn-primary" href="/home">ダッシュボードに戻る</a>
+                    <div class="eye right">
+                        <div class="pupil"></div>
                     </div>
                 </div>
+
+                <div class="mouth"></div>
             </div>
-            <!-- end col -->
+
+            <a href="/" class="home-link">
+                <span class="arrow">←</span>
+                Go Home
+            </a>
         </div>
-        <!-- end row -->
     </div>
-    <!-- end container -->
-</div>
-<!-- end authentication section -->
+</body>
+
+</html>

@@ -1,4 +1,4 @@
-import { CourseClass } from "@inversifyjs/domain";
+import { CourseClass, User } from "@inversifyjs/domain";
 import { GenericService } from "./generic-service.interface";
 
 export interface CourseClassService extends GenericService<CourseClass> {
@@ -21,4 +21,18 @@ export interface CourseClassService extends GenericService<CourseClass> {
           }>
         | undefined;
     getSemesterList(): Promise<any[]> | undefined;
+    // findStudentsByCourseClassId(
+    //     name: any,
+    //     courseClassId: any,
+    //     page: any,
+    //     limit: number,
+    //     sortBy: any,
+    //     sort: any
+    // ): Promise<{
+    //     list: User[];
+    //     total: number;
+    //     page: number;
+    //     pageSize: number;
+    // }> | undefined;
+    findAllClassesByTeacherId(teahcerId: number): Promise<CourseClass[]> | undefined;
 }

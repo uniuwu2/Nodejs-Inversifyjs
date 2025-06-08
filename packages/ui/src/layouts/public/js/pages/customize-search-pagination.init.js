@@ -2,10 +2,8 @@
 let currentPage = document.getElementById("page");
 
 const buttons = document.querySelectorAll("#page-link");
-// console.log(buttons);
 buttons.forEach((button) => {
     button.addEventListener("click", function () {
-        console.log(this.value)
         currentPage.value = this.value;
     });
 });

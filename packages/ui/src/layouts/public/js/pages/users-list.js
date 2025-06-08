@@ -1,3 +1,20 @@
+function getHrefInput(form, list) {
+    let input = document.createElement("input");
+    input.type = "hidden";
+    input.id = "href";
+    input.name = "href";
+    let value = document.location.search;
+    if (list && list.length === 1 && Number(currentPage.value) !== 1) {
+        let getPageIndex = new URLSearchParams(value.substring(value.indexOf("?")));
+        let getPage = getPageIndex.get("page");
+        value = value.replace(getPage, Number(currentPage.value) - 1);
+    }
+    input.value = String(value);
+    if (form.children.length === 0) {
+        form.appendChild(input);
+    }
+}
+
 
 // Hiển thị tên tệp khi người dùng chọn tệp
 document.getElementById('csv-file').addEventListener('change', function (event) {
@@ -38,25 +55,6 @@ function uploadCSV() {
     });
 }
 
-
-
-function getHrefInput(form, list) {
-    let input = document.createElement("input");
-    input.type = "hidden";
-    input.id = "href";
-    input.name = "href";
-    let value = document.location.search;
-
-    if (list && list.length === 1 && Number(currentPage.value) !== 1) {
-        let getPageIndex = new URLSearchParams(value.substring(value.indexOf("?")));
-        let getPage = getPageIndex.get("page");
-        value = value.replace(getPage, Number(currentPage.value) - 1);
-    }
-    input.value = String(value);
-    if (form.children.length === 0) {
-        form.appendChild(input);
-    }
-}
 
 // Filter by role
 let role = document.getElementById("roleSelect");
@@ -119,52 +117,38 @@ if (sortEmail)
     });
 
 // Handle button delete
-// let userList = document.getElementById("userList").dataset.test;
-// let userRow;
-// let params;
-// if (userList)
-//     JSON.parse(userList).forEach((id) => {
-//         params = document.getElementById(`sa-params-${id}`);
-//         updateParams = document.getElementById(`btn-update-${id}`);
-//         forms = document.getElementById(`form-delete`);
-//         formActive = document.getElementById("form-active");
-//         userRow = document.getElementsByClassName(`user-${id}`);
-//         if (params && userRow) {
-//             params.addEventListener("click", function () {
-//                 Swal.fire({
-//                     title: "本当に削除しますか？",
-//                     text: "元に戻すことはできません！",
-//                     icon: "warning",
-//                     showCancelButton: true,
-//                     confirmButtonText: "削除する",
-//                     cancelButtonText: "キャンセル",
-//                     confirmButtonClass: "btn btn-success mt-2",
-//                     cancelButtonClass: "btn btn-danger ms-2 mt-2",
-//                     buttonsStyling: false,
-//                     focusCancel: true,
-//                 }).then(function (result) {
-//                     if (result.value) {
-//                         getHrefInput(forms, JSON.parse(userList));
-//                         forms.method = "POST";
-//                         forms.action = `/users-list/${id}/delete`;
-//                         forms.submit();
-//                     }
-//                 });
-//             });
-//         }
-
-//         if (updateParams) {
-//             if (!formActive) {
-//                 formActive = document.createElement("form");
-//                 formActive.id = "form-active";
-//                 formActive.style.display = "none";
-//                 updateParams.appendChild(formActive);
-//             }
-//             updateParams.addEventListener("click", function () {
-//                 getHrefInput(formActive);
-//                 formActive.method = "POST";
-//                 formActive.action = `/users-list/${id}/active`;
-//                 formActive.submit();
-//             });
-//         }
-//     });
+let userList = document.getElementById("users").dataset.test;
+let userRow;
+let params;
+if (userList)
+    JSON.parse(userList).forEach((id) => {
+        params = document.getElementById(`sa-params-${id}`);
+        updateParams = document.getElementById(`btn-update-${id}`);
+        forms = document.getElementById(`form-delete`);
+        formActive = document.getElementById("form-active");
+        userRow = document.getElementsByClassName(`user-${id}`);
+        if (params && userRow) {
+            params.addEventListener("click", function () {
+                Swal.fire({
+                    title: "Delete user",
+                    text: "Do you want to delete this user?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Delete",
+                    cancelButtonText: "Cancel",
+                    confirmButtonClass: "btn btn-success mt-2",
+                    cancelButtonClass: "btn btn-danger ms-2 mt-2",
+                    buttonsStyling: false,
+                    focusCancel: true,
+                }).then(function (result) {
+                    if (result.value) {
+                        getHrefInput(forms, JSON.parse(userList));
+                        forms.method = "POST";
+                        forms.action = `/users/${id}/delete`;
+                        console.log(forms);
+                        forms.submit();
+                    }
+                });
+            });
+        }
+    });

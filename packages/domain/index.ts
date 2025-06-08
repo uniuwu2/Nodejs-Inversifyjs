@@ -12,4 +12,5 @@ import { SessionClass } from "./src/entities/session_class";
 import { ClassStudent } from "./src/entities/class_student";
 import { Attendance } from "./src/entities/attendance";
 import { Session } from "./src/entities/session";
-export { DataSourceConnection, User, Role, GenericEntity, Student, Staff, Activity, ActivityStudent, CourseClass, Course, SessionClass, ClassStudent, Attendance, Session };
+import { Department } from "./src/entities/department";
+export { DataSourceConnection, User, Role, GenericEntity, Student, Staff, Activity, ActivityStudent, CourseClass, Course, SessionClass, ClassStudent, Attendance, Session, Department };

@@ -8,28 +8,13 @@ export class Attendance extends GenericEntity {
     @Column("int", { name: "session_id" })
     public sessionId: number = 0;
 
-    @Column("int", { name: "student_id" })
-    public studentId: number = 0;
+    @Column("json", { name: "student_attendance" })
+    public studentAttendance: any = "";
 
     @Column("int", { name: "status" })
     public status: number = 0;
 
-    @Column("varchar", { name: "comment", length: 255 })
-    public comment: string = "";
-
-    @Column("datetime", { name: "attendance_date_time" })
-    public attendanceDateTime: Date = new Date();
-
-    @Column("varchar", { name: "attendance_type", length: 255 })
-    public attendanceType: string = "";
-
-    @Column("varchar", { name: "attendance_location", length: 255 })
-    public attendanceLocation: string = "";
-
-    @ManyToOne(() => SessionClass, (sessionClass) => sessionClass.attendance, {
-        onDelete: "NO ACTION",
-        onUpdate: "NO ACTION",
-    })
+    @ManyToOne(() => SessionClass, (sessionClass) => sessionClass.attendance)
     @JoinColumn([{ name: "session_id", referencedColumnName: "id" }])
-    public sessionClass: SessionClass | null = null;
+    public sessionClass!: SessionClass;
 }

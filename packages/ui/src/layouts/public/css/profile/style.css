@@ -1,0 +1,42 @@
+.text-row {
+    display: flex;
+    flex-direction: column;
+    padding: 13px 0;
+}
+
+.user_information_group {
+    border-bottom: 1px solid black;
+    padding-bottom: 5px;
+}
+
+.icon-custom {
+    font-size: 6rem;
+    background-color: #efefef;
+    border-radius: 100%;
+    position: relative;
+}
+
+.card-profile {
+    height: 97%;
+}
+@media (min-width: 768px) {
+    .col-md-4-5 {
+        -webkit-box-flex: 0;
+        -ms-flex: 0 0 auto;
+        flex: 0 0 auto;
+        width: 40.66667%;
+    }
+
+    .col-md-7-5 {
+        -webkit-box-flex: 0;
+        -ms-flex: 0 0 auto;
+        flex: 0 0 auto;
+        width: 56.66667%;
+    }
+}
+
+
+.user_information_group {
+    border-bottom: 1px solid black;
+    padding-bottom: 5px;
+}

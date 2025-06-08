@@ -1,4 +1,4 @@
-import { CourseClass } from "@inversifyjs/domain";
+import { CourseClass, User } from "@inversifyjs/domain";
 import { injectable } from "inversify";
 import { AbstractRepository } from "./abstract-repository";
 import { CourseClassRepository } from "./course-class-repository.interface";

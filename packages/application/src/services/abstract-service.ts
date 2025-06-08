@@ -109,6 +109,17 @@ export abstract class AbstractService<E extends GenericEntity, R extends Generic
         return Promise.resolve(false);
     }
 
+    public findOne(
+        relations?: string[],
+        where?: any,
+        order?: any
+    ): Promise<E> | undefined {
+        if (this.repository != undefined) {
+            return this.repository.findOne(relations, where, order);
+        }
+        return undefined;
+    }
+
     public delete(id: number): Promise<boolean> {
         if (this.repository != undefined) {
             return this.repository.delete(id);
@@ -121,6 +132,16 @@ export abstract class AbstractService<E extends GenericEntity, R extends Generic
         }
         return Promise.resolve(true);
     }
-
+    public find(
+        relations?: string[],
+        where?: any,
+        order?: any,
+        take?: number
+    ): Promise<E[]> | undefined {
+        if (this.repository != undefined) {
+            return this.repository.find(relations, where, order, take);
+        }
+        return undefined;
+    }
     public abstract getRepositoryName(): string;
 }

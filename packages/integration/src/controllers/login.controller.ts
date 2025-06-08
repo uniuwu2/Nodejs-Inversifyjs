@@ -1,5 +1,5 @@
 import { controller, httpGet, httpPost } from "inversify-express-utils";
-import { EncryptHelper, HttpCode, Message, RouteHelper, TYPES, UserService, Variables } from "@inversifyjs/application";
+import { EncryptHelper, HttpCode, Message, Messages, RouteHelper, TYPES, UserService, Variables } from "@inversifyjs/application";
 import { BaseController } from "./base-controller";
 import { inject } from "inversify";
 import { Request, Response } from "express";
@@ -94,19 +94,13 @@ export class LoginController extends BaseController {
                         return reject(err);
                     }
                     if (!data) {
-                        return reject(new Error('No user found'));
+                        return reject(new Error(Messages.USER_NOT_FOUND));
                     }
                     resolve(data);
                 })(request, response, next);
             });
-
-            // console.log(userData);
-
             // Kiểm tra xem người dùng đã tồn tại trong cơ sở dữ liệu chưa
             let user: User | undefined | null = await this.userService.findByEmail(userData.profile.emails[0].value);
-            // console.log("user", user);
-            // const accessToken: string = userData.accessToken;
-            // const refreshToken = randToken.generate(parseInt(this.refreshTokenSize));
             if (!user) {
                 // Nếu người dùng chưa tồn tại, tạo mới người dùng
                 let newUser = await this.userService.createFromGoogle(userData.profile);
@@ -131,11 +125,6 @@ export class LoginController extends BaseController {
             response.redirect(RouteHelper.LOGIN);
         }
     }
-
-
-
-
-
 
     @httpGet("/auth/google")
     public googleLogin(req: Request, res: Response): void {

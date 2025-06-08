@@ -17,7 +17,7 @@
             </form>
           </div>
           <div class="row align-items-center mb-3 gap-3">
-            <div class="col">
+            <div class="col-md-6">
               <div class="mb-3 mb-md-0">
                 <div class="position-relative">
                   <input type="text" class="form-control" placeholder="Search..." id="searchField" name="searchField"
@@ -34,8 +34,8 @@
                 <select class="form-select" id="departmentSelect" name="departmentSelect">
                   <option value="ALL" <%=departmentSelect=='ALL' && 'selected' %>>All</option>
                   <% if (departmentList?.length> 0) { departmentList.forEach(department => { %>
-                    <option value="<%= department.department %>" <%=String(department.department)==locals?.departmentSelect && 'selected' %>><%=
-                        department.department %>
+                    <option value="<%= department.id %>" <%=String(department.id)==locals?.departmentSelect && 'selected' %>><%=
+                        department.departmentName %>
                     </option>
                     <%}); } else { %>
                         <option value="1" <%=locals?.departmentSelect=='1' && 'selected' %>>Department 1</option>
@@ -45,6 +45,15 @@
                       <% } %>
                 </select>
               </div>
+            </div>
+            <div class="col">
+              <!-- Signup Button to page sign up -->
+                <div class="d-flex flex-wrap align-items-center justify-content-end gap-2">
+                    <button type="button"
+                        class="btn btn-primary waves-effect waves-light <%= locals?.errorValidator && 'open-modal'%> modal-open"
+                        data-bs-toggle="modal"
+                        data-bs-target="#createCourseModal">Create</button>
+                </div>
             </div>
             <div class="row pe-0">
               <div class="table-responsive pe-0">
@@ -71,26 +80,45 @@
                   <% if(courses.length > 0) { %> 
                       <%  courses.forEach(course=> { %>
                               <tr id="coursrRow-<%= course.id %>">
-                                  <td class="d-flex align-items-center">
+                                  <td class="id d-flex align-items-center">
                                     <%= course.id %>
                                 </td>
-                                  <td>
-                                      <%= course.courseName %>
+                                  <td class="course-name">
+                                      <a href="#" data-id="<%= course.id %>" class="course-link" data-bs-toggle="modal"
+                                          data-bs-target="#courseModal">
+                                          <%= course.courseName %>
+                                      </a>
                                   </td>
-                                  <td>
+                                  <td class="course-code">
                                       <%= course.courseCode %>
                                   </td>
-                                  <td>
-                                      <%= course.department %>
+                                  <td class="department" data-department-id="<%= course.department.id %>">
+                                      <%= course.department.departmentName %>
                                   </td>
-                                    <td>
+                                    <td class="credit">
                                         <%= course.credit %>
                                     </td>
-                                    <td class="text-center">
-                                        <div class="d-flex gap-2 justify-content-center">
-                                            <a href="/classroom/courses/<%= course.id %>" class="btn btn-primary btn-sm">View</a>
-                                            <a href="/classroom/courses/edit/<%= course.id %>" class="btn btn-warning btn-sm">Edit</a>
-                                        </div>
+                                    <td>
+                                        <ul class="list-inline m-0">
+                                            <li class="list-inline-item">
+                                              <button type="button"
+                                              class="p-0 btn btn-link edit-course <%= locals?.errorValidatorEdit && 'open-modal' %>"
+                                              data-bs-placement="top"
+                                              title="Edit" id="edit-course-<%= course.id %>"
+                                              data-bs-toggle="modal" data-bs-target="#editCourseModal">
+                                                <i class="ti ti-pencil font-size-20"></i>
+                                              </button>
+                                            </li>
+                                            <li class="list-inline-item"
+                                            id="delete-course-<%= course.id %>">
+                                              <form id="form-delete"></form>
+                                              <button type="button" data-bs-toggle="tooltip" data-bs-placement="top"
+                                                title="Delete" id="sa-params-<%= course.id %>"
+                                                class="p-0 btn btn-link waves-effect waves-light text-danger">
+                                                <i class="ti ti-trash font-size-20"></i>
+                                              </button>
+                                            </li>
+                                          </ul>
                                     </td>
 
                               </tr>

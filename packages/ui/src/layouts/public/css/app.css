@@ -2148,6 +2148,11 @@ body[data-layout-mode="dark"][data-layout-size="boxed"] #layout-wrapper {
     width: 6rem;
 }
 
+.avatar-xxl {
+    height: 10rem;
+    width: 10rem;
+}
+
 .avatar-title {
     -webkit-box-align: center;
     -ms-flex-align: center;
@@ -7737,7 +7742,7 @@ body[data-layout-mode="dark"] .gallery-box .box-content {
     border-color: #facccc;
 }
 .form-error {
-    border-color: #ff7878;
+    border-color: #ff7878 !important;
 }
 
 .form-error:focus-visible {

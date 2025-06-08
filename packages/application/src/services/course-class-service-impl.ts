@@ -1,4 +1,4 @@
-import { CourseClass } from "@inversifyjs/domain";
+import { CourseClass, User } from "@inversifyjs/domain";
 import { CourseClassRepository } from "@inversifyjs/infrastructure";
 import { injectable } from "inversify";
 import { AbstractService } from "./abstract-service";
@@ -31,14 +31,14 @@ export class CourseClassServiceImpl extends AbstractService<CourseClass, CourseC
         // }
 
         if (sortBy) {
-            if (sortBy === 'courseName') {
+            if (sortBy === "courseName") {
                 this.order = { course: { courseName: sort } };
-            } else if (sortBy === 'teacherName') {
+            } else if (sortBy === "teacherName") {
                 this.order = {
                     teacher: {
                         lastName: sort,
-                        firstName: sort
-                    }
+                        firstName: sort,
+                    },
                 };
             } else {
                 this.order = { [sortBy]: sort };
@@ -65,15 +65,16 @@ export class CourseClassServiceImpl extends AbstractService<CourseClass, CourseC
             where.push({ course: { courseName: Like(`%${name}%`) } });
         }
         return this.repository?.findAndCount(
-            ["course","teacher"], 
+            ["course", "teacher"], 
             (name || teacher || course || group || semester) && where, 
             page && { take: limit, page: page }, 
             sortBy && this.order)?.then((result: any) => {
+
             return {
                 list: result.list,
                 total: result.count,
-                page: page,
-                pageSize: limit,
+                page: result.page,
+                pageSize: result.pageSize,
             };
         }) as Promise<{
             list: CourseClass[];
@@ -94,7 +95,18 @@ export class CourseClassServiceImpl extends AbstractService<CourseClass, CourseC
                 return result.map((item: any) => item.semester);
             });
     }
-    
+
+    public findAllClassesByTeacherId(teacherId: number): Promise<CourseClass[]> | undefined {
+        if (!this.repository) return undefined;
+        return this.repository
+            .createQueryBuilder("course_class")
+            .leftJoinAndSelect("course_class.course", "course")
+            .leftJoinAndSelect("course_class.teacher", "teacher")
+            .where("course_class.teacherId = :teacherId", { teacherId })
+            .orderBy("course.course_name", "ASC")
+            .getMany();
+    }
+
     public getRepositoryName(): string {
         return "CourseClassRepositoryImpl";
     }

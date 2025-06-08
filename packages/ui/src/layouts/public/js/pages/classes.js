@@ -20,7 +20,7 @@ function uploadCSV() {
 
     // Gửi tệp đến API backend
     $.ajax({
-        url: "/classroom/class-upload-csv",
+        url: "/classroom/course-class-upload-csv",
         type: "POST",
         data: formData,
         processData: false,
@@ -60,21 +60,25 @@ function sortTypeSwitch() {
     else sort.value = "ASC";
 }
 
-// Filter by Teacher
-let teacher = document.getElementById("teacherSelect");
-if (teacher) {
-    teacher.addEventListener("change", function () {
-        document.getElementById("search-form").submit();
+$(document).ready(function () {
+    $("#teacherSelect").select2({
+        placeholder: "Chọn giáo viên",
     });
-}
 
-// Filter by Course
-let course = document.getElementById("courseSelect");
-if (course) {
-    course.addEventListener("change", function () {
-        document.getElementById("search-form").submit();
+    $("#courseSelect").select2({
+        placeholder: "Chọn khóa học",
     });
-}
+});
+
+$('#teacherSelect').on('change', function (e) {
+  const selectedValue = $(this).val();
+  document.getElementById("search-form").submit();
+});
+
+$('#courseSelect').on('change', function (e) {
+  const selectedValue = $(this).val();
+  document.getElementById("search-form").submit();
+});
 
 // Filter by Semester
 let semester = document.getElementById("semesterSelect");
@@ -133,54 +137,43 @@ if (sortSemester) {
         document.getElementById("search-form").submit();
     });
 }
+let classRow;
+let params;
+let classes = document.getElementById("courseClasses");
 
-// Handle button delete
-// let userList = document.getElementById("userList").dataset.test;
-// let userRow;
-// let params;
-// if (userList)
-//     JSON.parse(userList).forEach((id) => {
-//         params = document.getElementById(`sa-params-${id}`);
-//         updateParams = document.getElementById(`btn-update-${id}`);
-//         forms = document.getElementById(`form-delete`);
-//         formActive = document.getElementById("form-active");
-//         userRow = document.getElementsByClassName(`user-${id}`);
-//         if (params && userRow) {
-//             params.addEventListener("click", function () {
-//                 Swal.fire({
-//                     title: "本当に削除しますか？",
-//                     text: "元に戻すことはできません！",
-//                     icon: "warning",
-//                     showCancelButton: true,
-//                     confirmButtonText: "削除する",
-//                     cancelButtonText: "キャンセル",
-//                     confirmButtonClass: "btn btn-success mt-2",
-//                     cancelButtonClass: "btn btn-danger ms-2 mt-2",
-//                     buttonsStyling: false,
-//                     focusCancel: true,
-//                 }).then(function (result) {
-//                     if (result.value) {
-//                         getHrefInput(forms, JSON.parse(userList));
-//                         forms.method = "POST";
-//                         forms.action = `/users-list/${id}/delete`;
-//                         forms.submit();
-//                     }
-//                 });
-//             });
-//         }
-
-//         if (updateParams) {
-//             if (!formActive) {
-//                 formActive = document.createElement("form");
-//                 formActive.id = "form-active";
-//                 formActive.style.display = "none";
-//                 updateParams.appendChild(formActive);
-//             }
-//             updateParams.addEventListener("click", function () {
-//                 getHrefInput(formActive);
-//                 formActive.method = "POST";
-//                 formActive.action = `/users-list/${id}/active`;
-//                 formActive.submit();
-//             });
-//         }
-//     });
+if (classes) {
+    JSON.parse(classes.dataset.test).forEach((id) => {
+        params = document.getElementById(`sa-params-${id}`);
+        forms = document.getElementById(`form-delete`);
+        if (!forms) {
+            forms = document.createElement("form");
+            forms.id = "form-delete";
+            form.style.display = "none";
+            document.getElementById("delete-class-${id}").appendChild(forms);
+        }
+        classRow = document.getElementById(`classRow-${id}`);
+        if (params && classRow) {
+            params.addEventListener("click", function () {
+                Swal.fire({
+                    title: "Delete class",
+                    text: "Are you sure you want to delete this class?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Yes",
+                    cancelButtonText: "Cancel",
+                    confirmButtonClass: "btn btn-success mt-2",
+                    cancelButtonClass: "btn btn-danger ms-2 mt-2",
+                    buttonsStyling: false,
+                    focusCancel: true,
+                }).then((result) => {
+                    if (result.value) {
+                        forms.method = "POST";
+                        forms.action = "/classroom/class/" + id + "/delete";
+                        getHrefInput(forms);
+                        forms.submit();
+                    }
+                });
+            });
+        }
+    });
+}

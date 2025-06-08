@@ -1,0 +1,38 @@
+<%- include("../../partials/main") %>
+
+  <head>
+    <%- include("../../partials/title-meta", {title: 'Chi tiết sự kiện' }) %>
+      <%- include("../../partials/head-css"); %>
+        <link href="/libs/sweetalert2/sweetalert2.min.css" rel="stylesheet" type="text/css" />
+        <link href="/libs/alertifyjs/build/css/alertify.min.css" rel="stylesheet" type="text/css" />
+        <link rel="stylesheet" href="/libs/flatpickr/flatpickr.min.css">
+        <!-- Select2 CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+        <link href="/css/event/style.css" rel="stylesheet" type="text/css" />
+
+  </head>
+
+  <body>
+    <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+      data-sidebar-position="fixed" data-header-position="fixed">
+      <%- include("../../partials/left-sidebar") %>
+        <div class="body-wrapper">
+          <%- include("../../partials/header") %>
+            <div class="container-fluid">
+              <%- include("../../partials/modal/edit-event-student-status-modal") %>
+                <%- include("../../partials/modal/qr-event-modal") %>
+                  <%- include("../../partials/modal/add-event-student-modal") %>
+                    <%- include("../../partials/event-detail") %>
+            </div>
+
+        </div>
+    </div>
+    <%- include("../../partials/scripts/vendor-script") %>
+      <%- include("../../partials/scripts/notification-script") %>
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+        <script src="/js/pages/customize-search-pagination.init.js"></script>
+        <script src="/libs/sweetalert2/sweetalert2.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+        <script src="/js/pages/event-detail.js"></script>
+  </body>
+  </html>

@@ -1,0 +1,118 @@
+<div class="page-content">
+  <div class="container-fluid">
+    <div class="row">
+      <h5 class="card-title">
+        <% if(user?.id){ %> Edit User <% } else { %> New User <% } %>
+      </h5>
+      <div class="col-xl-12">
+        <div class="card">
+          <div class="card-body">
+            <% if(!user?.id) { %>
+            <form action="/signup" method="POST">
+              <% } else { %>
+              <form action="/signup/<%= user?.id %>" method="POST">
+                <% } %>
+                <div class="row p-4 gap-3 justify-content-center">
+                  <% let readOnly=user?.id && 'readonly' %>
+                  <div class="col-md-6 field-col">
+                    <label for="firstName" class="form-label form-required">First Name</label>
+                    <input type="text" class="form-control <%= locals.errorValidator && locals.errorValidator.firstName && 'form-error' %>" id="firstName" name="firstName" placeholder="First Name" value="<%= user?.firstName || '' %>" />
+                    <% if(locals.errorValidator && locals.errorValidator.firstName ){%>
+                        <div class="invalid-feedback  d-block">
+                            <%= locals.errorValidator.firstName %>
+                        </div>
+                    <%}%>
+                  </div>
+                  <div class="col-md-6 field-col">
+                    <label for="lastName" class="form-label form-required">Last Name</label>
+                    <input type="text" class="form-control <%= locals.errorValidator && locals.errorValidator.lastName && 'form-error' %>" id="lastName" name="lastName" placeholder="Last Name" value="<%= user?.lastName || '' %>" />
+                    <% if(locals.errorValidator && locals.errorValidator.lastName ){%>
+                        <div class="invalid-feedback  d-block">
+                            <%= locals.errorValidator.lastName %>
+                        </div>
+                    <% } %>
+                  </div>
+                  <div class="col-md-6 field-col">
+                    <label for="email" class="form-label form-required">Email</label>
+                    <input type="email" class="form-control <%= locals.errorValidator && locals.errorValidator.email && 'form-error' %>" id="email" name="email" placeholder="Email" value="<%= user?.email || '' %>" <%=readOnly %> />
+                    <% if(locals.errorValidator && locals.errorValidator.email ){%>
+                        <div class="invalid-feedback  d-block">
+                            <%= locals.errorValidator.email %>
+                        </div>
+                    <% } %>
+                  </div>
+                  <!-- Role -->
+                    <div class="col-md-6 field-col">
+                        <label for="role" class="form-label">Role</label>
+                        <select name="role" id="role" class="form-select <% if (user?.roleId == 1) { %> disabled <% } %>">
+                            <% if (roles?.length > 0) { %>
+                                <% let userRole = Number(user?.roleId) ? Number(user?.roleId) : 4; %>
+                                <% roles?.forEach(role => { %>
+                                    <% let selected = userRole === role?.id  ? "selected" : "" %>
+                                    <% if (!user) { %>
+                                        <% if (role?.id !== 1) { %>
+                                          <option value="<%= role?.id %>" <%= selected %>><%= role?.roleName %></option>
+                                        <% } %>
+                                    <% } else { %>
+                                          <option value="<%= role?.id %>" <%= selected %>><%= role?.roleName %></option>
+                                    <% } %>
+                                <% })} else { %>
+                                    <option value="1">Admin</option>
+                                    <option value="2">Teacher</option>
+                                    <option value="3">Staff</option>
+                                    <option value="4">Student</option>
+                                <% } %>
+                        </select>
+                    </div>
+                  <% if (user?.roleId !== 1) { %>
+                  <div class="col-md-6 field-col">
+                    <label for="department" class="form-label">Department</label>
+                    <select name="department" id="department" class="form-select">
+                      <% departments?.forEach(department=> { %>
+                      <option value="<%= department?.id %>" <% if (user?.departmentId==department?.id) { %> selected <% } %>><%= department?.departmentName %> </option>
+                      <% }) %>
+                    </select>
+                  </div>
+                  <% } %>
+                  <div class="col-md-6 field-col">
+                    <label for="phoneNumber" class="form-label">Phone</label>
+                    <input type="text" class="form-control" id="phoneNumber" name="phoneNumber" placeholder="Phone" value="<%= user?.phoneNumber || '' %>" />
+                  </div>
+                  <div class="col-md-6 field-col">
+                    <label for="password" class="form-label form-required">Password</label>
+                    <input type="password" class="form-control <%= locals.errorValidator && locals.errorValidator.password && 'form-error' %>" id="password" name="password" placeholder="Password" value="" />
+                    <% if(locals.errorValidator && locals.errorValidator.password ){%>
+                        <div class="invalid-feedback  d-block">
+                            <%= locals.errorValidator.password %>
+                        </div>
+                    <% } %>
+                  </div>
+                  <% if (user?.roleId == 1) { %>
+                  <div class="col-md-6 field-col"></div>
+                  <% } %>
+                  <div class="col-md-6 field-col">
+                    <label for="confirmPassword" class="form-label form-required">Confirm Password</label>
+                    <input type="password" class="form-control <%= locals.errorValidator && locals.errorValidator.confirmPassword && 'form-error' %>" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password" value="<%= user?.confirmPassword || '' %>" />
+                    <% if(locals.errorValidator && locals.errorValidator.confirmPassword ){%>
+                        <div class="invalid-feedback  d-block">
+                            <%= locals.errorValidator.confirmPassword %>
+                        </div>
+                    <% } %>
+                  </div>
+                  <div class="col-md-6 field-col"></div>
+                  <div class="col-md-6 field-col">    
+                    <div class="text-end">
+                        <a class="go_back">
+                            <button class="btn-cancel me-2" type="button">Back</button>
+                        </a>
+                        <button class="btn btn-primary" type="submit" ><% if(user?.id){ %> Update <% } else { %> Create <% } %></button>
+                    </div>
+                </div>
+                </div>
+              </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

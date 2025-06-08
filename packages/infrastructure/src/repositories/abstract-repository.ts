@@ -96,10 +96,55 @@ export abstract class AbstractRepository<E extends GenericEntity> implements Gen
         return undefined;
     }
 
+    public updateById(id: number, fieldName: any): Promise<E> | undefined {
+        if (this.repository != undefined) {
+            return this.repository
+                .update(id, fieldName)
+                .then((res) => {
+                    if (res.affected == null || res.affected == undefined) return undefined;
+                    return this.findOneById(id);
+                })
+                .catch((err) => err);
+        }
+        return undefined;
+    }
+
+    public deleteById(id: number): Promise<E> | undefined {
+        if (this.repository != undefined) {
+            return this.repository
+                .delete(id)
+                .then((res) => {
+                    if (res.affected == null || res.affected == undefined) return undefined;
+                    return this.findOneById(id);
+                })
+                .catch((err) => err);
+        }
+        return undefined;
+    }
+
     public findOneById(id: number): Promise<E> | undefined {
         if (this.repository != undefined) {
             return this.repository
                 .findOne({ where: { id } } as FindOneOptions<E>)
+                .then((res) => {
+                    if (res == null) {
+                        return undefined;
+                    }
+                    return res;
+                })
+                .catch((err) => err);
+        }
+        return undefined;
+    }
+
+    public findOne(
+        relations?: string[],
+        where?: any,
+        order?: any,
+    ): Promise<E> | undefined {
+        if (this.repository != undefined) {
+            return this.repository
+                .findOne({ relations, where, order } as FindOneOptions<E>)
                 .then((res) => {
                     if (res == null) {
                         return undefined;
@@ -243,6 +288,18 @@ export abstract class AbstractRepository<E extends GenericEntity> implements Gen
             this.repository.remove(entities);
         }
         return Promise.resolve(true);
+    }
+
+    public find(
+        relations?: string[],
+        where?: any,
+        order?: any,
+        take?: number,
+    ): Promise<E[]> | undefined {
+        if (this.repository != undefined) {
+            return this.repository.find({ relations, where, order, take });
+        }
+        return undefined;
     }
 
     public abstract getEntityType(): any;

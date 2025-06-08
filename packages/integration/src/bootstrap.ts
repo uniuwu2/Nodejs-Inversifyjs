@@ -11,7 +11,10 @@ import { DataSourceConnection,  } from "@inversifyjs/domain";
 import * as cookieParser from "cookie-parser";
 import { Repository, getRepository, LessThanOrEqual } from "typeorm";
 import { TypeormStore } from "connect-typeorm";
+import { initSocket,  } from "@inversifyjs/infrastructure";
+import { Server as SocketIOServer } from "socket.io";
 const passport = require("passport");
+import * as http from "http";
 
 import { serializeUser, initializePassport } from "./auth-passport";
 export async function bootstrap(container: Container, appPort: any, appPath: any, ...modules: ContainerModule[]) {
@@ -79,7 +82,8 @@ export async function bootstrap(container: Container, appPort: any, appPath: any
             app.use(bodyParser.urlencoded({ extended: true }));
             app.use(bodyParser.json());
             // app.use(helmet());
-            app.use(cors());
+            
+            // Enable CORS
             app.options("*", cors());
 
             app.on("close", function () {
@@ -98,9 +102,18 @@ export async function bootstrap(container: Container, appPort: any, appPath: any
             const now = new Date().getTime();
             await sessionRepository.delete({ expiredAt: LessThanOrEqual(now) });
         }
-
         const app = server.build();
-        app.listen(appPort);
+        const httpServer = http.createServer(app);
+
+        // Khởi tạo socket.io server trên HTTP server
+        const io = new SocketIOServer(httpServer);
+        
+        // Khởi tạo socket.io
+        initSocket(io);
+        // Lắng nghe HTTP server
+        httpServer.listen(appPort, () => {
+            logger.info(`Application listening on port ${appPort}...`);
+        });
         logger.info(`Application listening on port ${appPort}...`);
 
         container.bind<express.Application>(TYPES.App).toConstantValue(app);

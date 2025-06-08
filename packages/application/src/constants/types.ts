@@ -8,5 +8,12 @@ export const TYPES = {
     RoleService: Symbol.for("RoleService"),
     CourseService: Symbol.for("CourseService"),
     CourseClassService: Symbol.for("CourseClassService"),
+    CourseClassStudentService: Symbol.for("CourseClassStudentService"),
+    DepartmentService: Symbol.for("DepartmentService"),
     RouteHelper: Symbol.for("RouteHelper"),
+    ClassStudentService: Symbol.for("ClassStudentService"),
+    SessionClassService: Symbol.for("SessionClassService"),
+    AttendanceService: Symbol.for("AttendanceService"),
+    ActivityService: Symbol.for("ActivityService"),
+    ActivityStudentService: Symbol.for("ActivityStudentService"),
 };

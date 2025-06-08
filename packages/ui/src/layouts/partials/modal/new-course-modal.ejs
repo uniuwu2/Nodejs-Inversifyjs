@@ -1,0 +1,66 @@
+<div class="modal fade" id="createCourseModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="modalName" class="modal-title">
+                    <span id="modalTitle">Thêm môn học</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="courseName" class="form-label">Tên môn học</label>
+                        <input type="text" class="form-control" id="create-courseName" placeholder="Nhập tên môn học" name="create-courseName" />
+                        <% if (locals.errorValidator && locals.errorValidator.courseName) { %>
+                            <div class="invalid-feedback d-block">
+                                <%= locals.errorValidator.courseName %>
+                            </div>
+                            <% } %>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="courseCode" class="form-label">Mã môn</label>
+                        <input type="text" class="form-control" id="create-courseCode" placeholder="Nhập mã môn học" name="create-courseCode" />
+                        <% if (locals.errorValidator && locals.errorValidator.courseCode) { %>
+                            <div class="invalid-feedback d-block">
+                                <%= locals.errorValidator.courseCode %>
+                            </div>
+                            <% } %>
+                    </div>
+
+                    <div class="mb-3">
+                        <span class="form-label">Khoa</span>
+                        <select class="form-select" id="create-departmentId" name="create-departmentId">
+                            <% if (departmentList?.length> 0) { departmentList.forEach(department => { %>
+                                <option value="<%= department.id %>">
+                                    <%= department.departmentName %>
+                                </option>
+                                <% }); } else { %>
+                                    <option value="1">Department 1</option>
+                                    <option value="2">Department 2</option>
+                                    <option value="3">Department 3</option>
+                                    <option value="4">Department 4</option>
+                                    <% } %>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="credit" class="form-label">Tín chỉ</label>
+                        <input type="number" class="form-control" id="create-credit" placeholder="Nhập số tín chỉ" name="create-credit" />
+                        <% if (locals.errorValidator && locals.errorValidator.credit) { %>
+                            <div class="invalid-feedback d-block">
+                                <%= locals.errorValidator.credit %>
+                            </div>
+                            <% } %>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" id="createCourseBtn" class="btn btn-primary">Thêm môn học</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

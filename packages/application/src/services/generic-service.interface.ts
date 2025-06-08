@@ -27,4 +27,16 @@ export interface GenericService<E extends GenericEntity> {
               pageSize: number;
           }>
         | undefined;
+
+    find(
+        relations?: string[],
+        where?: any,
+        order?: any,
+        take?: number
+    ): Promise<E[]> | undefined;
+    findOne(
+        relations?: string[],
+        where?: any,
+        order?: any
+    ): Promise<E> | undefined;
 }
