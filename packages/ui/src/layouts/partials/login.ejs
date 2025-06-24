@@ -6,13 +6,13 @@
         <div class="row justify-content-center w-100">
           <div class="col-md-8 col-lg-6 col-xxl-3">
                 <div class="card">
-                    <div class="card-header">Login</div>
+                    <div class="card-header">Đăng nhập</div>
                     <div class="card-body">
                         <form action="/login" method="POST">
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email </label>
                                 <div class="position-relative input-custom-icon">
-                                    <input value="<%= locals?.data?.email || '' %>" type="text" class="form-control <%- locals?.errorValidator?.email && 'form-error' %>" id="email" name="email" placeholder="Enter your email" />
+                                    <input value="<%= locals?.data?.email || '' %>" type="text" class="form-control <%- locals?.errorValidator?.email && 'form-error' %>" id="email" name="email" placeholder="Nhập email" />
                                     <span class="ti ti-mail"></span>
                                 </div>
                                 <% if(locals?.errorValidator?.email) { %>
@@ -20,7 +20,7 @@
                                 <%}%>
                             </div>
                             <div class="mb-3">
-                                <label for="password" class="form-label">Password</label>
+                                <label for="password" class="form-label">Mật khẩu</label>
                                 <div class="position-relative auth-pass-inputgroup input-custom-icon">
                                     <span class="ti ti-lock"></span>
                                     <input
@@ -29,7 +29,7 @@
                                         class="form-control <%- locals?.errorValidator?.password && 'form-error' %>"
                                         id="password"
                                         name="password"
-                                        placeholder="Enter your password"
+                                        placeholder="Nhập mật khẩu"
                                     />
                                     <button type="button" class="btn btn-link position-absolute h-100 end-0 top-0" id="password-addon">
                                         <i class="ti ti-eye"></i>
@@ -43,15 +43,15 @@
                             <div class="form-check py-1">
                                 <% let checked = locals?.data?.remember ? "checked" : "" %>
                                 <input type="checkbox" class="form-check-input" id="remember" name="remember" <%= checked %> />
-                                <label class="form-check-label" for="remember">Remember me</label>
+                                <label class="form-check-label" for="remember">Ghi nhớ đăng nhập?</label>
                             </div>
 
-                            <button type="submit" class="btn btn-primary">Sign In</button>
+                            <button type="submit" class="btn btn-primary">Đăng nhập</button>
                         </form>
-                        <div class="gl-owing-text text-center  mb-3 gl-grow">or</div>
+                        <div class="gl-owing-text text-center  mb-3 gl-grow">Hoặc</div>
                         <a href="/login/auth/google" class="btn btn-outline-dark mt-3 d-flex align-items-center justify-content-center gap-2">
                             <i class="ti ti-brand-google"></i>
-                            <span>Login with Google</span>
+                            <span>Đăng nhập bằng Google</span>
                         </a>
                     </div>
                 </div>

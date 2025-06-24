@@ -24,5 +24,5 @@ export class Course extends GenericEntity {
     public courseDescription: string = "";
     
     @OneToMany(() => CourseClass, (courseClass) => courseClass.course)
-    public course: CourseClass[] | null = null;
+    public course!: CourseClass[];
 }

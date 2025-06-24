@@ -27,7 +27,12 @@ export class RouteHelper {
     public static readonly SESSION_CLASS_DETAIL: string = "/schedule/detail";
     public static readonly EVENT: string = "/events";
     public static readonly EVENT_DETAIL: string = "/event";
-
+    public static readonly STATISTIC: string = "/statistic";
+    public static readonly STATISTIC_DAYS: string = "/statistic/class/days";
+    public static readonly STATISTIC_CLASS: string = "/statistic/class";
+    public static readonly STATISTIC_STUDENT: string = "/statistic/class/student";
+    public static readonly EVENT_SCHEDULE: string = "/event-schedule";
+    
     private routeMap: Map<string, string> = new Map<string, string>();
 
     constructor() {
@@ -50,6 +55,10 @@ export class RouteHelper {
         this.routeMap.set(RouteHelper.SESSION_CLASS_DETAIL, "session-detail");
         this.routeMap.set(RouteHelper.EVENT, "event/index");
         this.routeMap.set(RouteHelper.EVENT_DETAIL, "event/detail");
+        this.routeMap.set(RouteHelper.STATISTIC_DAYS, "statistic/class/days");
+        this.routeMap.set(RouteHelper.STATISTIC_CLASS, "statistic/class/index");
+        this.routeMap.set(RouteHelper.STATISTIC_STUDENT, "statistic/class/student");
+        this.routeMap.set(RouteHelper.EVENT_SCHEDULE, "event-schedule/index");
     }
 
     /**

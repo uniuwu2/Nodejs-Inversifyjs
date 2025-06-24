@@ -1,5 +1,5 @@
 import { controller, httpGet, httpPost } from "inversify-express-utils";
-import { HttpCode, UserService, StudentService, RoleService, Variables, DepartmentService } from "@inversifyjs/application";
+import { HttpCode, UserService, StudentService, RoleService, Variables, DepartmentService, Messages } from "@inversifyjs/application";
 import { BaseController } from "./base-controller";
 import { inject } from "inversify";
 import { TYPES } from "@inversifyjs/application";
@@ -8,6 +8,7 @@ import { RouteHelper, Permission } from "@inversifyjs/application";
 import { checkPermissions, verifyAuthTokenRouter } from "@inversifyjs/infrastructure";
 import { uploadMiddleware } from "@inversifyjs/infrastructure";
 import * as fs from "fs";
+import { Student } from "@inversifyjs/domain";
 @controller(RouteHelper.USER_LIST)
 export class UserController extends BaseController {
     private userService: UserService;
@@ -15,8 +16,8 @@ export class UserController extends BaseController {
     private roleService: RoleService;
     private departmentService: DepartmentService
     public constructor(
-        @inject(TYPES.UserService) _userService: UserService, 
-        @inject(TYPES.StudentService) _studentService: StudentService, 
+        @inject(TYPES.UserService) _userService: UserService,
+        @inject(TYPES.StudentService) _studentService: StudentService,
         @inject(TYPES.RoleService) _roleService: RoleService,
         @inject(TYPES.DepartmentService) _departmentService: DepartmentService
     ) {
@@ -27,11 +28,11 @@ export class UserController extends BaseController {
         this.departmentService = _departmentService;
     }
 
-    @httpGet("/", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN, Permission.ONLY_TEACHER]))
+    @httpGet("/", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN]))
     public async getAllUsers(request: Request, response: Response): Promise<void> {
         let successMessage: string = "";
         if (request.cookies.messages) {
-            successMessage = "「" + request.cookies.messages.user + "」" + request.cookies.messages.message;
+            successMessage = "" + request.cookies.messages;
             response.clearCookie("messages");
         }
         // Có thể search theo tên, email, số điện thoại, mã sinh viên, phòng ban,
@@ -71,7 +72,7 @@ export class UserController extends BaseController {
     @httpPost("/import_csv", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN]), uploadMiddleware.single("file"))
     public async importCSV(request: Request, response: Response): Promise<void> {
         if (!request.file) {
-            response.status(HttpCode.BAD_REQUEST).send({ message: "File not found", status: HttpCode.BAD_REQUEST });
+            response.status(HttpCode.BAD_REQUEST).send({ message: Messages.FILE_NOT_FOUND, status: HttpCode.BAD_REQUEST });
         }
         try {
             let departments = await this.departmentService.findAll();
@@ -85,6 +86,7 @@ export class UserController extends BaseController {
                         this.logger.error("Email already exists: " + row.email);
                     } else {
                         let user = this.userService.create();
+
                         if (user) {
                             user.email = row.email;
                             user.firstName = row.firstname;
@@ -100,6 +102,9 @@ export class UserController extends BaseController {
                             if (departments?.length === 0) {
                                 user.departmentId = null;
                             }
+                            user.student = new Student();
+                            user.student.student_number = row.student_number;
+                            user.student.student_class = row.student_class;
                             await this.userService.save(user);
                         }
                     }
@@ -107,30 +112,62 @@ export class UserController extends BaseController {
                 .on("end", () => {
                     fs.unlinkSync(filePath);
                 });
-            response.status(HttpCode.IMPORT_SUCCESS).send({ message: "File imported successfully", status: HttpCode.IMPORT_SUCCESS });
+            response.status(HttpCode.IMPORT_SUCCESS).send({ message: Messages.IMPORT_FILE_SUCCESS, status: HttpCode.IMPORT_SUCCESS });
         } catch (error: any) {
             this.logger.error(error);
             response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
         }
     }
-    
-    @httpPost("/:id/delete" , verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN]))
+
+    @httpPost("/:id/delete", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN]))
     public async deleteUser(request: Request, response: Response): Promise<void> {
         let userId = Number(request.params.id);
         let user = await this.userService.findById(userId);
         let pathHref = String(request.body.href);
         try {
-            if (user?.imagePath) {
-                let path = `${process.env.IMAGE_PATH}/${user.imagePath}`;
-                fs.rmSync(path, { recursive: true, force: true });
+
+            // Chỉ vô hiệu hoá người dùng
+            if (user) {
+                user.active = Variables.INACTIVE;
+                await this.userService.save(user);
             }
 
-            await this.userService.delete(userId);
-
-            return response.cookie("messages", "User deleted successfully").redirect(RouteHelper.USER_LIST + pathHref);
+            return response.cookie("messages", Messages.USER_DELETE_SUCCESS).redirect(RouteHelper.USER_LIST + pathHref);
         } catch (error: any) {
             this.logger.error(error);
             response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
+        }
+    }
+
+    @httpPost("/:id/valid", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN]))
+    public async validUser(request: any, response: any): Promise<void> {
+        let id = Number(request.params.id);
+        let isChecked = request.body.isChecked;
+        try {
+            let user = await this.userService.findById(id);
+            if (!user) {
+                return response.status(HttpCode.BAD_REQUEST).json({
+                    message: Messages.USER_NOT_FOUND,
+                    code: HttpCode.BAD_REQUEST,
+                });
+            }
+            user.active = Number(isChecked) === 1 ? Variables.ACTIVE : Variables.INACTIVE;
+            await this.userService.save(user);
+            if (user.active === Variables.ACTIVE) {
+                return response.json({
+                    message: Messages.USER_ACTIVE_SUCCESS,
+                    code: HttpCode.SUCCESSFUL,
+                });
+            } else {
+                return response.json({
+                    message: Messages.USER_DELETE_SUCCESS,
+                    code: HttpCode.SUCCESSFUL,
+                });
+            }
+
+        } catch (error: any) {
+            this.logger.error(error);
+            return response.status(HttpCode.BAD_REQUEST).send({ message: error.message, code: HttpCode.BAD_REQUEST });
         }
     }
 

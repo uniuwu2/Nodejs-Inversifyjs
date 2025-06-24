@@ -38,47 +38,38 @@ $(function () {
     // console.log("User hiện tại:", window.currentUser);
 });
 
-$(function () {
-    // Sidebar xử lý ở trên bạn giữ nguyên...
+// $(function () {
+//     // Sidebar xử lý ở trên bạn giữ nguyên...
 
-    // Khởi tạo socket
-    const socket = io(); // Nếu dùng cùng domain
-    window.socket = socket;
+//     // Khởi tạo socket
+//     const socket = io(); // Nếu dùng cùng domain
+//     window.socket = socket;
 
-    // Lấy user hiện tại từ cookie hoặc biến JS được inject server-side
-    const currentUserId = window.currentUserId || 1; // fallback là admin (1)
-    console.log("[app.js] Đăng ký socket với userId:", currentUserId, "(kiểu:", typeof currentUserId, ")");
-    socket.emit("register", String(currentUserId)); // Đăng ký socket theo userId (string)
+//     // Lấy user hiện tại từ cookie hoặc biến JS được inject server-side
+//     const currentUserId = window.currentUserId || 1; // fallback là admin (1)
+//     console.log("[app.js] Đăng ký socket với userId:", currentUserId, "(kiểu:", typeof currentUserId, ")");
+//     socket.emit("register", String(currentUserId)); // Đăng ký socket theo userId (string)
 
-    // Hứng thông báo gửi đến
-    /** @param {Message} data */
-    socket.on("noti", (data) => {
-        console.log("[app.js] Received notification:", data);
-        // Thêm thông báo vào vùng notification-list trên header
-        const notiList = document.getElementById("notification-list");
-        if (notiList) {
-            const notiItem = document.createElement("div");
-            notiItem.className = "dropdown-item";
-            notiItem.textContent = data.message || "Có thông báo mới!";
-            notiList.prepend(notiItem);
-        }
+//     // Hứng thông báo gửi đến
+//     /** @param {Message} data */
+//     socket.on("noti", (data) => {
+//         console.log("[app.js] Received notification:", data);
+//         // Thêm thông báo vào vùng notification-list trên header
+//         const notiList = document.getElementById("notification-list");
+//         if (notiList) {
+//             const notiItem = document.createElement("div");
+//             notiItem.className = "dropdown-item";
+//             notiItem.textContent = data.message || "Có thông báo mới!";
+//             notiList.prepend(notiItem);
+//         }
         // Phát âm thanh thông báo
-        if (userInteracted) {
-            const audio = new Audio("../../sounds/notification.mp3");
-            audio.play();
-        }
+        // if (userInteracted) {
+        //     const audio = new Audio("../../sounds/notification.mp3");
+        //     audio.play();
+        // }
         // Có thể thêm hiệu ứng, badge, v.v. nếu muốn
-    });
-
-    // Ví dụ: Hàm gửi // noti từ admin đến userId =//  2
-    window.sendNotificationToUser2 = function () {
-        socket.emit("sendNoti", {
-            toUserId: 2,
-            message: "Chào bạn, bạn vừa được thêm vào buổi học!",
-        });
-    };
-
-});
+//     });
+// });
 
 /**
  * @typedef {Object} Message

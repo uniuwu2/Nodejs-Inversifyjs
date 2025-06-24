@@ -2,7 +2,7 @@
   <div class="container-fluid">
     <div class="row">
       <h5 class="card-title">
-        <% if(user?.id){ %> Edit User <% } else { %> New User <% } %>
+        <% if(user?.id){ %> Chỉnh sửa thông tin <% } else { %> Tạo người dùng mới <% } %>
       </h5>
       <div class="col-xl-12">
         <div class="card">
@@ -15,8 +15,8 @@
                 <div class="row p-4 gap-3 justify-content-center">
                   <% let readOnly=user?.id && 'readonly' %>
                   <div class="col-md-6 field-col">
-                    <label for="firstName" class="form-label form-required">First Name</label>
-                    <input type="text" class="form-control <%= locals.errorValidator && locals.errorValidator.firstName && 'form-error' %>" id="firstName" name="firstName" placeholder="First Name" value="<%= user?.firstName || '' %>" />
+                    <label for="firstName" class="form-label form-required">Họ</label>
+                    <input type="text" class="form-control <%= locals.errorValidator && locals.errorValidator.firstName && 'form-error' %>" id="firstName" name="firstName" placeholder="Họ" value="<%= user?.firstName || '' %>" />
                     <% if(locals.errorValidator && locals.errorValidator.firstName ){%>
                         <div class="invalid-feedback  d-block">
                             <%= locals.errorValidator.firstName %>
@@ -24,8 +24,8 @@
                     <%}%>
                   </div>
                   <div class="col-md-6 field-col">
-                    <label for="lastName" class="form-label form-required">Last Name</label>
-                    <input type="text" class="form-control <%= locals.errorValidator && locals.errorValidator.lastName && 'form-error' %>" id="lastName" name="lastName" placeholder="Last Name" value="<%= user?.lastName || '' %>" />
+                    <label for="lastName" class="form-label form-required">Tên</label>
+                    <input type="text" class="form-control <%= locals.errorValidator && locals.errorValidator.lastName && 'form-error' %>" id="lastName" name="lastName" placeholder="Tên" value="<%= user?.lastName || '' %>" />
                     <% if(locals.errorValidator && locals.errorValidator.lastName ){%>
                         <div class="invalid-feedback  d-block">
                             <%= locals.errorValidator.lastName %>
@@ -43,7 +43,7 @@
                   </div>
                   <!-- Role -->
                     <div class="col-md-6 field-col">
-                        <label for="role" class="form-label">Role</label>
+                        <label for="role" class="form-label">Vai trò</label>
                         <select name="role" id="role" class="form-select <% if (user?.roleId == 1) { %> disabled <% } %>">
                             <% if (roles?.length > 0) { %>
                                 <% let userRole = Number(user?.roleId) ? Number(user?.roleId) : 4; %>
@@ -66,7 +66,7 @@
                     </div>
                   <% if (user?.roleId !== 1) { %>
                   <div class="col-md-6 field-col">
-                    <label for="department" class="form-label">Department</label>
+                    <label for="department" class="form-label">Khoa</label>
                     <select name="department" id="department" class="form-select">
                       <% departments?.forEach(department=> { %>
                       <option value="<%= department?.id %>" <% if (user?.departmentId==department?.id) { %> selected <% } %>><%= department?.departmentName %> </option>
@@ -75,12 +75,12 @@
                   </div>
                   <% } %>
                   <div class="col-md-6 field-col">
-                    <label for="phoneNumber" class="form-label">Phone</label>
-                    <input type="text" class="form-control" id="phoneNumber" name="phoneNumber" placeholder="Phone" value="<%= user?.phoneNumber || '' %>" />
+                    <label for="phoneNumber" class="form-label">Số điện thoại</label>
+                    <input type="text" class="form-control" id="phoneNumber" name="phoneNumber" placeholder="Số điện thoại" value="<%= user?.phoneNumber || '' %>" />
                   </div>
                   <div class="col-md-6 field-col">
-                    <label for="password" class="form-label form-required">Password</label>
-                    <input type="password" class="form-control <%= locals.errorValidator && locals.errorValidator.password && 'form-error' %>" id="password" name="password" placeholder="Password" value="" />
+                    <label for="password" class="form-label form-required">Mật khẩu</label>
+                    <input type="password" class="form-control <%= locals.errorValidator && locals.errorValidator.password && 'form-error' %>" id="password" name="password" placeholder="Mật khẩu" value="" />
                     <% if(locals.errorValidator && locals.errorValidator.password ){%>
                         <div class="invalid-feedback  d-block">
                             <%= locals.errorValidator.password %>
@@ -91,8 +91,8 @@
                   <div class="col-md-6 field-col"></div>
                   <% } %>
                   <div class="col-md-6 field-col">
-                    <label for="confirmPassword" class="form-label form-required">Confirm Password</label>
-                    <input type="password" class="form-control <%= locals.errorValidator && locals.errorValidator.confirmPassword && 'form-error' %>" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password" value="<%= user?.confirmPassword || '' %>" />
+                    <label for="confirmPassword" class="form-label form-required">Xác nhận mật khẩu</label>
+                    <input type="password" class="form-control <%= locals.errorValidator && locals.errorValidator.confirmPassword && 'form-error' %>" id="confirmPassword" name="confirmPassword" placeholder="Xác nhận mật khẩu" value="<%= user?.confirmPassword || '' %>" />
                     <% if(locals.errorValidator && locals.errorValidator.confirmPassword ){%>
                         <div class="invalid-feedback  d-block">
                             <%= locals.errorValidator.confirmPassword %>
@@ -103,9 +103,9 @@
                   <div class="col-md-6 field-col">    
                     <div class="text-end">
                         <a class="go_back">
-                            <button class="btn-cancel me-2" type="button">Back</button>
+                            <button class="btn-cancel me-2" type="button">Quay lại</button>
                         </a>
-                        <button class="btn btn-primary" type="submit" ><% if(user?.id){ %> Update <% } else { %> Create <% } %></button>
+                        <button class="btn btn-primary" type="submit" ><% if(user?.id){ %> Sửa <% } else { %> Tạo <% } %></button>
                     </div>
                 </div>
                 </div>

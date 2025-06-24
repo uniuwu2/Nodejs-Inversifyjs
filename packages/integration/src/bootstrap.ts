@@ -83,7 +83,13 @@ export async function bootstrap(container: Container, appPort: any, appPath: any
             app.use(bodyParser.json());
             // app.use(helmet());
             
-            // Enable CORS
+            // Enable CORS cho cổng 8081
+            app.use(cors({
+                origin: process.env.CORS_ORIGIN || "*", // Cho phép tất cả các nguồn gốc
+                methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Các phương thức HTTP được phép
+                allowedHeaders: ["Content-Type", "Authorization"], // Các header được phép
+                credentials: true, // Cho phép cookie và thông tin xác thực
+            }));
             app.options("*", cors());
 
             app.on("close", function () {

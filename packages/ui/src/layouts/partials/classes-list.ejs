@@ -1,4 +1,4 @@
-<h1 class="mb-4">Classes</h1>
+<h1 class="mb-4">Danh sách lớp học</h1>
 <form method="GET" action="/classroom/classes" id="search-form">
   <div class="row">
     <div class="col-xl-12">
@@ -7,12 +7,12 @@
           <div class="row mb-3 gap-3">
             <form id="upload-form" enctype="multipart/form-data">
               <div class="col-md-12">
-                <label for="csv-file" class="form-label">Choose CSV File</label>
+                <label for="csv-file" class="form-label">Chọn tệp CSV để tải lên</label>
                 <div class="d-flex">
                   <input type="file" class="form-control" id="csv-file" accept=".csv" />
-                  <button type="button" class="btn btn-primary" onclick="uploadCSV()">Upload</button>
+                  <button type="button" class="btn btn-primary" onclick="uploadCSV()">Tải</button>
                 </div>
-                <div class="form-text" id="file-name">No file chosen</div>
+                <div class="form-text" id="file-name">Không có tệp nào được chọn</div>
               </div>
             </form>
           </div>
@@ -20,52 +20,54 @@
             <div class="col">
               <div class="mb-3 mb-md-0">
                 <div class="position-relative">
-                  <input type="text" class="form-control" placeholder="Search..." id="searchField" name="searchField" value="<%= locals?.searchField %>" autofocus />
+                  <input type="text" class="form-control" placeholder="Tìm kiếm..." id="searchField" name="searchField" value="<%= locals?.searchField %>" autofocus />
                   <% if(locals?.searchField.length> 0) { %>
-                  <button id="clear-search" type="button" class="btn-close button-clos" aria-label="Close"></button>
+                  <button id="clear-search" type="button" class="btn-close button-clos" aria-label="Đóng"></button>
                   <% } %>
                 </div>
               </div>
             </div>
           </div>
           <div class="row align-items-center mb-3 gap-3">
+            <% if (locals.jwtPayload.user.roleId === 1) { %>
             <div class="col-sm-3 position-relative d-flex">
               <div class="input-group flex-nowrap">
-                <span class="input-group-text">Teacher</span>
+                <span class="input-group-text">Giảng viên</span>
                 <select class="form-select" id="teacherSelect" name="teacherSelect">
-                  <option value="ALL" <%=teacherSelect=='ALL' && 'selected' %>>All</option>
+                  <option value="ALL" <%=teacherSelect=='ALL' && 'selected' %>>Tất cả</option>
                   <% if (teacherList?.length> 0) { teacherList.forEach(teacher => { %>
                   <option value="<%= teacher.id %>" <%=String(teacher.id)==locals?.teacherSelect && 'selected' %>><%=
                                                 teacher.firstName + " " + teacher.lastName %>
                   </option>
                   <%}); } else { %>
                   <!-- không có giáo viên nào -->
-                  <option value="ALL" selected>All</option>
+                  <option value="ALL" selected>Tất cả</option>
                   <% } %>
                 </select>
               </div>
             </div>
-            <div class="col-sm-3 position-relative d-flex">
+            <% } %>
+            <div class="col-sm-5 position-relative d-flex">
               <div class="input-group flex-nowrap">
-                <span class="input-group-text">Course</span>
+                <span class="input-group-text">Môn học</span>
                 <select class="form-select" id="courseSelect" name="courseSelect">
-                  <option value="ALL" <%=courseSelect=='ALL' && 'selected' %>>All</option>
+                  <option value="ALL" <%=courseSelect=='ALL' && 'selected' %>>Tất cả</option>
                   <% if (courseList?.length> 0) { courseList.forEach(course => { %>
                   <option value="<%= course.id %>" <%=String(course.id)==locals?.courseSelect
                                             && 'selected' %>><%= course.courseName %>
                   </option>
                   <%}); } else { %>
                   <!-- không có khoa nào -->
-                  <option value="ALL" selected>All</option>
+                  <option value="ALL" selected>Tất cả</option>
                   <% } %>
                 </select>
               </div>
             </div>
             <div class="col-sm-3 position-relative d-flex">
               <div class="input-group flex-nowrap">
-                <span class="input-group-text">Semester</span>
+                <span class="input-group-text">Học kì</span>
                 <select class="form-select" id="semesterSelect" name="semesterSelect">
-                  <option value="ALL" <%=semesterSelect=='ALL' && 'selected' %>>All</option>
+                  <option value="ALL" <%=semesterSelect=='ALL' && 'selected' %>>Tất cả</option>
                   <% if (semesterList?.length> 0) { semesterList.forEach(semester => { %>
                   <option value="<%= semester %>" <%=String(semester)==locals?.semesterSelect
                                             && 'selected' %>><%= semester %>
@@ -92,15 +94,15 @@
                       <i class="ti ti-arrow-narrow-down"></i>
                       <% }} %>
                       <th scope="col" role="button" id="sort-by-id">ID <% if(sortBy === "id") { iconSort() } else { %> <i class="ti ti-arrows-sort"></i> <% } %></th>
-                      <th scope="col" role="button" id="sort-by-course">Course Name <% if(sortBy === "courseName") { iconSort() } else { %> <i class="ti ti-arrows-sort"></i> <% } %></th>
-                      <th scope="col" role="button" id="sort-by-group">Group <% if(sortBy === "group") { iconSort() } else { %> <i class="ti ti-arrows-sort"></i> <% } %></th>
-                      <th scope="col" role="button" id="sort-by-teacher">Teacher <% if(sortBy === "teacherName") { iconSort() } else { %> <i class="ti ti-arrows-sort"></i> <% } %></th>
-                      <th scope="col" role="button" id="sort-by-semester">Semester <% if(sortBy === "semester") { iconSort() } else { %> <i class="ti ti-arrows-sort"></i> <% } %></th>
-                      <th scope="col" style="width: 200px">Session Number</th>
-                      <th scope="col" style="width: 200px">Current Students</th>
-                      <th scope="col" style="width: 200px">Max Students</th>
-                      <th scope="col" style="width: 200px">Schedule</th>
-                      <th scope="col" class="text-center" style="width: 200px">Action</th>
+                      <th scope="col" role="button" id="sort-by-course">Tên môn <% if(sortBy === "courseName") { iconSort() } else { %> <i class="ti ti-arrows-sort"></i> <% } %></th>
+                      <th scope="col" role="button" id="sort-by-group">Nhóm <% if(sortBy === "group") { iconSort() } else { %> <i class="ti ti-arrows-sort"></i> <% } %></th>
+                      <th scope="col" role="button" id="sort-by-teacher">Giảng viên <% if(sortBy === "teacherName") { iconSort() } else { %> <i class="ti ti-arrows-sort"></i> <% } %></th>
+                      <th scope="col" role="button" id="sort-by-semester">Học kì <% if(sortBy === "semester") { iconSort() } else { %> <i class="ti ti-arrows-sort"></i> <% } %></th>
+                      <th scope="col" style="width: 200px">Số buổi</th>
+                      <th scope="col" style="width: 200px">Sỉ số</th>
+                      <th scope="col" style="width: 200px">Sỉ số tối đa</th>
+                      <th scope="col" style="width: 200px">Lịch học</th>
+                      <th scope="col" class="text-center" style="width: 200px">Thao tác</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -128,7 +130,7 @@
                                 <li class="list-inline-item">
                                   <button class="p-0 btn btn-link" type="button">
                                     <a href="/classroom/class-detail/<%= classItem.id %>" class="px-2 text-primary" data-bs-toggle="tooltip"
-                                      data-bs-placement="top" title="Edit">
+                                      data-bs-placement="top" title="Sửa">
                                       <i class="ti ti-pencil font-size-20"></i>
                                     </a>
                                   </button>
@@ -137,7 +139,7 @@
                                 id="delete-class-<%= classItem.id %>">
                                   <form id="form-delete"></form>
                                   <button type="button" data-bs-toggle="tooltip" data-bs-placement="top"
-                                    title="Delete" id="sa-params-<%= classItem.id %>" 
+                                    title="Xoá" id="sa-params-<%= classItem.id %>" 
                                     class="p-0 btn btn-link waves-effect waves-light text-danger">
                                     <i class="ti ti-trash font-size-20"></i>
                                   </button>
@@ -148,7 +150,7 @@
                     <% }) %>
                     <% } else { %>
                     <tr>
-                      <td colspan="7" class="text-center pt-4 pb-0 border-bottom-0 ">No result found</td>
+                      <td colspan="10" class="text-center pt-4 pb-0 border-bottom-0 ">Không có lớp học nào</td>
                     </tr>
                     <% } %>
                   </tbody>
@@ -156,8 +158,8 @@
               </div>
             </div>
           </div>
+          <%- include("../partials/bottom-of-table", {page, limit, list: courseClasses, lastPage, total}) %>
         </div>
       </div>
     </div>
 </form>
-<%- include("../partials/bottom-of-table", {page, limit, list: courseClasses, lastPage, total}) %>

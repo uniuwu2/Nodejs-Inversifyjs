@@ -80,7 +80,8 @@ export class UserServiceImpl extends AbstractService<User, UserRepository> imple
         page: any,
         limitedItem: number,
         sortBy: any,
-        sort: any
+        sort: any,
+        currentUserRoleId?: any
         // isSuperAdmin: boolean
     ):
         | Promise<{
@@ -95,6 +96,12 @@ export class UserServiceImpl extends AbstractService<User, UserRepository> imple
 
         if (sortBy) {
             this.order = { [sortBy]: sort };
+        }
+        if (currentUserRoleId) {
+            this.where = [
+                { firstName: Like(`%${firstName}%`), ...(roleId !== Variables.ALL && { roleId: roleId }), ...(valid !== Variables.ALL && { active: valid }) },
+                { lastName: Like(`%${firstName}%`), ...(roleId !== Variables.ALL && { roleId: roleId }), ...(valid !== Variables.ALL && { active: valid }) },
+            ];
         }
         this.where = [
             { firstName: Like(`%${firstName}%`), ...(roleId !== Variables.ALL && { roleId: roleId }), ...(valid !== Variables.ALL && { active: valid }) },

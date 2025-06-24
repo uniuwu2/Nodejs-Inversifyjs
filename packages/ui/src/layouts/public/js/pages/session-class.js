@@ -35,6 +35,17 @@ function padTime(t) {
 }
 // console.log(courseClasses)
 function generateSessionClasses(course) {
+    // Lấy xem teacherId trên url
+    const urlParams = new URLSearchParams(window.location.search);
+    const teacherId = urlParams.get("teacherId");
+    if (teacherId) {
+        course = course.filter((c) => c.teacherId == teacherId);
+        // Cập nhật select giáo viên
+        const sessionTeacherSelect = document.getElementById("session-teacher-select");
+        if (sessionTeacherSelect) {
+            sessionTeacherSelect.value = teacherId;
+        }
+    }
     const sessions = [];
     course.forEach((sessionClass) => {
         let teacherColor = getColorForTeacher(sessionClass.teacherId);
@@ -74,10 +85,6 @@ function initializeSessions() {
         return;
     }
 
-    // for (const course of courseClasses) {
-    //     const sessions = generateSessionClasses(course);
-    //     sessionClasses.push(...sessions);
-    // }
     let test = generateSessionClasses(courseClasses);
     sessionClasses.push(...test);
 }
@@ -267,5 +274,19 @@ document.addEventListener("DOMContentLoaded", function () {
     // Nếu là giáo viên → tự động load môn học theo `user.id`
     if (!teacherSelect && window.currentTeacherId) {
         loadSubjects(window.currentTeacherId);
+    }
+
+    // Chọn giáo viên trong trang lịch
+    const sessionTeacherSelect = document.getElementById("session-teacher-select");
+    if (sessionTeacherSelect) {
+        sessionTeacherSelect.addEventListener("change", function () {
+            const teacherId = this.value;
+            // Reload lại lịch với giáo viên đã chọn
+            if (teacherId) {
+                window.location.href = `/session-class?teacherId=${teacherId}`;
+            } else {
+                window.location.href = `/session-class`;
+            }
+        });
     }
 });

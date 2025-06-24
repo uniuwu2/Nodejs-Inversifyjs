@@ -3,9 +3,9 @@ import { BaseController } from "./base-controller";
 import { AttendanceService, ClassStudentService, CourseClassService, CourseService, DepartmentService, HttpCode, Messages, Permission, RouteHelper, SessionClassService, TYPES, UserService, Variables } from "@inversifyjs/application";
 import { Request, Response } from "express";
 import { verify } from "crypto";
-import { verifyAuthTokenRouter } from "@inversifyjs/infrastructure";
+import { checkPermissions, verifyAuthTokenRouter } from "@inversifyjs/infrastructure";
 import { inject } from "inversify";
-import { Attendance, SessionClass, User } from "@inversifyjs/domain";
+import { Attendance, CourseClass, SessionClass, User } from "@inversifyjs/domain";
 import * as QRCode from "qrcode";
 import * as jwt from "jsonwebtoken";
 import { Brackets, In } from "typeorm";
@@ -35,15 +35,27 @@ export class SessionClassController extends BaseController {
         this.attendanceService = attendanceService;
     }
 
-    @httpGet("/", verifyAuthTokenRouter)
+    @httpGet("/", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_TEACHER, Permission.ONLY_ADMIN, Permission.ONLY_STUDENT]))
     public async getSessionClass(request: Request, response: Response): Promise<void> {
         try {
-            let courseClassList = await this.courseClassService.findAll(["course", "teacher"]
-                // , {
-                //     courseId: 1,
-                //     teacherId: 13,
-                // }
-            );
+            let currentTeacherId = null;
+            let currentStudentId = null;
+            let userId = response.locals.jwtPayload.user;
+            if (userId.roleId === Permission.ONLY_TEACHER) {
+                currentTeacherId = userId.id;
+            }
+
+            let courseClassList: CourseClass[] | undefined = [];
+            if (currentTeacherId) {
+                courseClassList = await this.courseClassService.findAll(["course", "teacher"], {
+                    teacherId: currentTeacherId
+                });
+            } else if (currentStudentId) {
+
+            } else {
+                courseClassList = await this.courseClassService.findAll(["course", "teacher"]);
+            }
+
             const dayOrder = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
             const dayMap: any = {
                 monday: "Thứ 2",
@@ -138,11 +150,23 @@ export class SessionClassController extends BaseController {
                 await this.sessionClassService.saveMulti(newSessionClasses);
             }
 
+            let savedSessionClasses: SessionClass[] | undefined = []
             // Lấy danh sách đã lưu
-            const savedSessionClasses = await this.sessionClassService.findAll(["courseClass", "teacher", "courseClass.course"]);
+            if (currentTeacherId) {
+                // Nếu là giáo viên thì chỉ lấy danh sách của giáo viên đó
+                savedSessionClasses = await this.sessionClassService.findAll(["courseClass", "teacher", "courseClass.course"], {
+                    teacherId: currentTeacherId,
+                });
+            } else if (currentStudentId) {
+                // Nếu là sinh viên thì lấy danh sách của tất cả các lớp học mà sinh viên đó đang học
+
+            } else {
+                savedSessionClasses = await this.sessionClassService.findAll(["courseClass", "teacher", "courseClass.course"]);
+            }
             // danh sách giáo viên
             let teacherList = await this.userService.getAllTeacher();
             response.render(this.routeHelper.getRenderPage(RouteHelper.SESSION_CLASS), {
+                classList: courseClassList,
                 courseClasses: JSON.stringify(savedSessionClasses),
                 teachers: teacherList,
             });
@@ -153,7 +177,7 @@ export class SessionClassController extends BaseController {
     }
 
 
-    @httpPost("/sessions/create")
+    @httpPost("/sessions/create", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_TEACHER, Permission.ONLY_ADMIN]))
     public async createSessionClass(request: Request, response: Response) {
         try {
             let courseId = Number(request.body.createsubject);
@@ -244,7 +268,7 @@ export class SessionClassController extends BaseController {
         }
     }
 
-    @httpPost("/schedule/:id/edit", verifyAuthTokenRouter)
+    @httpPost("/schedule/:id/edit", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_TEACHER, Permission.ONLY_ADMIN]))
     public async editSchedule(request: Request, response: Response) {
         let eventId = Number(request.body.eventId);
         let teacherId = Number(request.body.teacherId);
@@ -309,7 +333,7 @@ export class SessionClassController extends BaseController {
         }
     }
 
-    @httpGet("/schedule/detail/:id", verifyAuthTokenRouter)
+    @httpGet("/schedule/detail/:id", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_TEACHER, Permission.ONLY_ADMIN, Permission.ONLY_STUDENT]))
     public async getSessionClassDetail(request: Request, response: Response) {
         try {
             let sessionId = Number(request.params.id);
@@ -492,14 +516,14 @@ export class SessionClassController extends BaseController {
             sessionId: sessionClassId,
             createdAt: Date.now()
         };
-
+        // Chỉ cần có mã buổi học (môn), timestamp
         const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "30s" });
 
-        const attendanceUrl = `https://3577-2402-800-63b7-a742-f89a-6e98-2647-ca94.ngrok-free.app/api/v1/attendance/${token}`;
+        const attendanceUrl = `http://localhost:9999/api/v1/attendance/${token}`;
         return response.json({ token, url: attendanceUrl });
     }
 
-    @httpPost("/session/:classId/student/add", verifyAuthTokenRouter)
+    @httpPost("/session/:classId/student/add", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_TEACHER, Permission.ONLY_ADMIN]))
     public async addStudentToSession(request: Request, response: Response) {
         try {
             const studentIds: number[] = request.body.students;
@@ -534,6 +558,7 @@ export class SessionClassController extends BaseController {
             // Gộp danh sách cũ + mới
             const updatedList = [...currentList, ...newEntries];
             attendance.studentAttendance = updatedList;
+            console.log("Updated attendance:", attendance);
             // Cập nhật lại attendance
             await this.attendanceService.save(attendance)
             return response.status(HttpCode.SUCCESSFUL).json({
@@ -548,7 +573,7 @@ export class SessionClassController extends BaseController {
         }
     }
 
-    @httpPost("/session/:sessionId/student/delete", verifyAuthTokenRouter)
+    @httpPost("/session/:sessionId/student/delete", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_TEACHER, Permission.ONLY_ADMIN]))
     public async deleteStudentFromSession(request: Request, response: Response) {
         try {
             let studentIds = request.body.ids;
@@ -606,7 +631,7 @@ export class SessionClassController extends BaseController {
         }
     }
 
-    @httpPost("/session/student/edit-status", verifyAuthTokenRouter)
+    @httpPost("/session/student/edit-status", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_TEACHER, Permission.ONLY_ADMIN]))
     public async editStudentStatusInSession(request: Request, response: Response) {
         try {
             const sessionId = Number(request.body.sessionId);

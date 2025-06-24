@@ -65,6 +65,8 @@ import "./controllers/signup.controller";
 import "./controllers/session-class.controller";
 import "./controllers/api.controller";
 import "./controllers/event.controller";
+import "./controllers/statistic.controller";
+import "./controllers/event-schedule.controller";
 export const referenceDataIoCModule = new ContainerModule((bind) => {
     bind<Logger>(TYPES.Logger).to(LoggerMod).inSingletonScope();
     bind<DataSourceConnection>(TYPES.DataSourceConnect).to(DataSourceConnection).inSingletonScope();

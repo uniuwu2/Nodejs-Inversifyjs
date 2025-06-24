@@ -1,0 +1,56 @@
+<h1>Thống Kê Theo Sinh Viên</h1>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <!-- Chọn sinh viên -->
+        <script>
+            const students = <%- JSON.stringify(students) %>;
+        </script>
+        <div class="col-md-4">
+            <label for="student-select">Chọn sinh viên</label>
+            <div class="dropdown">
+                <input type="hidden" id="student-id">
+                <input type="text" class="form-control dropdown-toggle bg-white" id="studentSelect"
+                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" placeholder="Chọn sinh viên">
+                <div class="dropdown-menu w-100" id="studentDropdownMenu">
+                    <!-- Các sinh viên sẽ được thêm vào đây thông qua JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Biểu đồ tròn -->
+        <canvas id="studentChart" width="400" height="200"></canvas>
+
+        <!-- Bảng thống kê -->
+        <div class="row mb-3" id="course-table-container">
+            <h3>Thống kê sinh viên</h3>
+            <table class="table table-striped">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col" role="button" id="sort-by-courseName">Tên môn học <i
+                                class="ti ti-arrows-sort"></i></th>
+                        <th scope="col" role="button" id="sort-by-courseCode">Mã môn học <i
+                                class="ti ti-arrows-sort"></i></th>
+                        <th scope="col" role="button" id="sort-by-semester">Học kì <i class="ti ti-arrows-sort"></i>
+                        </th>
+                        <th scope="col" role="button" id="sort-by-group">Nhóm <i class="ti ti-arrows-sort"></i>
+                        </th>
+                        <th scope="col" role="button" id="sort-by-teacher">Giáo viên <i class="ti ti-arrows-sort"></i>
+                        </th>
+                        <th scope="col" role="button" id="sort-by-totalAttendance">Tổng số buổi <i
+                                class="ti ti-arrows-sort"></i></th>
+                        <th scope="col" role="button" id="sort-by-totalAbsent">Tổng số buổi vắng <i
+                                class="ti ti-arrows-sort"></i></th>
+                        <th scope="col" role="button" id="sort-by-attendanceRate">Tỉ lệ có mặt <i
+                                class="ti ti-arrows-sort"></i></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="8" class="text-center" id="no-data-here">Không có dữ liệu</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div id="pagination-container"></div>
+        </div>
+    </div>
+</div>

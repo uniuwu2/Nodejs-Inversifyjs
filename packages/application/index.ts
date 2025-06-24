@@ -32,6 +32,7 @@ import { ActivityService } from "./src/services/activity-service.interface";
 import { ActivityServiceImpl } from "./src/services/activity-service-impl";
 import { ActivityStudentService } from "./src/services/activity-student-service.interface";
 import { ActivityStudentServiceImpl } from "./src/services/activity-student-service-impl";
+import { SortHelper } from "./src/helpers/sort-helper";
 export {
     TYPES,
     HttpCode,
@@ -66,5 +67,6 @@ export {
     ActivityService,
     ActivityServiceImpl,
     ActivityStudentService,
-    ActivityStudentServiceImpl
+    ActivityStudentServiceImpl,
+    SortHelper
 }

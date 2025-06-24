@@ -110,7 +110,7 @@ export class SignupController extends BaseController {
         }
     }
 
-    @httpPost("/", verifyAuthTokenRouter)
+    @httpPost("/", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN]))
     public async postSignup(request: Request, response: Response): Promise<void> {
         let roles = await this.roleService.findAll();
         let departments = await this.departmentService.findAll();
@@ -129,13 +129,13 @@ export class SignupController extends BaseController {
         try {
             this.logger.info(`body: ${JSON.stringify(request.body)}`);
 
-            if (!firstName) this.errors = {...this.errors, firstName: "First name is required" };
-            if (!lastName) this.errors = {...this.errors, lastName: "Last name is required" };
-            if (!email) this.errors = {...this.errors, email: "Email is required" };
-             if (!password) this.errors = { ...this.errors, password: "Password is required" };
-            else if (password?.length < 6) this.errors = { ...this.errors, password: "Password must be at least 6 characters" };
-            if (!confirmPassword) this.errors = { ...this.errors, confirmPassword: "Confirm password is required" };
-            else if (confirmPassword?.length < 6) this.errors = { ...this.errors, confirmPassword: "Confirm password must be at least 6 characters" };
+            if (!firstName) this.errors = {...this.errors, firstName: Messages.USER_FIRST_NAME_REQUIRED };
+            if (!lastName) this.errors = {...this.errors, lastName: Messages.USER_LAST_NAME_REQUIRED };
+            if (!email) this.errors = {...this.errors, email: Messages.USER_EMAIL_REQUIRED };
+             if (!password) this.errors = { ...this.errors, password: Messages.USER_PASSWORD_REQUIRED };
+            else if (password?.length < 6) this.errors = { ...this.errors, password: Messages.USER_PASSWORD_MUST_BE_6_CHARACTERS };
+            if (!confirmPassword) this.errors = { ...this.errors, confirmPassword: Messages.USER_CONFIRM_PASSWORD_REQUIRED };
+            else if (confirmPassword?.length < 6) this.errors = { ...this.errors, confirmPassword: Messages.USER_PASSWORD_MUST_BE_6_CHARACTERS };
             
             if (this.errors) {
                 return response.status(HttpCode.BAD_REQUEST).render(this.routeHelper.getRenderPage(RouteHelper.SIGNUP), { errorValidator: this.errors, user: request.body, roles, departments });
@@ -143,7 +143,7 @@ export class SignupController extends BaseController {
 
             let user = await this.userService.findByEmail(email);
             if (user) {
-                return response.status(HttpCode.BAD_REQUEST).render(this.routeHelper.getRenderPage(RouteHelper.SIGNUP), { errorValidator: { email: "Email already exists" }, user: request.body, roles, departments });
+                return response.status(HttpCode.BAD_REQUEST).render(this.routeHelper.getRenderPage(RouteHelper.SIGNUP), { errorValidator: { email: Messages.EMAIL_ALREADY_EXIST }, user: request.body, roles, departments });
             }
 
             password = await EncryptHelper.bcryptHash(password);
@@ -162,7 +162,7 @@ export class SignupController extends BaseController {
                 await this.userService.save(userEntity);
             }
 
-            return response.cookie("messsage", "User created successfully").status(HttpCode.CREATED).redirect(RouteHelper.USER_LIST);
+            return response.cookie("messsage", Messages.USER_CREATE_SUCCESS).status(HttpCode.CREATED).redirect(RouteHelper.USER_LIST);
         } catch (error: any) {
             console.log("error", error);
             this.logger.error(error);

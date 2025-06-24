@@ -2,9 +2,6 @@
     <!-- Sidebar scroll-->
     <div>
         <div class="brand-logo d-flex align-items-center justify-content-between">
-            <a href="/home" class="text-nowrap logo-img">
-                <img src="/images/logos/dark-logo.svg" width="180" alt="" />
-            </a>
             <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
                 <i class="ti ti-x fs-8"></i>
             </div>
@@ -17,32 +14,42 @@
                         <span>
                             <i class="ti ti-layout-dashboard"></i>
                         </span>
-                        <span class="hide-menu">Dashboard</span>
+                        <span class="hide-menu">Trang chủ</span>
                     </a>
                 </li>
                 <hr class="sidebar-divider" />
+                <% if (locals.jwtPayload.user.id === 1) { %>
                 <li class="sidebar-item sidebar-users">
                     <a class="sidebar-link" href="/users" aria-expanded="false">
                         <span>
                             <i class="ti ti-user"></i>
                         </span>
-                        <span class="hide-menu">Users</span>
+                        <span class="hide-menu">Tài khoản</span>
                     </a>
                 </li>
-                <li class="sidebar-item sidebar-courses">
+                <% } %>
+                <li class="sidebar-item sidebar-classroom/courses">
                     <a class="sidebar-link" href="/classroom/courses" aria-expanded="false">
                         <span>
                             <i class="ti ti-book"></i>
                         </span>
-                        <span class="hide-menu">Courses</span>
+                        <span class="hide-menu">Môn học</span>
                     </a>
                 </li>
-                <li class="sidebar-item sidebar-classes">
+                <li class="sidebar-item sidebar-classroom/classes">
                     <a class="sidebar-link" href="/classroom/classes" aria-expanded="false">
                         <span>
                             <i class="ti ti-school"></i>
                         </span>
                         <span class="hide-menu">Lớp học</span>
+                    </a>
+                </li>
+                <li class="sidebar-item sidebar-session-class">
+                    <a class="sidebar-link" href="/session-class" aria-expanded="false">
+                        <span>
+                            <i class="ti ti-calendar"></i>
+                        </span>
+                        <span class="hide-menu">Lịch dạy học</span>
                     </a>
                 </li>
                 <li class="sidebar-item sidebar-events">
@@ -53,13 +60,58 @@
                         <span class="hide-menu">Sự kiện</span>
                     </a>
                 </li>
-                <li class="sidebar-item sidebar-sessions">
-                    <a class="sidebar-link" href="/session-class" aria-expanded="false">
+                <li class="sidebar-item sidebar-event-schedule">
+                    <a class="sidebar-link" href="/event-schedule" aria-expanded="false">
                         <span>
-                            <i class="ti ti-calendar"></i>
+                            <i class="ti ti-calendar-time"></i>
                         </span>
-                        <span class="hide-menu">Lịch dạy học</span>
+                        <span class="hide-menu">Lịch sự kiện</span>
                     </a>
+                </li>
+                <li class="sidebar-item sidebar-statistics">
+                    <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
+                        <span>
+                            <i class="ti ti-chart-infographic"></i>
+                        </span>
+                        <span class="hide-menu">Thống kê học tập</span>
+                    </a>
+                    <ul aria-expanded="false" class="collapse first-level base-level-line">
+                        <li class="sidebar-item">
+                            <a href="/statistic/class/days" class="sidebar-link">
+                                <span class="hide-menu">Theo ngày </span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="/statistic/class" class="sidebar-link">
+                                <span class="hide-menu">Theo lớp học </span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="/statistic/class/student" class="sidebar-link">
+                                <span class="hide-menu">Theo sinh viên </span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="sidebar-item sidebar-events-statistics">
+                    <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
+                        <span>
+                            <i class="ti ti-chart-pie"></i>
+                        </span>
+                        <span class="hide-menu">Thống kê sự kiện</span>
+                    </a>
+                    <ul aria-expanded="false" class="collapse first-level base-level-line">
+                        <li class="sidebar-item">
+                            <a href="/statistic/event/days" class="sidebar-link">
+                                <span class="hide-menu">Theo ngày </span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="/statistic/event" class="sidebar-link">
+                                <span class="hide-menu">Theo sự kiện </span>
+                            </a>
+                        </li>
+                    </ul>
             </ul>
         </nav>
         <!-- End Sidebar navigation -->

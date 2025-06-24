@@ -45,28 +45,27 @@ export class CourseClassServiceImpl extends AbstractService<CourseClass, CourseC
             }
         }
 
-        let where: any = [];
-        if (teacher && teacher !== Variables.ALL) {
-            where.push({ teacher: { id: teacher } });
-        }
-        if (course && course !== Variables.ALL) {
-            where.push({ course: { id: course } });
-        }
-
-        if (group && group !== Variables.ALL) {
-            where.push({ group: group });
-        }
-
-        if (semester && semester !== Variables.ALL) {
-            where.push({ semester: semester });
-        }
-        // nếu search có tồn tại thì tìm kiếm theo tên môn học, teacher
-        if (name && name !== Variables.ALL) {
-            where.push({ course: { courseName: Like(`%${name}%`) } });
+        if (name || teacher || course || group || semester) {
+            this.where = [
+                {
+                    course: { 
+                        id: course !== Variables.ALL ? course : undefined,
+                        courseName: Like(`%${name}%`)
+                    },
+                    teacher: {
+                        id: teacher !== Variables.ALL ? teacher : undefined,
+                        firstName: Like(`%${name}%`),
+                        lastName: Like(`%${name}%`),
+                    },
+                    group: group !== Variables.ALL ? group : undefined,
+                    semester: semester !== Variables.ALL ? semester : undefined,
+                },
+               
+            ];
         }
         return this.repository?.findAndCount(
             ["course", "teacher"], 
-            (name || teacher || course || group || semester) && where, 
+            (name || teacher || course || group || semester) && this.where, 
             page && { take: limit, page: page }, 
             sortBy && this.order)?.then((result: any) => {
 

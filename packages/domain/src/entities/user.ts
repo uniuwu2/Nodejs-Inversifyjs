@@ -49,11 +49,13 @@ export class User extends GenericEntity {
     @JoinColumn([{ name: "role_id", referencedColumnName: "id" }])
     public role!: Role;
 
-    @OneToOne(() => Student, (student) => student.user)
+    @OneToOne(() => Student, (student) => student.user, {
+        cascade: true,
+    })
     public student!: Student;
 
     @OneToOne(() => Staff, (student) => student.user)
-    public staff: Student | null = null;
+    public staff!: Staff;
 
     @OneToMany(() => Activity, (activity) => activity.user)
     public activity!: Activity[];
@@ -74,6 +76,6 @@ export class User extends GenericEntity {
     public department!: Department;
 
     @OneToMany(() => SessionClass, (sessionClass) => sessionClass.teacher)
-    public sessionClass: SessionClass[] | null = null;
+    public sessionClass!: SessionClass[];
     
 }

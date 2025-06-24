@@ -1,10 +1,22 @@
+<h1 class="mb-4">Lịch học</h1>
 <div class="row">
     <div class="col-12">
         <div class="card">
             <div class="card-body">
-                <h4 class="card-title">Session Class</h4>
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createSessionModal">+ Tạo buổi
-                    học</button>
+                <button class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#createSessionModal">Tạo buổi học</button>
+                <% if (locals.jwtPayload.user.roleId === 1) { %>
+                <div class="row mb-3">
+                    <div class="col-12 col-md-3">
+                        <label for="session-teacher-select" class="form-label">Giáo viên</label>
+                        <select class="form-select" id="session-teacher-select">
+                            <option value="">Tất cả</option>
+                            <% teachers.forEach(teacher => { %>
+                                <option value="<%= teacher.id %>"><%= teacher.firstName %> <%= teacher.lastName %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                </div>
+                <% } %>
                 <div class="calendar-wrapper">
                     <div id="calendar"></div>
                 </div>

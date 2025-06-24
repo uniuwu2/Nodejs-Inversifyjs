@@ -1,7 +1,7 @@
 import { controller, httpGet, httpPost } from "inversify-express-utils";
-import { ActivityService, ActivityStudentService, DateTimeHelper, HttpCode, RouteHelper, TYPES, UserService, Variables } from "@inversifyjs/application";
+import { ActivityService, ActivityStudentService, DateTimeHelper, HttpCode, Permission, RouteHelper, TYPES, UserService, Variables } from "@inversifyjs/application";
 import { BaseController } from "./base-controller";
-import { verifyAuthTokenRouter } from "@inversifyjs/infrastructure";
+import { checkPermissions, verifyAuthTokenRouter } from "@inversifyjs/infrastructure";
 import { Request, Response } from "express";
 import { inject } from "inversify";
 import * as QRCode from "qrcode";

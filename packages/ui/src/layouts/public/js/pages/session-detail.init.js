@@ -83,25 +83,33 @@ let timer;
 
 const updateQr = async () => {
     try {
-        const res = await fetch(`/session-class/schedule/qr/${sessionId}`);
-        const data = await res.json();
-
+        const expiredAt = Date.now() + 30000; // 30 giây từ thời điểm tạo
+        let qrurl = `https://c9e7-2001-ee0-1b09-bfa2-3cc9-86c6-ac63-1489.ngrok-free.app/qr?sessionId=${sessionId}&expiredAt=${expiredAt}`;
         const qrContainer = document.getElementById("qrCodeContainer");
         qrContainer.innerHTML = ""; // Xóa QR cũ
-
         const canvas = document.createElement("canvas");
-        await QRCode.toCanvas(canvas, data.url);
+        await QRCode.toCanvas(canvas, qrurl);
         qrContainer.appendChild(canvas);
-
         // Reset đồng hồ đếm ngược
         countdown = 30;
         document.getElementById("qrCountdown").innerText = `Còn: ${countdown} giây`;
-
         if (timer) clearInterval(timer);
         timer = setInterval(() => {
             countdown--;
             document.getElementById("qrCountdown").innerText = `Còn: ${countdown} giây`;
+            if (countdown <= 0) {
+                clearInterval(timer);
+                Swal.fire({
+                    icon: "warning",
+                    title: "QR Code đã hết hạn",
+                    text: "Vui lòng làm mới để tạo QR Code mới.",
+                    showConfirmButton: true,
+                }).then(() => {
+                    updateQr(); // Tạo QR mới
+                });
+            }
         }, 1000);
+
     } catch (err) {
         console.error("Lỗi tạo QR:", err);
     }

@@ -1,4 +1,4 @@
-<h1 class="mb-4">Courses</h1>
+<h1 class="mb-4">Danh sách môn học</h1>
 <form method="GET" action="/classroom/courses" id="search-form">
   <div class="row">
     <div class="col-xl-12">
@@ -7,12 +7,12 @@
           <div class="row mb-3 gap-3">
             <form id="upload-form" enctype="multipart/form-data">
               <div class="col-md-12">
-                <label for="csv-file" class="form-label">Choose CSV File</label>
+                <label for="csv-file" class="form-label">Chọn tệp CSV để tải lên</label>
                 <div class="d-flex">
                   <input type="file" class="form-control" id="csv-file" accept=".csv" />
-                  <button type="button" class="btn btn-primary" onclick="uploadCSV()">Upload</button>
+                  <button type="button" class="btn btn-primary" onclick="uploadCSV()">Tải</button>
                 </div>
-                <div class="form-text" id="file-name">No file chosen</div>
+                <div class="form-text" id="file-name">Chưa có tệp nào được chọn</div>
               </div>
             </form>
           </div>
@@ -20,7 +20,7 @@
             <div class="col-md-6">
               <div class="mb-3 mb-md-0">
                 <div class="position-relative">
-                  <input type="text" class="form-control" placeholder="Search..." id="searchField" name="searchField"
+                  <input type="text" class="form-control" placeholder="Tìm kiếm..." id="searchField" name="searchField"
                     value="<%= locals?.searchField %>" autofocus />
                   <% if(locals?.searchField.length> 0) { %>
                     <button id="clear-search" type="button" class="btn-close button-clos" aria-label="Close"></button>
@@ -28,11 +28,11 @@
                 </div>
               </div>
             </div>
-            <div class="col-sm-3 position-relative d-flex">
+            <div class="col-sm-4 position-relative d-flex">
               <div class="input-group flex-nowrap">
-                <span class="input-group-text">Department</span>
+                <span class="input-group-text">Khoa</span>
                 <select class="form-select" id="departmentSelect" name="departmentSelect">
-                  <option value="ALL" <%=departmentSelect=='ALL' && 'selected' %>>All</option>
+                  <option value="ALL" <%=departmentSelect=='ALL' && 'selected' %>>Tất cả</option>
                   <% if (departmentList?.length> 0) { departmentList.forEach(department => { %>
                     <option value="<%= department.id %>" <%=String(department.id)==locals?.departmentSelect && 'selected' %>><%=
                         department.departmentName %>
@@ -52,7 +52,7 @@
                     <button type="button"
                         class="btn btn-primary waves-effect waves-light <%= locals?.errorValidator && 'open-modal'%> modal-open"
                         data-bs-toggle="modal"
-                        data-bs-target="#createCourseModal">Create</button>
+                        data-bs-target="#createCourseModal">Tạo</button>
                 </div>
             </div>
             <div class="row pe-0">
@@ -69,11 +69,11 @@
                                   <i class="ti ti-arrow-narrow-down"></i>  
                               <% }} %>
                               <th scope="col"  role="button" id="sort-by-id">ID <% if(sortBy === "id") { iconSort() } else { %> <i class="ti ti-arrows-sort"></i>  <% } %></th>
-                              <th scope="col"  role="button" id="sort-by-courseName">Course Name <% if(sortBy === "courseName") { iconSort() } else { %> <i class="ti ti-arrows-sort"></i>  <% } %></th>
-                                <th scope="col"  role="button" id="sort-by-courseCode">Course Code <% if(sortBy === "courseCode") { iconSort() } else { %> <i class="ti ti-arrows-sort"></i>  <% } %></th>
-                                <th scope="col"  role="button" id="sort-by-department">Department <% if(sortBy === "department") { iconSort() } else { %> <i class="ti ti-arrows-sort"></i>  <% } %></th>
-                                <th scope="col"  role="button" id="sort-by-credit">Credit(s) <% if(sortBy === "credits") { iconSort() } else { %> <i class="ti ti-arrows-sort"></i>  <% } %></th>  
-                              <th scope="col"  style="width: 200px">Action</th>
+                              <th scope="col"  role="button" id="sort-by-courseName">Tên môn <% if(sortBy === "courseName") { iconSort() } else { %> <i class="ti ti-arrows-sort"></i>  <% } %></th>
+                                <th scope="col"  role="button" id="sort-by-courseCode">Mã môn <% if(sortBy === "courseCode") { iconSort() } else { %> <i class="ti ti-arrows-sort"></i>  <% } %></th>
+                                <th scope="col"  role="button" id="sort-by-department">Khoa <% if(sortBy === "department") { iconSort() } else { %> <i class="ti ti-arrows-sort"></i>  <% } %></th>
+                                <th scope="col"  role="button" id="sort-by-credit">Tín chỉ <% if(sortBy === "credits") { iconSort() } else { %> <i class="ti ti-arrows-sort"></i>  <% } %></th>  
+                              <th scope="col"  style="width: 200px">Thao tác</th>
                           </tr>
                       </thead>
                       <tbody>
@@ -104,7 +104,7 @@
                                               <button type="button"
                                               class="p-0 btn btn-link edit-course <%= locals?.errorValidatorEdit && 'open-modal' %>"
                                               data-bs-placement="top"
-                                              title="Edit" id="edit-course-<%= course.id %>"
+                                              title="Sửa" id="edit-course-<%= course.id %>"
                                               data-bs-toggle="modal" data-bs-target="#editCourseModal">
                                                 <i class="ti ti-pencil font-size-20"></i>
                                               </button>
@@ -113,7 +113,7 @@
                                             id="delete-course-<%= course.id %>">
                                               <form id="form-delete"></form>
                                               <button type="button" data-bs-toggle="tooltip" data-bs-placement="top"
-                                                title="Delete" id="sa-params-<%= course.id %>"
+                                                title="Xoá" id="sa-params-<%= course.id %>"
                                                 class="p-0 btn btn-link waves-effect waves-light text-danger">
                                                 <i class="ti ti-trash font-size-20"></i>
                                               </button>
@@ -125,7 +125,7 @@
                               <% }) %>
                               <% } else { %> 
                                   <tr>
-                                      <td colspan="7" class="text-center pt-4 pb-0 border-bottom-0 ">No result found</td>
+                                      <td colspan="7" class="text-center pt-4 pb-0 border-bottom-0 ">Không có môn học nào</td>
                                   </tr>
                                   <% } %>
                       </tbody>
@@ -133,8 +133,8 @@
               </div>
           </div>
           </div>
+          <%- include("../partials/bottom-of-table", {page, limit, list: courses, lastPage, total}) %>
         </div>
       </div>
     </div>
 </form>
-<%- include("../partials/bottom-of-table", {page, limit, list: courses, lastPage, total}) %>

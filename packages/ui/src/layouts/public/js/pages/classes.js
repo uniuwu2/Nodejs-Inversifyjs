@@ -84,6 +84,9 @@ $('#courseSelect').on('change', function (e) {
 let semester = document.getElementById("semesterSelect");
 if (semester) {
     semester.addEventListener("change", function () {
+        if (currentPage) {
+            currentPage.value = 1;
+        }
         document.getElementById("search-form").submit();
     });
 }

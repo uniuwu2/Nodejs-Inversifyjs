@@ -23,7 +23,7 @@
                                     <input type="text" class="form-control" placeholder="Tìm kiếm..." id="searchField"
                                         name="searchField" value="<%= locals?.searchField %>" autofocus />
                                     <% if(locals?.searchField.length> 0) { %>
-                                        <button id="clear-search" type="button" class="btn-close button-clos"
+                                        <button id="clear-search" type="button" class="btn-close button-close"
                                             aria-label="Close"></button>
                                         <% } %>
                                 </div>
@@ -166,17 +166,17 @@
                                             <% }) %>
                                         <% } else { %>
                                             <tr>
-                                                <td colspan="8" class="text-center">Không có sự kiện nào.
+                                                <td colspan="9" class="text-center">Không có sự kiện nào.
                                                 </td>
                                             </tr>
                                         <% } %>
                                 </tbody>
                             </table>
                         </div>
+                        <%- include("../partials/bottom-of-table", {page, limit, list: events, lastPage, total}) %>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </form>
-<%- include("../partials/bottom-of-table", {page, limit, list: events, lastPage, total}) %>

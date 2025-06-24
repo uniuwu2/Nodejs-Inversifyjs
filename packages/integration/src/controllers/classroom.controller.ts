@@ -31,7 +31,7 @@ export class ClassroomController extends BaseController {
     }
 
     // Môn học
-    @httpGet(RouteHelper.COURSES, verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN]))
+    @httpGet(RouteHelper.COURSES, verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN, Permission.ONLY_TEACHER]))
     public async getCourses(request: Request, response: Response): Promise<void> {
         let successMessage: string = "";
         if (request.cookies.messages) {
@@ -185,7 +185,7 @@ export class ClassroomController extends BaseController {
         }
     }
 
-    @httpPost("/course/:id/edit", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN]), uploadMiddleware.single("file"))
+    @httpPost("/course/:id/edit", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN, Permission.ONLY_TEACHER]), uploadMiddleware.single("file"))
     public async editCourse(request: Request, response: Response) {
         let courseId = Number(request.params.id);
         let name: string = request.body.courseName;
@@ -219,7 +219,7 @@ export class ClassroomController extends BaseController {
         }
     }
 
-    @httpPost("/course/:id/delete", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN]))
+    @httpPost("/course/:id/delete", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN, Permission.ONLY_TEACHER]))
     public async deleteCourse(request: Request, response: Response) {
         let courseId = Number(request.params.id);
         let url = request.body.href || "";
@@ -240,7 +240,7 @@ export class ClassroomController extends BaseController {
         }
     }
 
-    @httpPost("/course/create", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN]))
+    @httpPost("/course/create", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN, Permission.ONLY_TEACHER]))
     public async createCourse(request: Request, response: Response) {
         let name: string = request.body.courseName;
         let code: string = request.body.courseCode;
@@ -279,7 +279,7 @@ export class ClassroomController extends BaseController {
     public async getClasses(request: any, response: any): Promise<void> {
         let successMessage: string = "";
         if (request.cookies.messages) {
-            successMessage = "「" + request.cookies.messages.user + "」" + request.cookies.messages.message;
+            successMessage = "「" + request.cookies.messages.message + "」";
             response.clearCookie("messages");
         }
 
@@ -293,9 +293,9 @@ export class ClassroomController extends BaseController {
         let sort: any = request.query.sort || "ASC";
         try {
             // người đăng nhập hiện tại
-            let userId = request.session.userId;
-            if (userId === Permission.ONLY_TEACHER) {
-                teacher = userId;
+            let userId = response.locals.jwtPayload.user;
+            if (userId.roleId === Permission.ONLY_TEACHER) {
+                teacher = userId.id;
             }
             let classes = await this.courseClassService.showCourseClassList(teacher, course, group, semester, name, page, this.limitedItem, sortBy, sort);
             let courseList = await this.courseService.findAll();
@@ -321,11 +321,13 @@ export class ClassroomController extends BaseController {
                             times,
                         }));
                 }
-                classes.list.forEach((item: any) => {
-                    item.schedule = sortClassSchedule(item.classSchedule);
-                });
+                if (classes.list && classes.list.length > 0) {
+                    classes.list.forEach((item: any) => {
+                        item.schedule = sortClassSchedule(item.classSchedule);
+                    });
+                }
                 response.render(this.routeHelper.getRenderPage(RouteHelper.CLASSES), {
-                    courseClasses: classes.list,
+                    courseClasses: classes.list || [],
                     courseSelect: course,
                     groupSelect: group,
                     semesterSelect: semester,
@@ -344,6 +346,7 @@ export class ClassroomController extends BaseController {
                 });
             }
         } catch (error: any) {
+            console.log(error);
             this.logger.error(error);
             response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
         }
@@ -559,14 +562,15 @@ export class ClassroomController extends BaseController {
         }
     }
 
-    @httpPost("/class/:id/delete", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN]))
+    @httpPost("/class/:id/delete", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN, Permission.ONLY_TEACHER]))
     public async deleteClass(request: any, response: any): Promise<void> {
         let classId = Number(request.params.id);
         let url = request.body.href || "";
         try {
             let courseClass = await this.courseClassService.findById(classId);
             if (courseClass) {
-                await this.courseClassService.delete(classId);
+                courseClass.status = Variables.INACTIVE;
+                await this.courseClassService.save(courseClass);
                 return response
                     .status(HttpCode.SUCCESSFUL)
                     .cookie("messages", { message: Messages.DELETE_CLASS_SUCCESS, user: courseClass.id })

@@ -30,6 +30,7 @@ export class CourseServiceImpl extends AbstractService<Course, CourseRepository>
               pageSize: number;
           }>
         | undefined {
+
         if (sortBy) {
             this.order = { [sortBy]: sort };
         }

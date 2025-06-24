@@ -39,7 +39,7 @@ export class CourseClass extends GenericEntity {
     public courseId: number = 0;
     @ManyToOne(() => Course, (course) => course.course)
     @JoinColumn([{ name: "course_id", referencedColumnName: "id" }])
-    public course: Course | null = null;
+    public course!: Course;
 
     @Column("int", { name: "teacher_id" })
     public teacherId: number = 0;

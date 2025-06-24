@@ -30,9 +30,9 @@
                                 <h6 class="mb-0"><%= locals.jwtPayload.user.firstName %> <%= locals.jwtPayload.user.lastName %></h6>
                                 <p class="mb-0 font-size-11 text-muted"><%= locals.jwtPayload.user.email %></p>
                             </div>
-                            <a class="dropdown-item" href="/profile/<%= locals.jwtPayload.user.id %>"><i class="ti ti-user-circle text-muted font-size-16 align-middle me-2"></i> <span class="align-middle">My profile</span></a>
+                            <a class="dropdown-item" href="/profile/<%= locals.jwtPayload.user.id %>"><i class="ti ti-user-circle text-muted font-size-16 align-middle me-2"></i> <span class="align-middle">Hồ sơ</span></a>
                             <form action="/logout" method="get">
-                                <button class="dropdown-item" type="submit"><i class="ti ti-logout text-muted font-size-16 align-middle me-2"></i> <span class="align-middle">Logout</span></button>
+                                <button class="dropdown-item" type="submit"><i class="ti ti-logout text-muted font-size-16 align-middle me-2"></i> <span class="align-middle">Đăng xuất</span></button>
                             </form>
                         </div>
                     </div>
@@ -41,9 +41,7 @@
         </div>
     </nav>
 </header>
-<% const __userId = (locals && locals.jwtPayload && locals.jwtPayload.user && locals.jwtPayload.user.id) ? locals.jwtPayload.user.id : 1; %>
 <script>
-    window.currentUserId = <%- JSON.stringify(__userId) %>;
     document.querySelectorAll(".dropdown-menu").forEach((dropdown) => {
         dropdown.addEventListener("click", function (e) {
             e.stopPropagation();

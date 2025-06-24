@@ -1,0 +1,97 @@
+<h1>Thống Kê Theo Lớp Học</h1>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="row mb-3">
+            <script>
+                const courses = <%- JSON.stringify(courses) %>;
+            </script>
+            <!-- Dropdown tìm lớp học -->
+            <div class="col-md-3">
+                <label for="class-select">Chọn lớp học</label>
+                <div class="dropdown">
+                    <input type="hidden" id="class-id">
+                    <input type="text" class="form-control dropdown-toggle bg-white" id="class-select"
+                        data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" placeholder="Chọn lớp học">
+                    <div class="dropdown-menu w-100" id="classDropdownMenu">
+                        <!-- Các lớp học sẽ được thêm vào đây thông qua JavaScript -->
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 d-none" id="semester-select-container">
+                <label for="semester-select">Chọn học kì</label>
+                <select class="form-select" id="semester-select">
+                    <% if (semesters && semesters.length> 0) { %>
+                        <% semesters.forEach(semester=> { %>
+                            <option value="<%= semester %>">
+                                <%= semester %>
+                            </option>
+                        <% }) %>
+                    <% } else { %>
+                        <option value="1">Học kì 1</option>
+                        <option value="2">Học kì 2</option>
+                        <option value="3">Học kì 3</option>
+                        <option value="4">Học kì 4</option>
+                    <% } %>
+                </select>
+            </div>
+            <div class="col-md-3 d-none" id="group-select-container">
+                <label for="group-select">Chọn nhóm</label>
+                <select class="form-select" id="group-select">
+                    <% if (groups && groups.length> 0) { %>
+                        <% groups.forEach(group=> { %>
+                            <option value="<%= group %>">
+                                <%= group %>
+                            </option>
+                        <% }) %>
+                    <% } else { %>
+                        <option value="1">Nhóm 1</option>
+                        <option value="2">Nhóm 2</option>
+                        <option value="3">Nhóm 3</option>
+                    <% } %>
+                </select>
+            </div>
+            <!-- Nút tìm kiếm -->
+            <div class="col-md-2 d-flex align-items-end justify-content-start d-none" id="searchBtnContainer">
+                <button class="btn btn-primary" id="searchBtn">Tìm kiếm</button>
+            </div>
+        </div>
+        <!-- Thông tin của môn học -->
+        <div class="row mb-3" id="course-info-container"></div>
+
+        <!-- Biểu đồ -->
+        <canvas class="row mb-3" id="attendanceChart" width="400" height="200"></canvas>
+
+        <!-- Bảng thống kê sinh viên -->
+        <div class="row mb-3" id="student-statistics-container">
+            <h3>Thống kê sinh viên</h3>
+            <table class="table table-striped">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col" role="button" id="sort-by-firstName">Họ <i class="ti ti-arrows-sort"></i></th>
+                        <th scope="col" role="button" id="sort-by-lastName">Tên <i class="ti ti-arrows-sort"></i></th>
+                        <th scope="col" role="button" id="sort-by-studentNumber">Mã sinh viên <i
+                                class="ti ti-arrows-sort"></i></th>
+                        <th scope="col" role="button" id="sort-by-class">Lớp <i class="ti ti-arrows-sort"></i></th>
+                        <th scope="col" role="button" id="sort-by-attendance">Tổng số buổi có mặt <i
+                                class="ti ti-arrows-sort"></i></th>
+                        <th scope="col" role="button" id="sort-by-absent">Tổng số buổi vắng <i
+                                class="ti ti-arrows-sort"></i></th>
+                        <th scope="col" role="button" id="sort-by-attendanceRate">Tỷ lệ có mặt (%) <i
+                                class="ti ti-arrows-sort"></i></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Mặc định là chưa có dữ liệu -->
+                    <tr>
+                        <td colspan="7" class="text-center" id="no-data-here">Vui lòng chọn lớp học để xem thống kê</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div id="pagination-container">
+            </div>
+            <!-- Phân trang cho bảng -->
+            <!-- Các nút phân trang sẽ được thêm vào đây thông qua JavaScript -->
+        </div>
+
+    </div>
+</div>

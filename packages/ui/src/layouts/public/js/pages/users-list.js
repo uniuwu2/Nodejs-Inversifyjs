@@ -15,46 +15,65 @@ function getHrefInput(form, list) {
     }
 }
 
-
 // Hiển thị tên tệp khi người dùng chọn tệp
-document.getElementById('csv-file').addEventListener('change', function (event) {
+document.getElementById("csv-file").addEventListener("change", function (event) {
     const fileName = event.target.files[0]?.name;
     if (fileName) {
-        document.getElementById('file-name').textContent = `Selected file: ${fileName}`;
+        document.getElementById("file-name").textContent = `Selected file: ${fileName}`;
     }
 });
 
 // // Hàm upload CSV khi người dùng nhấn nút Upload
 function uploadCSV() {
-    const fileInput = document.getElementById('csv-file');
+    const fileInput = document.getElementById("csv-file");
     const file = fileInput.files[0];
 
     if (!file) {
-        alert('Please select a CSV file before uploading!');
+        Swal.fire({
+            title: "Chưa chọn tệp",
+            text: "Vui lòng chọn tệp CSV để tải lên.",
+            icon: "warning",
+            confirmButtonText: "OK",
+            confirmButtonClass: "btn btn-success mt-2",
+            buttonsStyling: false,
+        });
         return;
     }
 
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append("file", file);
 
     // Gửi tệp đến API backend
     $.ajax({
-        url: '/users/import_csv',
-        type: 'POST',
+        url: "/users/import_csv",
+        type: "POST",
         data: formData,
         processData: false,
         contentType: false,
         success: function (response) {
-            alert('File uploaded successfully!');
+            Swal.fire({
+                title: "Tải lên thành công",
+                text: "Tệp CSV đã được tải lên thành công.",
+                icon: "success",
+                confirmButtonText: "OK",
+                confirmButtonClass: "btn btn-success mt-2",
+                buttonsStyling: false,
+            });
             // Reload the page to see the updated user list
             location.reload();
         },
         error: function (xhr, status, error) {
-            alert('Error uploading file: ' + error);
-        }
+            Swal.fire({
+                title: "Lỗi tải lên",
+                text: "Đã xảy ra lỗi khi tải lên tệp CSV. Vui lòng thử lại.",
+                icon: "error",
+                confirmButtonText: "OK",
+                confirmButtonClass: "btn btn-danger mt-2",
+                buttonsStyling: false,
+            });
+        },
     });
 }
-
 
 // Filter by role
 let role = document.getElementById("roleSelect");
@@ -120,7 +139,7 @@ if (sortEmail)
 let userList = document.getElementById("users").dataset.test;
 let userRow;
 let params;
-if (userList)
+if (userList) {
     JSON.parse(userList).forEach((id) => {
         params = document.getElementById(`sa-params-${id}`);
         updateParams = document.getElementById(`btn-update-${id}`);
@@ -130,12 +149,12 @@ if (userList)
         if (params && userRow) {
             params.addEventListener("click", function () {
                 Swal.fire({
-                    title: "Delete user",
-                    text: "Do you want to delete this user?",
+                    title: "Vô hiệu hoá người dùng",
+                    text: "Bạn có chắc chắn muốn vô hiệu hoá người dùng này không?",
                     icon: "warning",
                     showCancelButton: true,
-                    confirmButtonText: "Delete",
-                    cancelButtonText: "Cancel",
+                    confirmButtonText: "Vô hiệu hoá",
+                    cancelButtonText: "Huỷ bỏ",
                     confirmButtonClass: "btn btn-success mt-2",
                     cancelButtonClass: "btn btn-danger ms-2 mt-2",
                     buttonsStyling: false,
@@ -152,3 +171,46 @@ if (userList)
             });
         }
     });
+}
+
+$("body").on("change", ".onoffswitch input", function (event, state) {
+    var switch_url = $(this).data("switch-url");
+    if (!switch_url) {
+        return;
+    }
+    var userId = $(this).data("user-id");
+    if ($(this).is(":checked") === true) {
+        var isChecked = 1;
+    } else {
+        var isChecked = 0;
+    }
+    $.ajax({
+        url: switch_url,
+        type: "POST",
+        data: {
+            isChecked: isChecked,
+        },
+        success: function (response) {
+            console.log(response);
+            if (response.code == 200) {
+                Swal.fire({
+                    title: "Cập nhật thành công",
+                    text: response.message || "Trạng thái người dùng đã được cập nhật.",
+                    icon: "success",
+                    confirmButtonText: "OK",
+                    confirmButtonClass: "btn btn-success mt-2",
+                    buttonsStyling: false,
+                });
+            } else {
+                Swal.fire({
+                    title: "Cập nhật thất bại",
+                    text: response.message || "Không thể cập nhật trạng thái người dùng.",
+                    icon: "error",
+                    confirmButtonText: "OK",
+                    confirmButtonClass: "btn btn-danger mt-2",
+                    buttonsStyling: false,
+                });
+            }
+        }
+    });
+});

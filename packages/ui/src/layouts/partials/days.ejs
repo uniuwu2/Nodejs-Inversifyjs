@@ -1,0 +1,94 @@
+<h1 class="mb-4">Thống kê theo ngày</h1>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form action="/statistic/class/days" method="get"  id="search-form">
+            <div class="row mb-3">
+                <div class="col-md-6 position-relative d-flex">
+                    <div class="input-group">
+                        <span class="input-group-text">Chọn ngày</span>
+                        <input type="text" class="form-control text-center" id="datepicker-range" />
+                        <input hidden type="text" id="startDate" name="startDate" value="<%= startDate %>" />
+                        <input hidden type="text" id="endDate" name="endDate" value="<%= endDate %>" />
+                    </div>
+                </div>
+            </div>
+            <div class="row pe-0">
+                <div class="table-responsive pe-0">
+                    <table class="table align-middle table-striped table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <input hidden type="text" id="sortBy" name="sortBy" value="<%= sortBy %>" />
+                                <input hidden type="text" id="sort" name="sort" value="<%= sort %>" />
+                                <% function iconSort() { if(sort==="ASC" ) { %>
+                                    <i class="ti ti-arrow-narrow-up"></i>
+                                    <% } else if (sort==="DESC" ) { %>
+                                        <i class="ti ti-arrow-narrow-down"></i>
+                                        <% }} %>
+                                            <th scope="col" role="button" id="sort-by-date">Ngày <% if(sortBy==="date" )
+                                                    { iconSort() } else { %> <i class="ti ti-arrows-sort"></i>
+                                                    <% } %>
+                                            </th>
+                                            <th scope="col" role="button" id="sort-by-total-totalSessions">Tổng buổi học
+                                                <% if(sortBy==="totalSessions" ) { iconSort() } else { %> <i
+                                                        class="ti ti-arrows-sort"></i>
+                                                    <% } %>
+                                            </th>
+                                            <th scope="col" role="button" id="sort-by-total-totalStudents">Tổng số lượng
+                                                sinh viên <% if(sortBy==="totalStudents" ) { iconSort() } else { %> <i
+                                                        class="ti ti-arrows-sort"></i>
+                                                    <% } %>
+                                            </th>
+                                            <th scope="col" role="button" id="sort-by-attended">Có mặt <%
+                                                    if(sortBy==="attended" ) { iconSort() } else { %> <i
+                                                        class="ti ti-arrows-sort"></i>
+                                                    <% } %>
+                                            </th>
+                                            <th scope="col" role="button" id="sort-by-absent">Vắng mặt <%
+                                                    if(sortBy==="absent" ) { iconSort() } else { %> <i
+                                                        class="ti ti-arrows-sort"></i>
+                                                    <% } %>
+                                            </th>
+                                            <th scope="col" role="button" id="sort-by-attendanceRate">Tỷ lệ điểm danh <%
+                                                    if(sortBy==="attendanceRate" ) { iconSort() } else { %> <i
+                                                        class="ti ti-arrows-sort"></i>
+                                                    <% } %>
+                                            </th>
+                        </thead>
+                        <tbody>
+                            <% if(statistics.length===0) { %>
+                                <tr>
+                                    <td colspan="6" class="text-center">Không có dữ liệu</td>
+                                </tr>
+                                <% } %>
+
+                                    <% statistics.forEach(function(statistic) { %>
+                                        <tr>
+                                            <td>
+                                                <%= statistic.date %>
+                                            </td>
+                                            <td>
+                                                <%= statistic.totalSessions %>
+                                            </td>
+                                            <td>
+                                                <%= statistic.totalStudents %>
+                                            </td>
+                                            <td>
+                                                <%= statistic.attended %>
+                                            </td>
+                                            <td>
+                                                <%= statistic.absent %>
+                                            </td>
+                                            <td>
+                                                <%= statistic.attendanceRate*100 %>%
+                                            </td>
+                                        </tr>
+                                        <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <%- include("../partials/bottom-of-table", {page, limit, list: statistics, lastPage, total}) %>
+
+        </form>
+    </div>
+</div>

@@ -1,4 +1,4 @@
-<h1 class="mb-4">Users</h1>
+<h1 class="mb-4">Danh sách người dùng</h1>
 <form method="GET" action="/users" id="search-form">
   <div class="row">
     <div class="col-xl-12">
@@ -7,12 +7,14 @@
           <div class="row mb-3 gap-3">
             <form id="upload-form" enctype="multipart/form-data">
               <div class="col-md-12">
-                <label for="csv-file" class="form-label">Choose CSV File</label>
+                <label for="csv-file" class="form-label">Chọn file CSV để tải lên</label>
                 <div class="d-flex">
                   <input type="file" class="form-control" id="csv-file" accept=".csv" />
-                  <button type="button" class="btn btn-primary" onclick="uploadCSV()">Upload</button>
+                  <button type="button" class="btn btn-primary" onclick="uploadCSV()">Tải</button>
                 </div>
-                <div class="form-text" id="file-name">No file chosen</div>
+                <div class="form-text" id="file-name">
+                  Chưa chọn file
+                </div>
               </div>
             </form>
           </div>
@@ -20,31 +22,31 @@
             <div class="col-md-4">
               <div class="mb-3 mb-md-0">
                 <div class="position-relative">
-                  <input type="text" class="form-control" placeholder="Search..." id="searchField" name="searchField"
+                  <input type="text" class="form-control" placeholder="Tìm kiếm..." id="searchField" name="searchField"
                     value="<%= locals?.searchField %>" autofocus />
                   <% if(locals?.searchField.length> 0) { %>
-                    <button id="clear-search" type="button" class="btn-close button-clos" aria-label="Close"></button>
+                    <button id="clear-search" type="button" class="btn-close button-clos" aria-label="Đóng"></button>
                     <% } %>
                 </div>
               </div>
             </div>
             <div class="col-sm-3 position-relative d-flex">
               <div class="input-group flex-nowrap">
-                <span class="input-group-text">Role</span>
+                <span class="input-group-text">Vai trò</span>
                 <select class="form-select" id="roleSelect" name="roleSelect">
-                  <option value="ALL" <%=roleSelect=='ALL' && 'selected' %>>All</option>
+                  <option value="ALL" <%=roleSelect=='ALL' && 'selected' %>>Tất cả</option>
                   <% if (roleList?.length> 0) { roleList.forEach(role => { %>
                     <option value="<%= role.id %>" <%=String(role.id)==locals?.roleSelect && 'selected' %>><%=
                         role.roleName %>
                     </option>
                     <%}); } else { %>
-                      <option value="1" <%=locals?.roleSelect=='1' && 'selected' %>>Administrator
+                      <option value="1" <%=locals?.roleSelect=='1' && 'selected' %>>Quản trị viên
                       </option>
-                      <option value="2" <%=locals?.roleSelect=='2' && 'selected' %>>Teacher
+                      <option value="2" <%=locals?.roleSelect=='2' && 'selected' %>>Giảng viên
                       </option>
-                      <option value="3" <%=locals?.roleSelect=='3' && 'selected' %>>Staff
+                      <option value="3" <%=locals?.roleSelect=='3' && 'selected' %>>Nhân viên sự kiện
                       </option>
-                      <option value="4" <%=locals?.roleSelect=='4' && 'selected' %>>Student
+                      <option value="4" <%=locals?.roleSelect=='4' && 'selected' %>>Sinh viên
                       </option>
                       <% } %>
                 </select>
@@ -52,7 +54,7 @@
             </div>
             <div class="col-sm-3">
               <div class="input-group flex-nowrap">
-                <span class="input-group-text">Status</span>
+                <span class="input-group-text">Trạng thái</span>
                 <select class="form-select" id="validSelect" name="validSelect">
                   <% validList.forEach(item=> { %>
                     <option value="<%= item.value %>" <%=String(item.value)===locals?.validSelect && 'selected' %>><%=
@@ -66,7 +68,7 @@
               <!-- Signup Button to page sign up -->
                 <div class="d-flex flex-wrap align-items-center justify-content-end gap-2">
                   <div>
-                    <a href="/signup" class="btn btn-primary">Create</a>
+                    <a href="/signup" class="btn btn-primary">Tạo</a>
                   </div>
                 </div>
             </div>
@@ -86,15 +88,15 @@
                                 %> <i class="ti ti-arrows-sort"></i>
                                 <% } %>
                             </th>
-                            <th scope="col" role="button" id="sort-by-firstName">Name <% if(sortBy==="firstName" )
+                            <th scope="col" role="button" id="sort-by-firstName">Họ và Tên <% if(sortBy==="firstName" )
                                 { iconSort() } else { %> <i class="ti ti-arrows-sort"></i>
                                 <% } %></i></th>
                             <th scope="col" role="button" id="sort-by-email">Email <% if(sortBy==="email" ) { iconSort()
                                 } else { %> <i class="ti ti-arrows-sort"></i>
                                 <% } %></i></th>
-                            <th scope="col" role="button">Role</th>
-                            <th scope="col" role="button">Status</th>
-                            <th scope="col" style="width: 200px">Action</th>
+                            <th scope="col" role="button">Vai trò</th>
+                            <th scope="col" role="button">Trạng thái</th>
+                            <th scope="col" style="width: 200px">Thao tác</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -124,41 +126,43 @@
                             <% if(user.roleId===1) { %>
                               <span class="alert alert-success p-2">Administrator</span>
                               <% } else if(user.roleId===2) { %>
-                                <span class="alert alert-secondary p-2">Teacher</span>
+                                <span class="alert alert-secondary p-2">Giảng viên</span>
                                 <% } else if(user.roleId===3) { %>
-                                  <span class="alert alert-danger p-2">Staff</span>
+                                  <span class="alert alert-danger p-2">Nhân viên sự kiện</span>
                                   <% } else { %>
-                                    <span class="alert alert-warning p-2">Student</span>
+                                    <span class="alert alert-warning p-2">Sinh viên</span>
                                     <% } %>
                           </td>
                           <td>
-                            <% if(user.active===1) { %>
-                              <span class="alert alert-success p-2">Active</span>
-                              <% } else { %>
-                                <span class="alert alert-danger p-2">Inactive</span>
-                                <% } %>
+                            <div class="onoffswitch">
+                              <input type="checkbox" data-switch-url="/users/<%= user.id %>/valid"
+                                class="onoffswitch-checkbox" id="validSwitch-<%= user.id %>"
+                                <%= user.active ? 'checked' : '' %> />
+                              <label class="onoffswitch-label" for="validSwitch-<%= user.id %>">
+                                </label>
                           </td>
-                          <% if(user.roleId !== 1) { %>
                             <td>
                               <ul class="list-inline m-0">
                                 <li class="list-inline-item">
                                   <button class="p-0 btn btn-link" type="button">
-                                    <a href="/signup/<%= user.id %>" class="px-2 text-primary" data-bs-toggle="tooltip"
-                                      data-bs-placement="top" title="Edit">
+                                    <a href="/signup/<%= user.id %>" class="px-2 text-primary"
+                                      data-bs-toggle="tooltip"
+                                      data-bs-placement="top" title="Sửa">
                                       <i class="ti ti-pencil font-size-20"></i>
                                     </a>
                                   </button>
                                 </li>
+                                <% if (locals.jwtPayload.user.id !== user.id && locals.jwtPayload.user.roleId === 1) { %>
                                 <li class="list-inline-item">
                                   <form id="form-delete"></form>
                                   <button type="button" data-bs-toggle="tooltip" data-bs-placement="top"
-                                    title="Delete" id="sa-params-<%= user?.id %>"
+                                    title="Xoá" id="sa-params-<%= user?.id %>"
                                     class="p-0 btn btn-link waves-effect waves-light text-danger">
                                     <i class="ti ti-trash font-size-20"></i>
                                   </button>
                                 </li>
+                                <% } %>
                             </td>
-                          <% } %>
                         </tr>
                         <% }) %>
                           <% } else { %>
@@ -171,8 +175,8 @@
               </div>
             </div>
           </div>
+          <%- include("../partials/bottom-of-table", {page, limit, list: users, lastPage, total}) %>
         </div>
       </div>
     </div>
 </form>
-<%- include("../partials/bottom-of-table", {page, limit, list: users, lastPage, total}) %>

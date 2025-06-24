@@ -13,7 +13,7 @@ export interface UserService extends GenericService<User> {
         limitedItem: number,
         sortBy: any,
         sort: any,
-        // isSuperAdmin: boolean
+        currentUserRoleId?: number,
     ):
         | Promise<{
               list: User[];
