@@ -35,8 +35,9 @@ export class Messages {
     public static readonly USER_CONFIRM_PASSWORD_REQUIRED = "Xác nhận mật khẩu là bắt buộc!";
     public static readonly EMAIL_ALREADY_EXIST = "Email đã tồn tại!";
     public static readonly USER_CREATE_SUCCESS = "Tạo người dùng thành công!";
-    public static readonly USER_DELETE_SUCCESS = "Vô hiệu hoá người dùng thành công!";
+    public static readonly USER_DELETE_SUCCESS = "Xóa người dùng thành công!";
     public static readonly USER_ACTIVE_SUCCESS = "Kích hoạt người dùng thành công!";
+    public static readonly USER_INACTIVE_SUCCESS = "Vô hiệu hóa người dùng thành công!";
     //Course Class
     public static readonly CLASS_NOT_FOUND = "Lớp học không tồn tại!";
     public static readonly DELETE_STUDENT_SUCCESS = "Xóa sinh viên thành công!";
@@ -59,4 +60,7 @@ export class Messages {
     public static readonly STUDENT_ATTENDED = "Sinh viên đã điểm danh rồi!";
     public static readonly STUDENT_ATTENDED_SUCCESS = "Điểm danh thành công!";
     public static readonly SESSION_EXPIRED = "Mã lớp học đã hết hạn!";
+    
+
+    public static readonly USER_IN_CLASS_OR_EVENT = "Người dùng đang trong lớp học hoặc sự kiện, không thể xóa!";
 }

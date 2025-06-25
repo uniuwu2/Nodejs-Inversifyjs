@@ -14,7 +14,7 @@ export class UserController extends BaseController {
     private userService: UserService;
     private studentService: StudentService;
     private roleService: RoleService;
-    private departmentService: DepartmentService
+    private departmentService: DepartmentService;
     public constructor(
         @inject(TYPES.UserService) _userService: UserService,
         @inject(TYPES.StudentService) _studentService: StudentService,
@@ -120,18 +120,25 @@ export class UserController extends BaseController {
     }
 
     @httpPost("/:id/delete", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN]))
-    public async deleteUser(request: Request, response: Response): Promise<void> {
+    public async deleteUser(request: any, response: any): Promise<void> {
         let userId = Number(request.params.id);
         let user = await this.userService.findById(userId);
         let pathHref = String(request.body.href);
         try {
-
             // Chỉ vô hiệu hoá người dùng
-            if (user) {
-                user.active = Variables.INACTIVE;
-                await this.userService.save(user);
-            }
+            // if (user) {
+            //     user.active = Variables.INACTIVE;
+            //     await this.userService.save(user);
+            // }
 
+            // Tìm xem người dùng có đang trong bất kì lớp học, sự kiện nào không
+            let userCheck = await this.userService.findOne(["classStudent", "activityStudent"], { id: userId });
+            if ((userCheck?.classStudent && userCheck.classStudent.length > 0) || (userCheck?.activityStudent && userCheck.activityStudent.length > 0)) {
+                // Người dùng đang trong lớp học hoặc sự kiện, không thể xóa
+                return response.cookie("messages", Messages.USER_IN_CLASS_OR_EVENT).redirect(RouteHelper.USER_LIST + pathHref);
+            }
+            // Xoá người dùng
+            await this.userService.delete(userId);
             return response.cookie("messages", Messages.USER_DELETE_SUCCESS).redirect(RouteHelper.USER_LIST + pathHref);
         } catch (error: any) {
             this.logger.error(error);
@@ -160,15 +167,13 @@ export class UserController extends BaseController {
                 });
             } else {
                 return response.json({
-                    message: Messages.USER_DELETE_SUCCESS,
+                    message: Messages.USER_INACTIVE_SUCCESS,
                     code: HttpCode.SUCCESSFUL,
                 });
             }
-
         } catch (error: any) {
             this.logger.error(error);
             return response.status(HttpCode.BAD_REQUEST).send({ message: error.message, code: HttpCode.BAD_REQUEST });
         }
     }
-
 }

@@ -599,4 +599,23 @@ export class ClassroomController extends BaseController {
             response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
         }
     }
+    @httpGet("/classes/create", verifyAuthTokenRouter)
+    public async getCreateClass(request: Request, response: Response): Promise<void> {
+        try {
+            let courseList = await this.courseService.find();
+            let semesterList = await this.courseClassService.getSemesterList();
+            let teacherList = await this.userService.getAllTeacher();
+            console.log(teacherList);
+            console.log(courseList);
+            console.log(semesterList);
+            response.render(this.routeHelper.getRenderPage(RouteHelper.CREATE_CLASS), {
+                courseList: courseList,
+                teacherList: teacherList,
+                semesterList: semesterList,
+            });
+        } catch (error: any) {
+            this.logger.error(error);
+            response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
+        }
+    }
 }

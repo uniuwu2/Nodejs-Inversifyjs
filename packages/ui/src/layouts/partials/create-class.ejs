@@ -1,0 +1,95 @@
+<div class="page-content">
+    <div class="container-fluid">
+        <div class="row">
+            <h5 class="card-title">Tạo lớp học mới</h5>
+            <div class="col-xl-12">
+                <div class="card">
+                    <div class="card-body">
+                        <form action="/classroom/classes/create" method="POST">
+                            <div class="form-group mb-3">
+                                <!-- Môn -->
+                                <label for="subject" class="form-label form-required">Môn học</label>
+                                <select name="subject" id="subject" class="form-select">
+                                    <% courseList?.forEach(course => { %>
+                                    <option value="<%= course.id %>"><%= course.courseName %></option>
+                                    <% }) %>
+                                    
+                                </select>
+                            </div>
+                            <!-- Nhóm -->
+                            <div class="form-group mb-3">
+                                <label for="group" class="form-label form-required">Nhóm</label>
+                                <input type="number" class="form-control" id="group" name="group" placeholder="Nhóm" min="1" required />
+                            </div>
+                            <!-- Giảng viên -->
+                            <div class="form-group mb-3">
+                                <label for="teacher" class="form-label form-required">Giảng viên</label>
+                                <select name="teacher" id="teacher" class="form-select">
+                                    <option value="">Chọn giảng viên</option>
+                                    <% teacherList?.forEach(teacher => { %>
+                                    <option value="<%= teacher.id %>"><%= teacher.firstName + ' ' + teacher.lastName %></option>
+                                    <% }) %>
+                                </select>
+                            </div>
+                            <!-- Học kì -->
+                            <div class="form-group mb-3">
+                                <label for="semester" class="form-label form-required">Học kì</label>
+                                <select name="semester" id="semester" class="form-select">
+                                    <option value="">Chọn học kì</option>
+                                    
+                                </select>
+                            </div>
+                            <!-- Số buổi -->
+                            <div class="form-group mb-3">
+                                <label for="numberOfSessions" class="form-label form-required">Số buổi</label>
+                                <input type="number" class="form-control" id="numberOfSessions" name="numberOfSessions" placeholder="Số buổi" required />
+                            </div>
+                            <!-- Lịch học -->
+                            <div class="form-group mb-3">
+                                <label for="schedule" class="form-label form-required">Lịch học</label>
+                                <div id="schedule-list">
+                                    <div class="schedule-item mb-3">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <label for="day" class="form-label">Ngày</label>
+                                                <select name="day" class="form-select">
+                                                    <option value="1">Thứ 2</option>
+                                                    <option value="2">Thứ 3</option>
+                                                    <option value="3">Thứ 4</option>
+                                                    <option value="4">Thứ 5</option>
+                                                    <option value="5">Thứ 6</option>
+                                                    <option value="6">Thứ 7</option>
+                                                    <option value="7">Chủ nhật</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label for="startTime" class="form-label">Giờ bắt đầu</label>
+                                                <input type="time" class="form-control" name="time[][startTime]" required />
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label for="endTime" class="form-label">Giờ kết thúc</label>
+                                                <input type="time" class="form-control" name="time[][endTime]" required />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-secondary mt-2" onclick="addSchedule()">Thêm lịch học</button>
+                            </div>
+
+                            <!-- Submit -->
+                            <div class="text-end mt-4">
+                                <button type="submit" class="btn btn-primary">Tạo lớp học</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function addSchedule() {
+        const item = document.querySelector(".schedule-item").cloneNode(true);
+        document.getElementById("schedule-list").appendChild(item);
+    }
+</script>

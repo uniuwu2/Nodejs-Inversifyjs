@@ -134,12 +134,15 @@
                                     <% } %>
                           </td>
                           <td>
+                            <% if(user.id != 1) { %>
                             <div class="onoffswitch">
                               <input type="checkbox" data-switch-url="/users/<%= user.id %>/valid"
                                 class="onoffswitch-checkbox" id="validSwitch-<%= user.id %>"
                                 <%= user.active ? 'checked' : '' %> />
                               <label class="onoffswitch-label" for="validSwitch-<%= user.id %>">
                                 </label>
+                            </div>
+                            <% } %>
                           </td>
                             <td>
                               <ul class="list-inline m-0">
