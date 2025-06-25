@@ -63,4 +63,8 @@ export class Messages {
     
 
     public static readonly USER_IN_CLASS_OR_EVENT = "Người dùng đang trong lớp học hoặc sự kiện, không thể xóa!";
+    public static readonly CLASS_GROUP_REQUIRED = "Nhóm lớp học là bắt buộc!";
+    public static readonly CLASS_SCHEDULE_REQUIRED = "Lịch học là bắt buộc!";
+    public static readonly CLASS_MAX_STUDENT_REQUIRED = "Số lượng sinh viên tối đa là bắt buộc!";
+    public static readonly CLASS_EXISTED = "Lớp học đã tồn tại!";
 }

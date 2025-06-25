@@ -4,7 +4,6 @@ import { DataSource } from "typeorm";
 import { User } from "./entities/user";
 import { Role } from "./entities/role";
 import { Student } from "./entities/student";
-import { Staff } from "./entities/staff";
 import { Activity } from "./entities/activity";
 import { ActivityStudent } from "./entities/activity_student";
 import { CourseClass } from "./entities/course_class";
@@ -46,7 +45,7 @@ export class DataSourceConnection {
                 database: this.database,
                 synchronize: this.synchronize,
                 // logging: true,
-                entities: [User, Role, Student, Staff, Activity, ActivityStudent, CourseClass, Course, SessionClass, ClassStudent, Attendance, Session, Department],
+                entities: [User, Role, Student, Activity, ActivityStudent, CourseClass, Course, SessionClass, ClassStudent, Attendance, Session, Department],
             });
             await this._dataSource.initialize();
         }

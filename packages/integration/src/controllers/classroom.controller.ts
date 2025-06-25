@@ -6,7 +6,7 @@ import { checkPermissions, uploadMiddleware, verifyAuthTokenRouter } from "@inve
 import * as fs from "fs";
 import { Response, Request } from "express";
 import { In, Like, Not } from "typeorm";
-import { ClassStudent } from "@inversifyjs/domain";
+import { ClassStudent, CourseClass } from "@inversifyjs/domain";
 
 @controller(RouteHelper.CLASSROOM)
 export class ClassroomController extends BaseController {
@@ -599,20 +599,83 @@ export class ClassroomController extends BaseController {
             response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
         }
     }
-    @httpGet("/classes/create", verifyAuthTokenRouter)
+
+    @httpGet("/classes/create", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN, Permission.ONLY_TEACHER]))
     public async getCreateClass(request: Request, response: Response): Promise<void> {
         try {
             let courseList = await this.courseService.find();
             let semesterList = await this.courseClassService.getSemesterList();
             let teacherList = await this.userService.getAllTeacher();
-            console.log(teacherList);
-            console.log(courseList);
-            console.log(semesterList);
+
             response.render(this.routeHelper.getRenderPage(RouteHelper.CREATE_CLASS), {
                 courseList: courseList,
                 teacherList: teacherList,
                 semesterList: semesterList,
             });
+        } catch (error: any) {
+            this.logger.error(error);
+            response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
+        }
+    }
+
+    @httpPost("/classes/create", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN, Permission.ONLY_TEACHER]))
+    public async createClass(request: any, response: any): Promise<void> {
+
+        let courseId = Number(request.body.course);
+        let group = request.body.group;
+        let maxStudent = Number(request.body.maxStudent);
+        let numberOfSessions = Number(request.body.numberOfSessions);
+        let semester = request.body.semester;
+        let teacherId = Number(request.body.teacher);
+        let classSchedule = request.body.schedules;
+        try {
+            let courseList = await this.courseService.find();
+            let semesterList = await this.courseClassService.getSemesterList();
+            let teacherList = await this.userService.getAllTeacher();
+            // check if course class already exists
+            let courseClassExist = await this.courseClassService.findOne([], {
+                courseId: courseId,
+                group: group,
+                semester: semester,
+                teacherId: teacherId,
+            })
+
+            if (courseClassExist) {
+                this.errors = { ...this.errors, group: Messages.CLASS_EXISTED };
+                return response.status(HttpCode.SUCCESSFUL).render(this.routeHelper.getRenderPage(RouteHelper.CREATE_CLASS),
+                    { errorValidator: this.errors, courseId, group, maxStudent, semester, numberOfSessions, teacherId, courseList, teacherList, semesterList, classSchedule });
+            }
+
+            const convertedSchedule: { [day: string]: string[] } = {};
+
+            for (const item of classSchedule) {
+                const { day, startTime, endTime } = item;
+                const timeRange = `${startTime}-${endTime}`;
+                if (!convertedSchedule[day]) {
+                    convertedSchedule[day] = [];
+                }
+                convertedSchedule[day].push(timeRange);
+            }
+
+            console.log("classSchedule (converted):", convertedSchedule);
+
+            let courseClass = new CourseClass();
+            courseClass.courseId = courseId;
+            courseClass.group = group;
+            courseClass.maxStudent = maxStudent;
+            courseClass.sessionNumber = numberOfSessions;
+            courseClass.semester = semester;
+            courseClass.teacherId = teacherId;
+            courseClass.classSchedule = JSON.stringify(convertedSchedule);
+            courseClass.currentStudent = 0; // default value
+            courseClass.status = Variables.ACTIVE;
+            
+
+        
+            if (courseClass) {
+                this.courseClassService.save(courseClass);
+            }
+            // return response.status(HttpCode.SUCCESSFUL).cookie("messages", { message: Messages.CREATE_CLASS_SUCCESS }).send({ url: url });
         } catch (error: any) {
             this.logger.error(error);
             response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });

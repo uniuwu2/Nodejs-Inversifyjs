@@ -1,7 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from "typeorm";
 import { GenericEntity } from "../generic-entities";
 import { Role } from "./role";
-import { Staff } from "./staff";
 import { Student } from "./student";
 import { ActivityStudent } from "./activity_student";
 import { CourseClass } from "./course_class";
@@ -53,9 +52,6 @@ export class User extends GenericEntity {
         cascade: true,
     })
     public student!: Student;
-
-    @OneToOne(() => Staff, (student) => student.user)
-    public staff!: Staff;
 
     @OneToMany(() => Activity, (activity) => activity.user)
     public activity!: Activity[];
