@@ -1,0 +1,94 @@
+<div class="page-content">
+    <div class="container-fluid">
+        <div class="row">
+            <h5 class="card-title">Tạo sự kiện</h5>
+            <div class="col-xl-12">
+                <div class="card">
+                    <div class="card-body">
+                        <form action="/events/create" method="POST" class="needs-validation" novalidate>
+                            <div class="form-group mb-3">
+                                <!-- Môn -->
+                                <label for="activityName" class="form-label form-required">Tiêu đề</label>
+                                <input type="text" class="form-control" id="activityName" name="activityName"
+                                    placeholder="Tiêu đề" value="<%= locals?.activityName || '' %>" required />
+                            </div>
+                            <!-- Địa điểm -->
+                            <div class="form-group mb-3">
+                                <label for="location" class="form-label form-required">Địa điểm</label>
+                                <input type="text" class="form-control" id="location" name="location"
+                                    placeholder="Địa điểm" value="<%= locals?.location || '' %>" required />
+                            </div>
+                            <!-- Người phụ trách -->
+                            <div class="form-group mb-3">
+                                <label for="responsiblePerson" class="form-label form-required">Người phụ trách</label>
+                                <select name="responsiblePerson" id="responsiblePerson" class="form-select">
+                                    <% staffs?.forEach(person=> { %>
+                                        <option value="<%= person.id %>">
+                                            <%= person.firstName + ' ' + person.lastName %>
+                                                <% if (locals?.responsiblePersonId &&
+                                                    person.id==locals?.responsiblePersonId) { %>
+                                                    selected
+                                                    <% } %>
+                                        </option>
+                                        <% }) %>
+                                </select>
+                            </div>
+
+
+                            <!-- Số lượng sinh viên -->
+                            <div class="form-group mb-3">
+                                <label for="maxStudent" class="form-label form-required">Số lượng sinh viên tối
+                                    đa</label>
+                                <input type="number" class="form-control" id="maxStudent" name="maxStudent"
+                                    placeholder="Số lượng sinh viên tối đa" value="<%= locals?.maxStudent || '' %>"
+                                    min="1" required />
+                            </div>
+                            <!-- Ngày bắt đầu -->
+                            <div class="form-group mb-3">
+                                <label for="startDate" class="form-label form-required">Thời gian diễn ra</label>
+                                <input type="date" class="form-control" id="startDate" name="startDate"
+                                    placeholder="Ngày bắt đầu" value="<%= locals?.startDate || '' %>" required />
+                            </div>
+                            <!-- Mô tả -->
+                            <div class="form-group mb-3">
+                                <label for="description" class="form-label">Mô tả</label>
+                                <textarea class="form-control" id="description" name="description"
+                                    placeholder="Mô tả ngắn về sự kiện"
+                                    rows="3"><%= locals?.description || '' %></textarea>
+                            </div>
+                            <!-- Lịch học -->
+                            <div class="form-group mb-3">
+                                <label for="startTime" class="form-label form-required">Thời gian bắt đầu</label>
+                                <input type="time" class="form-control" id="startTime" name="startTime"
+                                    placeholder="Thời gian bắt đầu" value="<%= locals?.startTime || '' %>" required />
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="endTime" class="form-label form-required">Thời gian kết thúc</label>
+                                <input type="time" class="form-control" id="endTime" name="endTime"
+                                    placeholder="Thời gian kết thúc" value="<%= locals?.endTime || '' %>" required />
+                            </div>
+                    </div>
+
+                </div>
+                <!-- Nơi hiển thị lỗi -->
+                <div class="form-text text-danger">
+                    <% if(locals.errorValidator && locals.errorValidator.activityName ){%>
+                        <div class="text-danger d-flex justify-content-center h5">
+                            <%= locals.errorValidator.activityName %>
+                        </div>
+                        <%}%>
+                </div>
+                <!-- Submit -->
+                <div class="text-end mt-4">
+                    <button type="submit" class="btn btn-primary">Tạo sự kiện</button>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+<script>
+
+</script>

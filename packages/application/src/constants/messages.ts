@@ -73,4 +73,5 @@ export class Messages {
     public static readonly MAX_STUDENT_EXCEEDED = "Số lượng sinh viên hiện tại vượt quá số lượng tối đa của lớp học!";
     public static readonly STUDENT_NOT_EXISTED_IN_EVENT = "Sinh viên không tồn tại trong sự kiện!";
     public static readonly EVENT_NOT_FOUND = "Không tìm thấy sự kiện!";
+    public static readonly IMPORT_EVENT_SUCCESS = "Nhập sự kiện thành công!"
 }

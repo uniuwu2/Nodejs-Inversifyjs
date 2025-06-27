@@ -297,7 +297,7 @@ export class ApiController extends BaseController {
             session.studentAttendance.push({
                 student_id: userId,
                 status: 1, // Đánh dấu là đã điểm danh
-                time: new Date().toISOString(), // Ghi lại thời gian điểm danh
+                timestamp: new Date().toISOString(), // Ghi lại thời gian điểm danh
                 note: "Điểm danh từ QR code",
             });
         }
@@ -393,4 +393,118 @@ export class ApiController extends BaseController {
             },
         });
     }
+
+    @httpGet("/get-student-attendance/:id")
+    public async getStudentAttendance(req: Request, res: Response) {
+        let studentId = req.params.id;
+        let getStudentAttendance = await this.attendanceService.find(["sessionClass", "sessionClass.courseClass", "sessionClass.courseClass.course"], {
+            sessionClass: {
+                courseClass: {
+                    classStudent: {
+                        studentId: studentId,
+                    }
+                }
+            }
+        });
+        if (!getStudentAttendance || getStudentAttendance.length === 0) {
+            return res.status(404).json({
+                message: "Không tìm thấy lịch sử điểm danh cho sinh viên này",
+            });
+        }
+        // Chuyển đổi dữ liệu thành định dạng mong muốn
+        let attendanceHistory: any[] = [];
+        getStudentAttendance.forEach((attendance: any) => {
+            attendance.studentAttendance.forEach((session: any) => {
+                if (session.student_id === Number(studentId)) {
+                    let status = "Có mặt";
+                    let color = "#28a745";
+                    if (session.status === 0 || session.status === null) {
+                        status = "Chưa điểm danh";
+                        color = "#dc3545";
+                    } else if (session.status === 2) {
+                        status = "Vắng";
+                        color = "#dc3545";
+                    } else if (session.status === 1) {
+                        status = "Có mặt";
+                        color = "#28a745";
+                    } else if (session.status === 3) {
+                        status = "Muộn";
+                        color = "#ffc107";
+                    }
+                    attendanceHistory.push({
+                        id: attendance.id,
+                        subject: attendance.sessionClass.courseClass.course.courseName,
+                        date: attendance.sessionClass.sessionDate,
+                        startTime: attendance.sessionClass.sessionStartTime,
+                        endTime: attendance.sessionClass.sessionEndTime,
+                        room: attendance.sessionClass.room || " ",
+                        status: status,
+                        color: color,
+                        checkedAt: session.timestamp ? new Date(session.timestamp).toISOString() : null,
+                    });
+                }
+            });
+        });
+        // sort theo checkedAt giảm dần
+        attendanceHistory.sort((a, b) => new Date(b.checkedAt).getTime() - new Date(a.checkedAt).getTime());
+        const json = {
+            "message": "Lịch sử điểm danh môn học đã được lấy thành công",
+            "data": attendanceHistory
+        };
+
+        return res.status(HttpCode.SUCCESSFUL).json(json);
+    }
+
+    @httpGet("/get-student-event-attendance/:id")
+    public async getStudentEventAttendance(req: Request, res: Response) {
+        const studentId = req.params.id;
+        console.log("Fetching event attendance for student ID:", studentId);
+
+        let getStudentEventAttendance = await this.activityStudent.find(["activity"], {
+            studentId: studentId,
+        });
+        if (!getStudentEventAttendance || getStudentEventAttendance.length === 0) {
+            return res.status(404).json({
+                message: "Không tìm thấy lịch sử điểm danh sự kiện cho sinh viên này",
+            });
+        }
+        // Chuyển đổi dữ liệu thành định dạng mong muốn
+        let eventAttendanceHistory: any[] = [];
+        getStudentEventAttendance.forEach((attendance: any) => {
+            let status = "Có mặt";
+            let color = "#28a745";
+            if (attendance.attendanceCheck === 0 || attendance.attendanceCheck === null) {
+                status = "Chưa điểm danh";
+                color = "#dc3545";
+            } else if ( attendance.status === 2) {
+                status = "Vắng";
+                color = "#dc3545";
+            } else if (attendance.attendanceCheck === 1) {
+                status = "Có mặt";
+                color = "#28a745";
+            } else if (attendance.attendanceCheck === 3) {
+                status = "Muộn";
+                color = "#ffc107";
+            }
+            eventAttendanceHistory.push({
+                id: attendance.id,
+                eventName: attendance.activity.activityName,
+                date: attendance.activity.activityDate.toISOString().split("T")[0], // Chỉ lấy ngày
+                startTime: attendance.activity.startTime,
+                endTime: attendance.activity.endTime,
+                location: attendance.activity.location || " ",
+                status: status,
+                checkedAt: attendance.attendanceTime ? attendance.attendanceTime.toISOString() : null,
+                color: color,
+            });
+        });
+        // sort theo checkedAt giảm dần
+        eventAttendanceHistory.sort((a, b) => new Date(b.checkedAt).getTime() - new Date(a.checkedAt).getTime());
+        const json = {
+            "message": "Lịch sử điểm danh sự kiện đã được lấy thành công",
+            "data": eventAttendanceHistory
+        };
+        return res.status(HttpCode.SUCCESSFUL).json(json);
+    }
+
 }

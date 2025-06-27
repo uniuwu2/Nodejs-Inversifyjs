@@ -1,14 +1,15 @@
 import { controller, httpGet, httpPost } from "inversify-express-utils";
-import { ActivityService, ActivityStudentService, DateTimeHelper, HttpCode, Permission, RouteHelper, TYPES, UserService, Variables } from "@inversifyjs/application";
+import { ActivityService, ActivityStudentService, DateTimeHelper, HttpCode, Messages, Permission, RouteHelper, TYPES, UserService, Variables } from "@inversifyjs/application";
 import { BaseController } from "./base-controller";
-import { checkPermissions, verifyAuthTokenRouter } from "@inversifyjs/infrastructure";
+import { checkPermissions, uploadMiddleware, verifyAuthTokenRouter } from "@inversifyjs/infrastructure";
 import { Request, Response } from "express";
 import { inject } from "inversify";
 import * as QRCode from "qrcode";
 import * as jwt from "jsonwebtoken";
 import { In, Not } from "typeorm";
-import { ActivityStudent } from "@inversifyjs/domain";
+import { Activity, ActivityStudent } from "@inversifyjs/domain";
 const JWT_SECRET = process.env.TOKEN_KEY || "mydevsecretkey123456";
+import * as fs from "fs";
 
 @controller(RouteHelper.EVENT)
 export class EventController extends BaseController {
@@ -354,4 +355,119 @@ export class EventController extends BaseController {
             response.status(HttpCode.BAD_REQUEST).render(this.routeHelper.getRenderPage(RouteHelper.INTERNAL_SERVER_ERROR));
         }
     }
+
+    @httpGet("/create", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN, Permission.ONLY_STAFF]))
+    public async createEvent(request: Request, response: Response): Promise<void> {
+        let successMessage: string = "";
+        if (request.cookies.messages) {
+            successMessage = "「" + request.cookies.messages.message + "」";
+            response.clearCookie("messages");
+        }
+        try {
+            let users = await this.userService.getStaffList();
+            response.render(this.routeHelper.getRenderPage(RouteHelper.EVENT_CREATE), {
+                staffs: users,
+                successMessage: successMessage,
+            });
+        } catch (error: any) {
+            this.logger.error(error);
+            response.status(HttpCode.BAD_REQUEST).render(this.routeHelper.getRenderPage(RouteHelper.INTERNAL_SERVER_ERROR));
+        }
+    }
+
+    @httpPost("/create", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN, Permission.ONLY_STAFF]))
+    public async postCreateEvent(request: any, response: any): Promise<void> {
+        let activityName = request.body.activityName?.trim() || "";
+        let responsiblePerson = Number(request.body.responsiblePerson);
+        let startDate = request.body.startDate;
+        let maxStudent = Number(request.body.maxStudent);
+        let description = request.body.description?.trim() || "";
+        let location = request.body.location?.trim() || "";
+        let startTime = request.body.startTime;
+        let endTime = request.body.endTime;
+        try {
+            if (!activityName || !startDate || !responsiblePerson || !maxStudent || !location) {
+                this.errors = { ...this.errors, activityName: "Vui lòng điền đầy đủ thông tin" };
+                return response.status(HttpCode.BAD_REQUEST).render(this.routeHelper.getRenderPage(RouteHelper.EVENT_CREATE), {
+                    errorValidator: this.errors,
+                    activityName: activityName,
+                    responsiblePerson: responsiblePerson,
+                    startDate: startDate,
+                    maxStudent: maxStudent,
+                    description: description,
+                    staffs: await this.userService.getStaffList(),
+                });
+            }
+            // Thêm sự kiện mới
+            let newEvent = new Activity();
+            newEvent.activityName = activityName;
+            newEvent.userId = responsiblePerson;
+            newEvent.activityDate = startDate;
+            newEvent.maxStudent = maxStudent;
+            newEvent.activityDescription = description;
+            newEvent.currentStudent = 0; // Mặc định là 0 sinh viên tham gia
+            newEvent.active = 1; // Mặc định là hoạt động
+            newEvent.location = location;
+            newEvent.startTime = startTime;
+            newEvent.endTime = endTime;
+            let createdEvent = await this.activityService.save(newEvent);
+            if (createdEvent) {
+                // Tạo thông báo thành công
+                response.cookie("messages", { message: "Đã được tạo thành công" });
+                return response.redirect(RouteHelper.EVENT);
+            }
+
+        } catch (error: any) {
+            this.logger.error(error);
+            return response.status(HttpCode.BAD_REQUEST).render(this.routeHelper.getRenderPage(RouteHelper.INTERNAL_SERVER_ERROR));
+        }
+    }
+    @httpPost("/event-upload-csv", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN]), uploadMiddleware.single("file"))
+    public async uploadEventCsv(request: Request, response: Response): Promise<void> {
+        if (!request.file) {
+            response.status(HttpCode.BAD_REQUEST).send({ message: Messages.FILE_NOT_FOUND, status: HttpCode.BAD_REQUEST });
+        }
+        try {
+            const filePath: any = request.file?.path;
+            fs.createReadStream(filePath)
+                .pipe(require("csv-parser")())
+                .on("data", async (row: any) => {
+                    const { activityName, responsiblePerson, startDate, maxStudent, description, location, startTime, endTime } = row;
+                    if (!activityName || !startDate || !responsiblePerson || !maxStudent || !location) {
+                        throw new Error(Messages.FILE_NOT_FOUND);
+                    }
+                    // Kiểm tra xem người phụ trách có tồn tại không
+                    const user = await this.userService.findOne([], { id: Number(responsiblePerson) });
+                    if (!user) {
+                        throw new Error(`Người phụ trách với ID ${responsiblePerson} không tồn tại.`);
+                    }
+                    // Thêm sự kiện mới
+                    const newEvent = new Activity();
+                    newEvent.activityName = activityName;
+                    newEvent.userId = Number(responsiblePerson);
+                    newEvent.activityDate = startDate;
+                    newEvent.maxStudent = Number(maxStudent);
+                    newEvent.activityDescription = description || "";
+                    newEvent.currentStudent = 0; // Mặc định là 0 sinh viên tham gia
+                    newEvent.active = 1; // Mặc định là hoạt động
+                    newEvent.location = location || "";
+                    newEvent.startTime = startTime || null;
+                    newEvent.endTime = endTime || null;
+                    const createdEvent = await this.activityService.save(newEvent);
+                    if (!createdEvent) {
+                        throw new Error("Không thể tạo sự kiện từ dữ liệu CSV.");
+                    }
+                    this.logger.info(`Đã tạo sự kiện: ${activityName}`);
+                    
+                })
+                .on("end", () => {
+                    fs.unlinkSync(filePath);
+                });
+            response.status(HttpCode.IMPORT_SUCCESS).cookie("messages", { message: Messages.IMPORT_EVENT_SUCCESS }).send({ status: HttpCode.IMPORT_SUCCESS });
+        } catch (error: any) {
+            this.logger.error(error);
+            response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
+        }
+    }
+
 }

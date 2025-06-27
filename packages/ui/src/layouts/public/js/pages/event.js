@@ -1,3 +1,40 @@
+// Hiển thị tên tệp khi người dùng chọn tệp
+document.getElementById("csv-file").addEventListener("change", function (event) {
+    const fileName = event.target.files[0]?.name;
+    if (fileName) {
+        document.getElementById("file-name").textContent = `Selected file: ${fileName}`;
+    }
+});
+
+// Hàm upload CSV khi người dùng nhấn nút Upload
+function uploadCSV() {
+    const fileInput = document.getElementById("csv-file");
+    const file = fileInput.files[0];
+
+    if (!file) {
+        alert("Please select a CSV file before uploading!");
+        return;
+    }
+    const formData = new FormData();
+    formData.append("file", file);
+
+    // Gửi tệp đến API backend
+    $.ajax({
+        url: "/events/event-upload-csv",
+        type: "POST",
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (response) {
+            alert("File uploaded successfully!");
+            location.reload();
+        },
+        error: function (xhr, status, error) {
+            alert("Error uploading file: " + error);
+        },
+    });
+}
+
 // Filter by role
 let statusFilter = document.getElementById("statusSelect");
 

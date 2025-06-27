@@ -605,7 +605,6 @@ export class SessionClassController extends BaseController {
             // Gộp danh sách cũ + mới
             const updatedList = [...currentList, ...newEntries];
             attendance.studentAttendance = updatedList;
-            console.log("Updated attendance:", attendance);
             // Cập nhật lại attendance
             await this.attendanceService.save(attendance)
             return response.status(HttpCode.SUCCESSFUL).json({
