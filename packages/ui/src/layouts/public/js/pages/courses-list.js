@@ -320,12 +320,12 @@ if (courses) {
         if (params && courseRow) {
             params.addEventListener("click", function () {
                 Swal.fire({
-                    title: "Delete course",
-                    text: "Are you sure you want to delete this course?",
+                    title: "Xoá môn học",
+                    text: "Bạn có chắc chắn muốn xoá môn học này không?",
                     icon: "warning",
                     showCancelButton: true,
-                    confirmButtonText: "Yes",
-                    cancelButtonText: "Cancel",
+                    confirmButtonText: "Có",
+                    cancelButtonText: "Không",
                     confirmButtonClass: "btn btn-success mt-2",
                     cancelButtonClass: "btn btn-danger ms-2 mt-2",
                     buttonsStyling: false,

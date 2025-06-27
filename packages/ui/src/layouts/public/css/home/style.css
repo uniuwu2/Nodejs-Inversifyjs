@@ -57,3 +57,32 @@
         height: 90vh;
     }
 }
+
+.banner {
+    position: relative;
+    overflow: hidden;
+}
+.banner img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+}
+.banner-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    text-align: center;
+    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7);
+}
+.banner-text h1 {
+    font-size: 3rem;
+    font-weight: bold;
+    color: white;
+
+}
+.banner-text p {
+    font-size: 1.25rem;
+}

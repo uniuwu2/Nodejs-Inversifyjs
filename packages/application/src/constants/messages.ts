@@ -67,4 +67,6 @@ export class Messages {
     public static readonly CLASS_SCHEDULE_REQUIRED = "Lịch học là bắt buộc!";
     public static readonly CLASS_MAX_STUDENT_REQUIRED = "Số lượng sinh viên tối đa là bắt buộc!";
     public static readonly CLASS_EXISTED = "Lớp học đã tồn tại!";
+    public static readonly CREATE_CLASS_SUCCESS = "Tạo lớp học thành công!"
+    public static readonly COURSE_CLASS_EXISTED = "Lớp học của môn học đã tồn tại!";
 }

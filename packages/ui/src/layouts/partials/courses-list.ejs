@@ -57,7 +57,7 @@
             </div>
             <div class="row pe-0">
               <div class="table-responsive pe-0">
-                  <table class="table table-nowrap align-middle">
+                  <table class="table align-middle table-striped table-hover">
                       <thead class="table-light">
                           <tr>
                               <input hidden type="text" id="sortBy" name="sortBy" value="<%= sortBy %>" />
@@ -80,7 +80,7 @@
                   <% if(courses.length > 0) { %> 
                       <%  courses.forEach(course=> { %>
                               <tr id="coursrRow-<%= course.id %>">
-                                  <td class="id d-flex align-items-center">
+                                  <td class="id align-items-center">
                                     <%= course.id %>
                                 </td>
                                   <td class="course-name">

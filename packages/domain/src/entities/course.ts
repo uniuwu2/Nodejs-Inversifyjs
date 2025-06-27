@@ -25,4 +25,7 @@ export class Course extends GenericEntity {
     
     @OneToMany(() => CourseClass, (courseClass) => courseClass.course)
     public course!: CourseClass[];
+
+    @Column("tinyint", { name: "is_deleted", default: 0 })
+    public isDeleted: number = 0;
 }

@@ -1,7 +1,9 @@
 <%- include("../../partials/main") %>
   <head>
-    <%- include("../../partials/title-meta", {title: 'Home' }) %>
+    <%- include("../../partials/title-meta", {title: 'Trang chủ' }) %>
     <%- include("../../partials/head-css"); %>
+    <link href="/css/home/style.css" rel="stylesheet" type="text/css" />
+
   </head>
 
   <body>
@@ -11,10 +13,11 @@
       <div class="body-wrapper">
           <%- include("../../partials/header") %>
             <div class="container-fluid">
-              <button onclick="sendNotificationToUser2()">Gửi thông báo</button>
+          <%- include("../../partials/home") %>
             </div>
         </div>
     </div>
     <%- include("../../partials/scripts/vendor-script") %>
+    <%- include("../../partials/footer") %>
   </body>
 </html>

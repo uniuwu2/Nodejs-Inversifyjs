@@ -34,9 +34,14 @@ export class ClassroomController extends BaseController {
     @httpGet(RouteHelper.COURSES, verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN, Permission.ONLY_TEACHER]))
     public async getCourses(request: Request, response: Response): Promise<void> {
         let successMessage: string = "";
+        let errorsMessage: string = "";
         if (request.cookies.messages) {
             successMessage = "「" + request.cookies.messages.message + "」";
             response.clearCookie("messages");
+        }
+        if (request.cookies.errors) {
+            errorsMessage = "「" + request.cookies.errors.errors.course + "」";
+            response.clearCookie("errors");
         }
 
         let department: any = request.query.departmentSelect || Variables.ALL;
@@ -56,6 +61,7 @@ export class ClassroomController extends BaseController {
                     limit: this.limitedItem,
                     total: courses.total,
                     successMessage,
+                    errorMessage: errorsMessage,
                     page: courses?.pageSize,
                     lastPage: Math.ceil(courses.total / this.limitedItem),
                     sortBy,
@@ -225,6 +231,13 @@ export class ClassroomController extends BaseController {
         let url = request.body.href || "";
         try {
             let course = await this.courseService.findById(courseId);
+            let courseClassList = await this.courseClassService.find(["course"], { courseId: courseId });
+            if (courseClassList && courseClassList.length > 0) {
+                this.errors = { ...this.errors, course: Messages.COURSE_CLASS_EXISTED };
+                return response.status(HttpCode.SUCCESSFUL)
+                .cookie("errors", { errors: this.errors })
+                .redirect(RouteHelper.CLASSROOM + RouteHelper.COURSES + url);
+            }
             if (course) {
                 await this.courseService.delete(courseId);
                 return response
@@ -628,6 +641,15 @@ export class ClassroomController extends BaseController {
         let semester = request.body.semester;
         let teacherId = Number(request.body.teacher);
         let classSchedule = request.body.schedules;
+        const dayMap: Record<string, string> = {
+            'Thứ 2': 'monday',
+            'Thứ 3': 'tuesday',
+            'Thứ 4': 'wednesday',
+            'Thứ 5': 'thursday',
+            'Thứ 6': 'friday',
+            'Thứ 7': 'saturday',
+            'Chủ nhật': 'sunday',
+        };
         try {
             let courseList = await this.courseService.find();
             let semesterList = await this.courseClassService.getSemesterList();
@@ -650,14 +672,15 @@ export class ClassroomController extends BaseController {
 
             for (const item of classSchedule) {
                 const { day, startTime, endTime } = item;
-                const timeRange = `${startTime}-${endTime}`;
-                if (!convertedSchedule[day]) {
-                    convertedSchedule[day] = [];
-                }
-                convertedSchedule[day].push(timeRange);
-            }
+                const engDay = dayMap[day];
+                if (!engDay) continue; // Bỏ qua ngày không hợp lệ
 
-            console.log("classSchedule (converted):", convertedSchedule);
+                const timeRange = `${startTime}-${endTime}`;
+                if (!convertedSchedule[engDay]) {
+                    convertedSchedule[engDay] = [];
+                }
+                convertedSchedule[engDay].push(timeRange);
+            }
 
             let courseClass = new CourseClass();
             courseClass.courseId = courseId;
@@ -669,13 +692,12 @@ export class ClassroomController extends BaseController {
             courseClass.classSchedule = JSON.stringify(convertedSchedule);
             courseClass.currentStudent = 0; // default value
             courseClass.status = Variables.ACTIVE;
-            
 
-        
+
             if (courseClass) {
                 this.courseClassService.save(courseClass);
             }
-            // return response.status(HttpCode.SUCCESSFUL).cookie("messages", { message: Messages.CREATE_CLASS_SUCCESS }).send({ url: url });
+            return response.status(HttpCode.SUCCESSFUL).cookie("messages", { message: Messages.CREATE_CLASS_SUCCESS }).redirect(RouteHelper.CLASSROOM + RouteHelper.CLASSES);
         } catch (error: any) {
             this.logger.error(error);
             response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
