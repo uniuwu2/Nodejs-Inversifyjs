@@ -1,6 +1,6 @@
 import { controller, httpGet, httpPost } from "inversify-express-utils";
 import { BaseController } from "./base-controller";
-import { ClassStudentService, CourseClassService, CourseService, DepartmentService, HttpCode, Messages, Permission, RouteHelper, TYPES, UserService, Variables } from "@inversifyjs/application";
+import { AttendanceService, ClassStudentService, CourseClassService, CourseService, DepartmentService, HttpCode, Messages, Permission, RouteHelper, TYPES, UserService, Variables } from "@inversifyjs/application";
 import { inject } from "inversify";
 import { checkPermissions, uploadMiddleware, verifyAuthTokenRouter } from "@inversifyjs/infrastructure";
 import * as fs from "fs";
@@ -14,13 +14,15 @@ export class ClassroomController extends BaseController {
     private courseClassService!: CourseClassService;
     private userService!: UserService;
     private departmentService!: DepartmentService;
-    private classStudentService!: ClassStudentService
+    private classStudentService!: ClassStudentService;
+    private attendanceService!: AttendanceService;
     public constructor(
         @inject(TYPES.CourseService) _courseService: CourseService,
         @inject(TYPES.CourseClassService) _courseClassService: CourseClassService,
         @inject(TYPES.UserService) _userService: UserService,
         @inject(TYPES.DepartmentService) _departmentService: DepartmentService,
-        @inject(TYPES.ClassStudentService) _classStudentService: ClassStudentService
+        @inject(TYPES.ClassStudentService) _classStudentService: ClassStudentService,
+        @inject(TYPES.AttendanceService) _attendanceService: AttendanceService
     ) {
         super();
         this.courseService = _courseService;
@@ -28,6 +30,7 @@ export class ClassroomController extends BaseController {
         this.userService = _userService;
         this.departmentService = _departmentService;
         this.classStudentService = _classStudentService;
+        this.attendanceService = _attendanceService;
     }
 
     // Môn học
@@ -40,7 +43,7 @@ export class ClassroomController extends BaseController {
             response.clearCookie("messages");
         }
         if (request.cookies.errors) {
-            errorsMessage = "「" + request.cookies.errors.errors.course + "」";
+            errorsMessage = "「" + request.cookies.errors.message + "」";
             response.clearCookie("errors");
         }
 
@@ -197,6 +200,7 @@ export class ClassroomController extends BaseController {
         let name: string = request.body.courseName;
         let code: string = request.body.courseCode;
         let credit: number = request.body.credit;
+        let courseDescription: string = request.body.courseDescription;
         let url: string = request.body.url;
         let oldCourse = await this.courseService.findById(courseId, ["department"]);
         try {
@@ -233,10 +237,10 @@ export class ClassroomController extends BaseController {
             let course = await this.courseService.findById(courseId);
             let courseClassList = await this.courseClassService.find(["course"], { courseId: courseId });
             if (courseClassList && courseClassList.length > 0) {
-                this.errors = { ...this.errors, course: Messages.COURSE_CLASS_EXISTED };
-                return response.status(HttpCode.SUCCESSFUL)
-                .cookie("errors", { errors: this.errors })
-                .redirect(RouteHelper.CLASSROOM + RouteHelper.COURSES + url);
+                return response
+                    .status(HttpCode.SUCCESSFUL)
+                    .cookie("errors", { message: Messages.COURSE_CLASS_EXISTED })
+                    .redirect(RouteHelper.CLASSROOM + RouteHelper.COURSES + url);
             }
             if (course) {
                 await this.courseService.delete(courseId);
@@ -276,6 +280,7 @@ export class ClassroomController extends BaseController {
             let course = {
                 ...request.body,
             };
+            course.isDeleted = 0;
 
             if (course) {
                 this.courseService.save(course);
@@ -294,6 +299,11 @@ export class ClassroomController extends BaseController {
         if (request.cookies.messages) {
             successMessage = "「" + request.cookies.messages.message + "」";
             response.clearCookie("messages");
+        }
+        let errorsMessage: string = "";
+        if (request.cookies.errors) {
+            errorsMessage = "「" + request.cookies.errors.message + "」";
+            response.clearCookie("errors");
         }
 
         let teacher: any = request.query.teacherSelect || Variables.ALL;
@@ -352,6 +362,7 @@ export class ClassroomController extends BaseController {
                     limit: this.limitedItem,
                     total: classes.total,
                     successMessage,
+                    errorMessage: errorsMessage,
                     page: classes?.pageSize,
                     lastPage: Math.ceil(classes.total / this.limitedItem),
                     sortBy,
@@ -386,23 +397,39 @@ export class ClassroomController extends BaseController {
                     ["student"],
                     {
                         roleId: 4,
-                        id: Not(In(currentStudentIdList))
+                        id: Not(In(currentStudentIdList)),
                     },
-                    { lastName: "ASC", firstName: "ASC" },
+                    { lastName: "ASC", firstName: "ASC" }
                 );
             }
-            let studentList = await this.userService.find(
-                ["student"],
-                { roleId: 4 },
-                { lastName: "ASC", firstName: "ASC" },
-                this.limitedItem,
-            );
+            let schedule: any[] = [];
+            if (courseClass) {
+                const dayOrder = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+                const dayMap: any = {
+                    monday: "Thứ 2",
+                    tuesday: "Thứ 3",
+                    wednesday: "Thứ 4",
+                    thursday: "Thứ 5",
+                    friday: "Thứ 6",
+                    saturday: "Thứ 7",
+                    sunday: "Chủ nhật",
+                };
+                schedule = Object.entries(courseClass.classSchedule)
+                    .sort(([a], [b]) => dayOrder.indexOf(a) - dayOrder.indexOf(b))
+                    .map(([day, times]) => ({
+                        day,
+                        label: dayMap[day],
+                        times,
+                    }));
+            }
+            let studentList = await this.userService.find(["student"], { roleId: 4 }, { lastName: "ASC", firstName: "ASC" }, this.limitedItem);
             response.render(this.routeHelper.getRenderPage(RouteHelper.CLASS_DETAIL), {
                 courseClass: courseClass,
                 classId: classId,
                 departmentList: departmentList,
                 studentList: studentList,
                 currentSeletStudentList: currentSeletStudentList,
+                schedule:schedule
             });
         } catch (error: any) {
             this.logger.error(error);
@@ -412,13 +439,22 @@ export class ClassroomController extends BaseController {
 
     @httpGet("/class/info/:id", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN, Permission.ONLY_TEACHER]))
     public async getClassInfoById(request: Request, response: Response): Promise<void> {
+        let successMessage: string = "";
+        let errorsMessage: string = "";
+        if (request.cookies.messages) {
+            successMessage = "「" + request.cookies.messages.message + "」";
+            response.clearCookie("messages");
+        }
+        if (request.cookies.errors) {
+            errorsMessage = "「" + request.cookies.errors.message + "」";
+            response.clearCookie("errors");
+        }
         let classId = request.params.id;
         let searchField = request.query.searchField || "";
         let page: any = request.query.page || 1;
         let sortBy: any = request.query.sortBy;
         let sort: any = request.query.sort || "ASC";
         try {
-
             let classStudent = await this.classStudentService.findStudentsByCourseClassId(searchField, classId, page, this.limitedItem, sortBy, sort);
             if (classStudent?.list.length == 0 && page > 1) {
                 classStudent = await this.classStudentService.findStudentsByCourseClassId(searchField, classId, 1, this.limitedItem, sortBy, sort);
@@ -433,6 +469,8 @@ export class ClassroomController extends BaseController {
                     lastPage: Math.ceil(classStudent.total / this.limitedItem),
                     sort,
                     searchField,
+                    successMessage,
+                    errorMessage: errorsMessage,
                 });
             }
         } catch (error: any) {
@@ -449,11 +487,20 @@ export class ClassroomController extends BaseController {
         try {
             let courseClass = await this.courseClassService.findById(classId);
             if (courseClass) {
+                let sessionClass = await this.attendanceService.find(["sessionClass", "sessionClass.courseClass"], {
+                    sessionClass: {
+                        courseClassId: classId,
+                    },
+                });
                 if (studentIdArray.length > 0 && studentIdArray[0] === "all") {
                     let classStudent = await this.classStudentService.findByCourseClassId(classId);
                     if (classStudent) {
                         classStudent.forEach(async (student: any) => {
                             await this.classStudentService.delete(student.id);
+                            sessionClass?.forEach(async (session: any) => {
+                                session.studentAttendance = session.studentAttendance.filter((attendance: any) => attendance.student_id !== Number(student.studentId));
+                                await this.attendanceService.save(session);
+                            });
                         });
                     }
                 }
@@ -462,15 +509,19 @@ export class ClassroomController extends BaseController {
                     if (classStudent) {
                         classStudent.forEach(async (student: any) => {
                             await this.classStudentService.delete(student.id);
+                            // Xóa điểm danh của sinh viên trong buổi học
+                            sessionClass?.forEach(async (session: any) => {
+                                session.studentAttendance = session.studentAttendance.filter((attendance: any) => attendance.student_id !== Number(student.studentId));
+                                await this.attendanceService.save(session);
+                            });
                         });
                     }
                 });
-                return response
-                    .status(HttpCode.SUCCESSFUL)
-                    .cookie("messages", { message: Messages.DELETE_STUDENT_SUCCESS, user: studentIdArray.length })
-                    .json({ status: HttpCode.SUCCESSFUL, user: studentIdArray.length });
+                // Cập nhật lại số lượng sinh viên hiện tại của lớp học
+                courseClass.currentStudent = courseClass.currentStudent - studentIdArray.length;
+                await this.courseClassService.save(courseClass);
+                return response.status(HttpCode.SUCCESSFUL).cookie("messages", { message: Messages.DELETE_STUDENT_SUCCESS, user: studentIdArray.length }).json({ status: HttpCode.SUCCESSFUL, user: studentIdArray.length });
             }
-
         } catch (error: any) {
             this.logger.error(error);
             response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });
@@ -550,11 +601,52 @@ export class ClassroomController extends BaseController {
                         classStudents.push(classStudent);
                     }
                 });
-                this.classStudentService.saveMulti(classStudents);
-                return response
-                    .status(HttpCode.SUCCESSFUL)
-                    .cookie("messages", { message: Messages.ADD_STUDENT_SUCCESS, user: studentIdArray.length })
-                    .json({ status: HttpCode.SUCCESSFUL, user: studentIdArray.length });
+                
+                // cập nhật sỉ số sinh viên hiện tại của lớp học
+                let courseClass = await this.courseClassService.findById(classId);
+                if (courseClass) {
+                    courseClass.currentStudent = courseClass.currentStudent + classStudents.length;
+                    // nếu số lượng sinh viên hiện tại của lớp học vượt quá số lượng tối đa thì không cho thêm sinh viên
+                    if (courseClass.currentStudent > courseClass.maxStudent) {
+                        this.errors = { ...this.errors, maxStudent: Messages.MAX_STUDENT_EXCEEDED };
+                        return response.status(HttpCode.SUCCESSFUL)
+                        .cookie("errors", { message: Messages.MAX_STUDENT_EXCEEDED })
+                        .json({ status: HttpCode.BAD_REQUEST, message: Messages.MAX_STUDENT_EXCEEDED });
+                    } else {
+                        await this.courseClassService.save(courseClass);
+                    }
+                }
+                await this.classStudentService.saveMulti(classStudents);
+                
+                // Lấy buổi học của lớp học
+                let sessionClass = await this.attendanceService.find(["sessionClass", "sessionClass.courseClass"], {
+                    sessionClass: {
+                        courseClassId: classId,
+                    },
+                });
+                // Thêm diểm danh cho từng sinh viên vào trong buổi học
+                if (sessionClass && sessionClass.length > 0) {
+                    sessionClass.forEach(async (session: any) => {
+                        classStudents.forEach(async (student: any) => {
+                            // Kiểm tra xem student.studentId đã có trong từng session.studentAttendance hay chưa
+                            // studentAttendance là json chứa danh sách sinh viên đã điểm danh
+                            for (let i = 0; i < session.studentAttendance.length; i++) {
+                                if (session.studentAttendance[i].student_id === Number(student.studentId)) {
+                                    return; // Nếu đã có thì không thêm nữa
+                                }
+                            }
+                            // Nếu chưa có thì thêm vào
+                            session.studentAttendance.push({
+                                student_id: Number(student.studentId),
+                                status: Variables.INACTIVE, // Mặc định là chưa điểm danh
+                                note: "",
+                                time: null,
+                            });
+                            await this.attendanceService.save(session);
+                        });
+                    });
+                }
+                return response.status(HttpCode.SUCCESSFUL).cookie("messages", { message: Messages.ADD_STUDENT_SUCCESS }).json({ status: HttpCode.SUCCESSFUL, user: studentIdArray.length });
             }
             if (studentIdArray.length > 0) {
                 studentIdArray.forEach(async (studentId: any) => {
@@ -563,11 +655,51 @@ export class ClassroomController extends BaseController {
                     classStudent.studentId = studentId;
                     classStudents.push(classStudent);
                 });
-                this.classStudentService.saveMulti(classStudents);
-                return response
-                    .status(HttpCode.SUCCESSFUL)
-                    .cookie("messages", { message: Messages.ADD_STUDENT_SUCCESS, user: studentIdArray.length })
-                    .json({ status: HttpCode.SUCCESSFUL, user: studentIdArray.length });
+                // cập nhật sỉ số sinh viên hiện tại của lớp học
+                let courseClass = await this.courseClassService.findById(classId);
+                if (courseClass) {
+                    courseClass.currentStudent = courseClass.currentStudent + classStudents.length;
+                    // nếu số lượng sinh viên hiện tại của lớp học vượt quá số lượng tối đa thì không cho thêm sinh viên
+                    if (courseClass.currentStudent > courseClass.maxStudent) {
+                        this.errors = { ...this.errors, maxStudent: Messages.MAX_STUDENT_EXCEEDED };
+                        return response.status(HttpCode.SUCCESSFUL)
+                            .cookie("errors", { message: Messages.MAX_STUDENT_EXCEEDED })
+                            .json({ status: HttpCode.BAD_REQUEST, message: Messages.MAX_STUDENT_EXCEEDED });
+                    } else {
+                        await this.courseClassService.save(courseClass);
+                    }
+                }
+                await this.classStudentService.saveMulti(classStudents);
+                
+                // Lấy buổi học của lớp học
+                let sessionClass = await this.attendanceService.find(["sessionClass", "sessionClass.courseClass"], {
+                    sessionClass: {
+                        courseClassId: classId,
+                    },
+                });
+                // Thêm diểm danh cho từng sinh viên vào trong buổi học
+                if (sessionClass && sessionClass.length > 0) {
+                    sessionClass.forEach(async (session: any) => {
+                        classStudents.forEach(async (student: any) => {
+                            // Kiểm tra xem student.studentId đã có trong từng session.studentAttendance hay chưa
+                            // studentAttendance là json chứa danh sách sinh viên đã điểm danh
+                            for (let i = 0; i < session.studentAttendance.length; i++) {
+                                if (session.studentAttendance[i].student_id === Number(student.studentId)) {
+                                    return; // Nếu đã có thì không thêm nữa
+                                }
+                            }
+                            // Nếu chưa có thì thêm vào
+                            session.studentAttendance.push({
+                                student_id: Number(student.studentId),
+                                status: Variables.INACTIVE, // Mặc định là chưa điểm danh
+                                note: "",
+                                time: null,
+                            });
+                            await this.attendanceService.save(session);
+                        });
+                    });
+                }
+                return response.status(HttpCode.SUCCESSFUL).cookie("messages", { message: Messages.ADD_STUDENT_SUCCESS, user: studentIdArray.length }).json({ status: HttpCode.SUCCESSFUL, user: studentIdArray.length });
             }
         } catch (error: any) {
             this.logger.error(error);
@@ -581,6 +713,15 @@ export class ClassroomController extends BaseController {
         let url = request.body.href || "";
         try {
             let courseClass = await this.courseClassService.findById(classId);
+            // Kiểm tra lớp có sinh viên hay không, nếu có thì không cho xóa
+            let classStudentList = await this.classStudentService.find(["student"], { courseClassId: classId });
+            if (classStudentList && classStudentList.length > 0) {
+                this.errors = { ...this.errors, courseClass: Messages.CLASS_STUDENT_EXISTED };
+                return response
+                    .status(HttpCode.SUCCESSFUL)
+                    .cookie("errors", { message: Messages.CLASS_STUDENT_EXISTED })
+                    .redirect(RouteHelper.CLASSROOM + RouteHelper.CLASSES + url);
+            }
             if (courseClass) {
                 courseClass.status = Variables.INACTIVE;
                 await this.courseClassService.save(courseClass);
@@ -633,7 +774,6 @@ export class ClassroomController extends BaseController {
 
     @httpPost("/classes/create", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_ADMIN, Permission.ONLY_TEACHER]))
     public async createClass(request: any, response: any): Promise<void> {
-
         let courseId = Number(request.body.course);
         let group = request.body.group;
         let maxStudent = Number(request.body.maxStudent);
@@ -641,14 +781,15 @@ export class ClassroomController extends BaseController {
         let semester = request.body.semester;
         let teacherId = Number(request.body.teacher);
         let classSchedule = request.body.schedules;
+        let startDate = request.body.startDate;
         const dayMap: Record<string, string> = {
-            'Thứ 2': 'monday',
-            'Thứ 3': 'tuesday',
-            'Thứ 4': 'wednesday',
-            'Thứ 5': 'thursday',
-            'Thứ 6': 'friday',
-            'Thứ 7': 'saturday',
-            'Chủ nhật': 'sunday',
+            "Thứ 2": "monday",
+            "Thứ 3": "tuesday",
+            "Thứ 4": "wednesday",
+            "Thứ 5": "thursday",
+            "Thứ 6": "friday",
+            "Thứ 7": "saturday",
+            "Chủ nhật": "sunday",
         };
         try {
             let courseList = await this.courseService.find();
@@ -660,12 +801,23 @@ export class ClassroomController extends BaseController {
                 group: group,
                 semester: semester,
                 teacherId: teacherId,
-            })
+            });
 
             if (courseClassExist) {
                 this.errors = { ...this.errors, group: Messages.CLASS_EXISTED };
-                return response.status(HttpCode.SUCCESSFUL).render(this.routeHelper.getRenderPage(RouteHelper.CREATE_CLASS),
-                    { errorValidator: this.errors, courseId, group, maxStudent, semester, numberOfSessions, teacherId, courseList, teacherList, semesterList, classSchedule });
+                return response.status(HttpCode.SUCCESSFUL).render(this.routeHelper.getRenderPage(RouteHelper.CREATE_CLASS), {
+                    errorValidator: this.errors,
+                    courseId,
+                    group,
+                    maxStudent,
+                    semester,
+                    numberOfSessions,
+                    teacherId,
+                    courseList,
+                    teacherList,
+                    semesterList,
+                    classSchedule,
+                });
             }
 
             const convertedSchedule: { [day: string]: string[] } = {};
@@ -692,12 +844,15 @@ export class ClassroomController extends BaseController {
             courseClass.classSchedule = JSON.stringify(convertedSchedule);
             courseClass.currentStudent = 0; // default value
             courseClass.status = Variables.ACTIVE;
-
+            courseClass.startDate = startDate ? new Date(startDate) : new Date();
 
             if (courseClass) {
                 this.courseClassService.save(courseClass);
             }
-            return response.status(HttpCode.SUCCESSFUL).cookie("messages", { message: Messages.CREATE_CLASS_SUCCESS }).redirect(RouteHelper.CLASSROOM + RouteHelper.CLASSES);
+            return response
+                .status(HttpCode.SUCCESSFUL)
+                .cookie("messages", { message: Messages.CREATE_CLASS_SUCCESS })
+                .redirect(RouteHelper.CLASSROOM + RouteHelper.CLASSES);
         } catch (error: any) {
             this.logger.error(error);
             response.status(HttpCode.BAD_REQUEST).send({ message: error.message, status: HttpCode.BAD_REQUEST });

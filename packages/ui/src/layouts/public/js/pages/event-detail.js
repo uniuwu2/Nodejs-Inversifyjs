@@ -139,24 +139,32 @@ let timer;
 
 const updateQr = async () => {
     try {
-        const res = await fetch(`/events/event/qr/${eventId}`);
-        const data = await res.json();
-
+        let expiredTimeInput = document.getElementById("expiredTime");
+        const expiredAt = Date.now() + (expiredTimeInput ? parseInt(expiredTimeInput.value) * 1000 : 30000); // Mặc định là 30 giây
+        let qrurl = `https://30f4-113-161-54-89.ngrok-free.app/qr?eventId=${eventId}&expiredAt=${expiredAt}`;
         const qrContainer = document.getElementById("qrCodeContainer");
         qrContainer.innerHTML = ""; // Xóa QR cũ
-
         const canvas = document.createElement("canvas");
-        await QRCode.toCanvas(canvas, data.url);
+        await QRCode.toCanvas(canvas, qrurl);
         qrContainer.appendChild(canvas);
-
         // Reset đồng hồ đếm ngược
-        countdown = 30;
+        countdown = expiredTimeInput ? parseInt(expiredTimeInput.value) : 30;
         document.getElementById("qrCountdown").innerText = `Còn: ${countdown} giây`;
-
         if (timer) clearInterval(timer);
         timer = setInterval(() => {
             countdown--;
             document.getElementById("qrCountdown").innerText = `Còn: ${countdown} giây`;
+            if (countdown <= 0) {
+                clearInterval(timer);
+                Swal.fire({
+                    icon: "warning",
+                    title: "QR Code đã hết hạn",
+                    text: "Vui lòng làm mới để tạo QR Code mới.",
+                    showConfirmButton: true,
+                }).then(() => {
+                    updateQr(); // Tạo QR mới
+                });
+            }
         }, 1000);
     } catch (err) {
         console.error("Lỗi tạo QR:", err);
@@ -359,8 +367,8 @@ function normalizeString(str) {
         .trim();
 }
 
-const socket = io();
-socket.emit("register", currentUser);
+// const socket = io();
+// socket.emit("register", currentUser);
 // Xử lý submit form thêm sinh viên
 let addStudentBtn = document.getElementById("addStudetnBtn");
 if (addStudentBtn) {
@@ -391,42 +399,33 @@ if (addStudentBtn) {
                     students: studentIds,
                     eventId: eventId,
                 };
-
-                // Gửi thông báo đến từng sinh viên được thêm vào buổi học
-                studentIds.forEach((studentId) => {
-                    console.log("[event-detail.js] Gửi noti tới userId:", String(studentId));
-                    (window.socket || socket).emit("sendNoti", {
-                        toUserId: String(studentId),
-                        message: "Bạn vừa được thêm vào buổi học!",
-                    })
-                });
-                // fetch(`/events/event/addStudents`, {
-                //     method: "POST",
-                //     headers: {
-                //         "Content-Type": "application/json",
-                //     },
-                //     body: JSON.stringify(data),
-                // })
-                //     .then((res) => res.json())
-                //     .then((res) => {
-                //         if (res.code === 200) {
-                //             Swal.fire({
-                //                 icon: "success",
-                //                 title: `Đã thêm ${selectedStudents.length} sinh viên`,
-                //                 showConfirmButton: false,
-                //                 timer: 3000,
-                //             }).then(() => {
-                //                 window.location.reload();
-                //             });
-                //         } else {
-                //             Swal.fire({
-                //                 icon: "error",
-                //                 title: res.message,
-                //                 showConfirmButton: false,
-                //                 timer: 3000,
-                //             });
-                //         }
-                //     });
+                fetch(`/events/event/addStudents`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(data),
+                })
+                    .then((res) => res.json())
+                    .then((res) => {
+                        if (res.code === 200) {
+                            Swal.fire({
+                                icon: "success",
+                                title: `Đã thêm ${selectedStudents.length} sinh viên`,
+                                showConfirmButton: false,
+                                timer: 3000,
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: "error",
+                                title: res.message,
+                                showConfirmButton: false,
+                                timer: 3000,
+                            });
+                        }
+                    });
             }
         });
     });

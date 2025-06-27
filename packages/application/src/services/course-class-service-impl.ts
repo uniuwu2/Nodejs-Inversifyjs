@@ -59,6 +59,7 @@ export class CourseClassServiceImpl extends AbstractService<CourseClass, CourseC
                     },
                     group: group !== Variables.ALL ? group : undefined,
                     semester: semester !== Variables.ALL ? semester : undefined,
+                    status: 1
                 },
                
             ];

@@ -34,23 +34,14 @@ export class CourseServiceImpl extends AbstractService<Course, CourseRepository>
         if (sortBy) {
             this.order = { [sortBy]: sort };
         }
-        let where: any = [];
-        if (name !== "") {
-            if (!isNaN(Number(name))) {
-                where.push({ credit: Number(name), isDeleted: 0 });
-            } else {
-                where.push(
-                    { courseName: Like(`%${name}%`), isDeleted: 0 },
-                    { courseCode: Like(`%${name}%`), isDeleted: 0 }
-                )
-            }
+        if (name || department) {
+            this.where = [
+                { courseName: Like(`%${name}%`), departmentId: department !== Variables.ALL ? department : undefined, ...(department !== Variables.ALL && { isDeleted: 0 }) },
+                { courseCode: Like(`%${name}%`), departmentId: department !== Variables.ALL ? department : undefined, ...(department !== Variables.ALL && { isDeleted: 0 }) },
+            ];
         }
 
-        if (department !== Variables.ALL) {
-            where.push({ department: Like(`%${department}%`), isDeleted: 0 });
-        }
-
-        return this.repository?.findAndCount(['department'], (name || department) && where, page && { take: limit, page: page }, sortBy && this.order)?.then((result: any) => {
+        return this.repository?.findAndCount(['department'], (name || department) && this.where, page && { take: limit, page: page }, sortBy && this.order)?.then((result: any) => {
             return {
                 list: result.list,
                 total: result.count,

@@ -71,13 +71,19 @@ $(document).ready(function () {
 });
 
 $('#teacherSelect').on('change', function (e) {
-  const selectedValue = $(this).val();
-  document.getElementById("search-form").submit();
+    const selectedValue = $(this).val();
+    if (currentPage) {
+        currentPage.value = 1;
+    }
+    document.getElementById("search-form").submit();
 });
 
 $('#courseSelect').on('change', function (e) {
-  const selectedValue = $(this).val();
-  document.getElementById("search-form").submit();
+    const selectedValue = $(this).val();
+    if (currentPage) {
+        currentPage.value = 1;
+    }
+    document.getElementById("search-form").submit();
 });
 
 // Filter by Semester
@@ -97,6 +103,9 @@ if (sortId) {
     sortId.addEventListener("click", function () {
         if (sortBy.value === "id") sortTypeSwitch();
         sortBy.value = "id";
+        if (currentPage) {
+            currentPage.value = 1;
+        }
         document.getElementById("search-form").submit();
     });
 }
@@ -107,6 +116,9 @@ if (sortCourseName) {
     sortCourseName.addEventListener("click", function () {
         if (sortBy.value === "courseName") sortTypeSwitch();
         sortBy.value = "courseName";
+        if (currentPage) {
+            currentPage.value = 1;
+        }
         document.getElementById("search-form").submit();
     });
 }
@@ -117,6 +129,9 @@ if (sortGroupName) {
     sortGroupName.addEventListener("click", function () {
         if (sortBy.value === "group") sortTypeSwitch();
         sortBy.value = "group";
+        if (currentPage) {
+            currentPage.value = 1;
+        }
         document.getElementById("search-form").submit();
     });
 }
@@ -127,6 +142,9 @@ if (sortTeacher) {
     sortTeacher.addEventListener("click", function () {
         if (sortBy.value === "teacherName") sortTypeSwitch();
         sortBy.value = "teacherName";
+        if (currentPage) {
+            currentPage.value = 1;
+        }
         document.getElementById("search-form").submit();
     });
 }
@@ -137,6 +155,9 @@ if (sortSemester) {
     sortSemester.addEventListener("click", function () {
         if (sortBy.value === "semester") sortTypeSwitch();
         sortBy.value = "semester";
+        if (currentPage) {
+            currentPage.value = 1;
+        }
         document.getElementById("search-form").submit();
     });
 }

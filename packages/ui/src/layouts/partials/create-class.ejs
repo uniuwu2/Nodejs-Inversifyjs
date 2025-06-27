@@ -43,14 +43,17 @@
                             <div class="form-group mb-3">
                                 <label for="semester" class="form-label form-required">Học kì</label>
                                 <select name="semester" id="semester" class="form-select">
-                                    <% for (let i=0; i< semesterList?.length; i++) { %>
-                                        <option value="<%= semesterList[i] %>" 
-                                            <% if (locals?.semester && semesterList[i] == locals?.semester) { %>
-                                                selected
-                                                <% } %>>
-                                            <%= semesterList[i] %>
-                                        </option>
-                                        <% } %>
+                                    <% if (!semesterList || semesterList.length === 0) { %>
+                                        <option value="HK1/<%= new Date().getFullYear()-1 %>">HK1/<%= new Date().getFullYear()-1 %></option>
+                                        <option value="HK2/<%= new Date().getFullYear()-1 %>">HK2/<%= new Date().getFullYear()-1 %></option>
+                                        <option value="HK3/<%= new Date().getFullYear()-1 %>">HK3/<%= new Date().getFullYear()-1 %></option>
+                                        <option value="HK1/<%= new Date().getFullYear() %>">HK1/<%= new Date().getFullYear() %></option>
+                                        <option value="HK2/<%= new Date().getFullYear() %>">HK2/<%= new Date().getFullYear() %></option>
+                                        <option value="HK3/<%= new Date().getFullYear() %>">HK3/<%= new Date().getFullYear() %></option>
+                                        <option value="HK1/<%= new Date().getFullYear()+1 %>">HK1/<%= new Date().getFullYear()+1 %></option>
+                                        <option value="HK2/<%= new Date().getFullYear()+1 %>">HK2/<%= new Date().getFullYear()+1 %></option>
+                                        <option value="HK3/<%= new Date().getFullYear()+1 %>">HK3/<%= new Date().getFullYear()+1 %></option>
+                                    <% } %>
                                 </select>
                             </div>
                             <!-- Số lượng sinh viên -->
@@ -61,6 +64,14 @@
                                     placeholder="Số lượng sinh viên tối đa" 
                                     value="<%= locals?.maxStudent || '' %>"
                                     min="1" required />
+                            </div>
+                            <!-- Ngày bắt đầu -->
+                            <div class="form-group mb-3">
+                                <label for="startDate" class="form-label form-required">Ngày bắt đầu</label>
+                                <input type="date" class="form-control" id="startDate" name="startDate"
+                                    placeholder="Ngày bắt đầu" 
+                                    value="<%= locals?.startDate || '' %>"
+                                    required />
                             </div>
                             <!-- Số buổi -->
                             <div class="form-group mb-3">

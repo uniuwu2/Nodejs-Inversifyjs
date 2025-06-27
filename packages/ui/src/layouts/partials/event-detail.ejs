@@ -10,6 +10,7 @@
             const eventId = <%= event.id %>;
             const studentsNotInEvent = <%- JSON.stringify(studentsNotInEvent) %>;
             const currentUser = <%= currentUser %>;
+            const expiredTime = <%= expiredTime %>;
         </script>
         <div class="card-body">
             <div class="row mb-3">
@@ -26,8 +27,8 @@
                     <%= event.location %>
                 </div>
                 <div class="col-md-6"><strong>Trạng thái:</strong>
-                    <span class="badge bg-<%= event.status === 1 ? 'success' : 'danger' %>">
-                        <%= event.status===1 ? 'Đang diễn ra' : 'Đã kết thúc' %>
+                    <span class="badge bg-<%= event.active === 1 ? 'success' : 'danger' %>">
+                        <%= event.active===1 ? 'Đang diễn ra' : 'Đã kết thúc' %>
                     </span>
                 </div>
             </div>
@@ -65,6 +66,11 @@
                 </div>
             </div>
             <div class="card-body pt-0 pb-0 ps-0">
+                <label for="expiredTime" class="form-label">Thời gian hết hạn của mã điểm danh (giây):</label>
+
+                <div class="mb-3 col-md-2">
+                    <input type="number" class="form-control" id="expiredTime" name="expiredTime" value="<%= expiredTime/1000 %>" min="1" max="60" step="1" required>
+                </div>
                 <button type="button" class="btn btn-primary waves-effect waves-light me-2" data-bs-toggle="modal"
                     data-bs-target="#qrEventCodeModal">Tạo mã điểm danh</button>
                 <button type="button" class="btn btn-secondary waves-effect waves-light me-2" data-bs-toggle="modal"

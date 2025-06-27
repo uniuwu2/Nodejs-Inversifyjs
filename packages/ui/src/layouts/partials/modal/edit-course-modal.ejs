@@ -9,7 +9,6 @@
             </div>
             <div class="modal-body">
                 <div class="modal-body">
-
                     <div class="mb-3">
                         <label for="courseName" class="form-label">Tên môn học</label>
                         <input type="text" class="form-control" id="editCourseName" value="<%= locals?.courseName || '' %>" placeholder="Nhập tên môn học" />
@@ -47,11 +46,15 @@
                         <div class="invalid-feedback d-block"><%= locals.errorValidatorEdit.credit %></div>
                         <% } %>
                     </div>
-                </div>
+                    <div class="mb-3">
+                        <label for="courseDescription" class="form-label">Mô tả môn học</label>
+                        <textarea class="form-control" id="editCourseDescription" rows="3" placeholder="Nhập mô tả môn học"><%= locals?.courseDescription || '' %></textarea>
+                    </div>
 
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                    <button type="button" id="saveCourseBtn" class="btn btn-primary">Lưu thay đổi</button>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        <button type="button" id="saveCourseBtn" class="btn btn-primary">Lưu thay đổi</button>
+                    </div>
                 </div>
             </div>
         </div>

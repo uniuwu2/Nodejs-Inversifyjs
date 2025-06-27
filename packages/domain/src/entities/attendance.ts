@@ -6,7 +6,7 @@ import { SessionClass } from "./session_class";
 @Entity("attendance")
 export class Attendance extends GenericEntity {
     @Column("int", { name: "session_id" })
-    public sessionId: number = 0;
+    public sessionId!: number;
 
     @Column("json", { name: "student_attendance" })
     public studentAttendance: any = "";

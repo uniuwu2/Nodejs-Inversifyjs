@@ -20,7 +20,7 @@ export class Course extends GenericEntity {
     @Column("int", { name: "credit" })
     public credit: number = 0;
 
-    @Column("varchar", { name: "course_description", length: 255 })
+    @Column("varchar", { name: "course_description", length: 255, nullable: true })
     public courseDescription: string = "";
     
     @OneToMany(() => CourseClass, (courseClass) => courseClass.course)

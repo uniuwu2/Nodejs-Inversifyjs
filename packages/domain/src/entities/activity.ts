@@ -5,7 +5,7 @@ import { ActivityStudent } from "./activity_student";
 
 @Entity("activity")
 export class Activity extends GenericEntity {
-    @Column("varchar", { name: "activity_name", unique: true, length: 255 })
+    @Column("varchar", { name: "activity_name", length: 255 })
     public activityName: string = "";
 
     @Column("varchar", { name: "activity_description", length: 255 })

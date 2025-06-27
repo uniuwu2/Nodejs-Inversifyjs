@@ -47,6 +47,9 @@ let department = document.getElementById("departmentSelect");
 if (department)
     department.addEventListener("change", function () {
         // openModalSpinner.click();
+        if (currentPage) {
+            currentPage.value = 1;
+        }
         document.getElementById("search-form").submit();
     });
 
@@ -237,6 +240,7 @@ $(document).ready(function () {
                     courseCode: $("#editCourseCode").val(),
                     credit: $("#editCredit").val(),
                     departmentId: $("#editCourseDepartment").val(),
+                    courseDescription: $("#editCourseDescription").val(),
                     url: window.location.href,
                 },
                 success: function (response) {
@@ -345,10 +349,12 @@ if (courses) {
                 let courseName = document.getElementById("editCourseName");
                 let courseCode = document.getElementById("editCourseCode");
                 let credit = document.getElementById("editCredit");
+                let courseDescription = document.getElementById("editCourseDescription");
 
                 courseName.value = "";
                 courseCode.value = "";
                 credit.value = "";
+                courseDescription.value = "";
                 courseName.classList.remove("form-error");
                 courseCode.classList.remove("form-error");
                 credit.classList.remove("form-error");

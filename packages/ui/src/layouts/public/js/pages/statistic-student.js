@@ -90,7 +90,7 @@ function renderData(studentId, sortBy = null, sort = "ASC", page = 1) {
                                 <ul class="pagination mb-sm-0">
                                     <input hidden id="page" name="page" type="text" value="${page}" />
                                     <li class="page-item ${page === 1 ? "disabled" : ""}">
-                                        <button class="page-link text-nowrap prev-btn" id="page-link" value="${page - 1}" onclick="renderData('${studentId}', '${sortBy}', '${sort}', ${page - 1})"><< Previous</button>
+                                        <button class="page-link text-nowrap prev-btn" id="page-link" value="${page - 1}" onclick="renderData('${studentId}', '${sortBy}', '${sort}', ${page - 1})"><< Trước</button>
                                     </li>
                     `;
                 if (page > 3) {
@@ -118,7 +118,7 @@ function renderData(studentId, sortBy = null, sort = "ASC", page = 1) {
                 }
                 paginationHTML += `
                                     <li class="page-item ${page === data.data.lastPage ? "disabled" : ""}">
-                                        <button class="page-link text-nowrap" id="page-link" value="${page + 1}" onclick="renderData('${studentId}', '${sortBy}', '${sort}', ${page + 1})">Next >></button>
+                                        <button class="page-link text-nowrap" id="page-link" value="${page + 1}" onclick="renderData('${studentId}', '${sortBy}', '${sort}', ${page + 1})">Sau >></button>
                                     </li>
                                 </ul>
                             </div>

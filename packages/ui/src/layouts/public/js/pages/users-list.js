@@ -81,6 +81,9 @@ let role = document.getElementById("roleSelect");
 if (role)
     role.addEventListener("change", function () {
         // openModalSpinner.click();
+        if (currentPage) {
+            currentPage.value = 1;
+        }
         document.getElementById("search-form").submit();
     });
 
@@ -89,6 +92,9 @@ let valid = document.getElementById("validSelect");
 if (valid)
     valid.addEventListener("change", function () {
         // openModalSpinner.click();
+        if (currentPage) {
+            currentPage.value = 1;
+        }
         document.getElementById("search-form").submit();
     });
 

@@ -35,9 +35,9 @@ export class SessionClass extends GenericEntity {
 
     @ManyToOne(() => CourseClass, (courseClass) => courseClass.sessionClass)
     @JoinColumn([{ name: "course_class_id", referencedColumnName: "id" }])
-    public courseClass: CourseClass | null = null;
+    public courseClass!: CourseClass;
 
 
     @OneToMany(() => Attendance, (attendance) => attendance.sessionClass)
-    public attendance: Attendance | null = null;
+    public attendance!: Attendance[];
 }

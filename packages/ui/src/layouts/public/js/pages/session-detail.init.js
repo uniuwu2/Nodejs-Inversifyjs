@@ -83,15 +83,16 @@ let timer;
 
 const updateQr = async () => {
     try {
-        const expiredAt = Date.now() + 30000; // 30 giây từ thời điểm tạo
-        let qrurl = `https://c9e7-2001-ee0-1b09-bfa2-3cc9-86c6-ac63-1489.ngrok-free.app/qr?sessionId=${sessionId}&expiredAt=${expiredAt}`;
+        let expiredTimeInput = document.getElementById("expiredTime");
+        const expiredAt = Date.now() + (expiredTimeInput ? parseInt(expiredTimeInput.value) * 1000 : 30000); // Mặc định là 30 giây
+        let qrurl = `https://30f4-113-161-54-89.ngrok-free.app/qr?sessionId=${sessionId}&expiredAt=${expiredAt}`;
         const qrContainer = document.getElementById("qrCodeContainer");
         qrContainer.innerHTML = ""; // Xóa QR cũ
         const canvas = document.createElement("canvas");
         await QRCode.toCanvas(canvas, qrurl);
         qrContainer.appendChild(canvas);
         // Reset đồng hồ đếm ngược
-        countdown = 30;
+        countdown = expiredTimeInput ? parseInt(expiredTimeInput.value) : 30;
         document.getElementById("qrCountdown").innerText = `Còn: ${countdown} giây`;
         if (timer) clearInterval(timer);
         timer = setInterval(() => {

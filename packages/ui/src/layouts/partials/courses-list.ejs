@@ -72,7 +72,8 @@
                               <th scope="col"  role="button" id="sort-by-courseName">Tên môn <% if(sortBy === "courseName") { iconSort() } else { %> <i class="ti ti-arrows-sort"></i>  <% } %></th>
                                 <th scope="col"  role="button" id="sort-by-courseCode">Mã môn <% if(sortBy === "courseCode") { iconSort() } else { %> <i class="ti ti-arrows-sort"></i>  <% } %></th>
                                 <th scope="col"  role="button" id="sort-by-department">Khoa <% if(sortBy === "department") { iconSort() } else { %> <i class="ti ti-arrows-sort"></i>  <% } %></th>
-                                <th scope="col"  role="button" id="sort-by-credit">Tín chỉ <% if(sortBy === "credits") { iconSort() } else { %> <i class="ti ti-arrows-sort"></i>  <% } %></th>  
+                                <th scope="col"  role="button" id="sort-by-credit">Tín chỉ <% if(sortBy === "credits") { iconSort() } else { %> <i class="ti ti-arrows-sort"></i>  <% } %></th>
+                                <th scope="col"style="width: 200px">Mô tả</th>  
                               <th scope="col"  style="width: 200px">Thao tác</th>
                           </tr>
                       </thead>
@@ -98,6 +99,9 @@
                                     <td class="credit">
                                         <%= course.credit %>
                                     </td>
+                                  <td class="description">
+                                      <%= course.courseDescription %>
+                                  </td>
                                     <td>
                                         <ul class="list-inline m-0">
                                             <li class="list-inline-item">

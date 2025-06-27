@@ -214,7 +214,7 @@ function renderPagination(page, limit, list, lastPage, total) {
         html += ` disabled`;
     }
     html += `">
-                    <a class="page-link text-nowrap prev-btn" href="#" onclick="loadData('${sortBy}', ${page - 1}, '${sort}', '${searchValue}')">Previous</a>
+                    <a class="page-link text-nowrap prev-btn" href="#" onclick="loadData('${sortBy}', ${page - 1}, '${sort}', '${searchValue}')">Trước</a>
                 </li>`;
     if (page > 3) {
         html += `<button class="page-link" onclick="loadData('${sortBy}', 1, '${sort}', '${searchValue}')">1</button>`;
@@ -242,7 +242,7 @@ function renderPagination(page, limit, list, lastPage, total) {
     }
     html += `
                 <li class="page-item ${page === lastPage ? "disabled" : ""}">
-                    <a class="page-link" href="#" onclick="loadData('${sortBy}', ${page + 1}, '${sort}', '${searchValue}')">Next</a>
+                    <a class="page-link" href="#" onclick="loadData('${sortBy}', ${page + 1}, '${sort}', '${searchValue}')">Sau</a>
                 </li>
             </ul>
         </div>
@@ -269,7 +269,7 @@ $(document).ready(function () {
                 };
             },
             processResults: function (data) {
-                console.log(data);
+                
                 const results = data.studentList;
                 if (results.length === 0) {
                     console;
@@ -287,7 +287,7 @@ $(document).ready(function () {
                     id: student.id,
                     text: `${student.firstName} ${student.lastName} - ${student.student.student_number}`,
                 }));
-
+                console.log(allOptions);
                 if (allOptions.length > 0) {
                     allOptions.unshift({
                         id: "all",
@@ -417,7 +417,6 @@ if (addStudentModal) {
                     };
                 },
                 processResults: function (data) {
-                    console.log(data);
                     const results = data.studentList;
                     if (results.length === 0) {
                         console;
@@ -430,7 +429,6 @@ if (addStudentModal) {
                             ],
                         };
                     }
-
                     const allOptions = results.map((student) => ({
                         id: student.id,
                         text: `${student.firstName} ${student.lastName} - ${student.student.student_number}`,

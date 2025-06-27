@@ -14,8 +14,11 @@ export class ActivityStudent extends GenericEntity {
     @Column("tinyint", { name: "attendance_check"})
     public attendanceCheck: number = 0;
 
-    @Column("varchar", { name: "note", length: 255})
-    public note: string | null = null;
+    @Column("varchar", { name: "note", length: 255, nullable: true })
+    public note: string = "";
+
+    @Column("datetime", { name: "attendance_time", nullable: true })
+    public attendanceTime: Date | null = null;
 
     @ManyToOne(() => Activity, (activity) => activity.student)
     @JoinColumn([{ name: "activity_id", referencedColumnName: "id" }])

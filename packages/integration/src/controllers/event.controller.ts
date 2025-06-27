@@ -7,6 +7,7 @@ import { inject } from "inversify";
 import * as QRCode from "qrcode";
 import * as jwt from "jsonwebtoken";
 import { In, Not } from "typeorm";
+import { ActivityStudent } from "@inversifyjs/domain";
 const JWT_SECRET = process.env.TOKEN_KEY || "mydevsecretkey123456";
 
 @controller(RouteHelper.EVENT)
@@ -14,11 +15,7 @@ export class EventController extends BaseController {
     private userService!: UserService;
     private activityService!: ActivityService;
     private activityStudentService!: ActivityStudentService;
-    constructor(
-        @inject(TYPES.UserService) userService: UserService,
-        @inject(TYPES.ActivityService) activityService: ActivityService,
-        @inject(TYPES.ActivityStudentService) activityStudentService: ActivityStudentService
-    ) {
+    constructor(@inject(TYPES.UserService) userService: UserService, @inject(TYPES.ActivityService) activityService: ActivityService, @inject(TYPES.ActivityStudentService) activityStudentService: ActivityStudentService) {
         super();
         this.userService = userService;
         this.activityService = activityService;
@@ -59,7 +56,7 @@ export class EventController extends BaseController {
                     startDate,
                     endDate,
                     sortBy,
-                    sort
+                    sort,
                 });
             }
         } catch (error: any) {
@@ -81,8 +78,8 @@ export class EventController extends BaseController {
                     message: "Cập nhật trạng thái thành công",
                     event: {
                         id: event.id,
-                        active: event.active
-                    }
+                        active: event.active,
+                    },
                 });
             } else {
                 response.status(HttpCode.NOT_FOUND).render(this.routeHelper.getRenderPage(RouteHelper.NOT_FOUND));
@@ -99,20 +96,18 @@ export class EventController extends BaseController {
         let pathHref = String(request.body.href);
 
         try {
-            let participant = await this.activityStudentService.find(["student", "activity"],
-                {
-                    "activityId": eventId
-                });
+            let participant = await this.activityStudentService.find(["student", "activity"], {
+                activityId: eventId,
+            });
             if (participant && participant.length > 0) {
                 response.status(HttpCode.BAD_REQUEST).json({
                     status: HttpCode.BAD_REQUEST,
-                    message: "Không thể xóa sự kiện này vì có người tham gia"
+                    message: "Không thể xóa sự kiện này vì có người tham gia",
                 });
                 return;
             }
             await this.activityService.delete(eventId);
             return response.cookie("messages", "Đã xoá event").redirect(RouteHelper.EVENT + pathHref);
-
         } catch (error: any) {
             this.logger.error(error);
             response.status(HttpCode.BAD_REQUEST).render(this.routeHelper.getRenderPage(RouteHelper.INTERNAL_SERVER_ERROR));
@@ -128,29 +123,41 @@ export class EventController extends BaseController {
         let sort: any = request.query.sort || "ASC";
         try {
             let event = await this.activityService.findOne(["user", "student"], {
-                "id": eventId
+                id: eventId,
             });
             if (!event) {
                 response.status(HttpCode.NOT_FOUND).render(this.routeHelper.getRenderPage(RouteHelper.NOT_FOUND));
                 return;
             }
             let participants = await this.activityStudentService.showActivityStudentList(eventId, name, page, this.limitedItem, sortBy, sort);
-            const payload = { activityId: eventId }
+            // const payload = { activityId: eventId }
 
-            const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "1m" });
+            // const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "1m" });
 
             // Tạo URL điểm danh chứa token
-            const attendanceUrl = `http://localhost:9999/api/v1/attendance/event/${token}`;
+            // const attendanceUrl = `http://localhost:9999/api/v1/attendance/event/${token}`;
 
             // Tạo QR code dạng data URL
-            const qrImageUrl = await QRCode.toDataURL(attendanceUrl);
+            // const qrImageUrl = await QRCode.toDataURL(attendanceUrl);
+            const expiredTime = process.env.QR_EXPIRED_TIME ? parseInt(process.env.QR_EXPIRED_TIME) : 30000; // Mặc định là 30 giây
+
             // Lọc ra những sinh viên không có mặt trong hoạt động này
+            let totalStudents =
+                (await this.userService.find(["student"], {
+                    roleId: 4,
+                })) || [];
+            let totalParticipants =
+                (await this.activityStudentService.find(["student"], {
+                    activityId: eventId,
+                })) || [];
             if (participants) {
-            let studentInEvent = participants.list.map(participant => participant.student.id);
-                let studentsNotInEvent = await this.userService.find(["student"], {
-                    id: Not(In(studentInEvent)),
-                    roleId: 4
-                }) || [];
+                let studentInEvent = totalParticipants.map((participant) => participant.studentId);
+
+                let studentsNotInEvent =
+                    (await this.userService.find(["student"], {
+                        id: Not(In(studentInEvent)),
+                        roleId: 4,
+                    })) || [];
                 response.render(this.routeHelper.getRenderPage(RouteHelper.EVENT_DETAIL), {
                     event: event,
                     students: participants.list,
@@ -160,11 +167,12 @@ export class EventController extends BaseController {
                     total: participants.total,
                     page: participants.pageSize,
                     lastPage: Math.ceil(participants.total / this.limitedItem),
-                    qrImageUrl: qrImageUrl,
-                    qrExpiresIn: 30, // 60 giây
+                    // qrImageUrl: qrImageUrl,
+                    // qrExpiresIn: 30, // 60 giây
                     sortBy,
                     sort,
-                    currentUser: request.session.userId
+                    currentUser: request.session.userId,
+                    expiredTime
                 });
             } else {
                 response.status(HttpCode.NOT_FOUND).render(this.routeHelper.getRenderPage(RouteHelper.NOT_FOUND));
@@ -183,12 +191,12 @@ export class EventController extends BaseController {
         try {
             let participant = await this.activityStudentService.findOne([], {
                 activityId: activityId,
-                studentId: studentId
+                studentId: studentId,
             });
             if (!participant) {
                 response.status(HttpCode.NOT_FOUND).json({
                     status: HttpCode.NOT_FOUND,
-                    message: "Không tìm thấy người tham gia"
+                    message: "Không tìm thấy người tham gia",
                 });
                 return;
             }
@@ -197,11 +205,10 @@ export class EventController extends BaseController {
 
             await this.activityStudentService.save(participant);
 
-
             response.json({
                 code: HttpCode.SUCCESSFUL,
                 message: "Cập nhật trạng thái thành công",
-                participant: participant
+                participant: participant,
             });
         } catch (error: any) {
             this.logger.error(error);
@@ -215,7 +222,7 @@ export class EventController extends BaseController {
 
         const payload = {
             eventId: eventId,
-            createdAt: Date.now()
+            createdAt: Date.now(),
         };
 
         const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "30s" });
@@ -232,7 +239,7 @@ export class EventController extends BaseController {
             if (participantIds.length === 0) {
                 return response.status(HttpCode.BAD_REQUEST).json({
                     status: HttpCode.BAD_REQUEST,
-                    message: "Không có người dùng nào được chọn để xóa"
+                    message: "Không có người dùng nào được chọn để xóa",
                 });
             }
             if (participantIds[0] == "all") {
@@ -243,10 +250,10 @@ export class EventController extends BaseController {
                 if (!allParticipants || allParticipants.length === 0) {
                     return response.status(HttpCode.NOT_FOUND).json({
                         status: HttpCode.NOT_FOUND,
-                        message: "Không tìm thấy người dùng nào để xóa"
+                        message: "Không tìm thấy người dùng nào để xóa",
                     });
                 }
-                participantIds = allParticipants.map(participant => participant.studentId);
+                participantIds = allParticipants.map((participant) => participant.studentId);
             }
 
             let participants = await this.activityStudentService.find([], {
@@ -256,17 +263,22 @@ export class EventController extends BaseController {
             if (!participants || participants.length === 0) {
                 return response.status(HttpCode.NOT_FOUND).json({
                     status: HttpCode.NOT_FOUND,
-                    message: "Không tìm thấy người dùng nào để xóa"
+                    message: "Không tìm thấy người dùng nào để xóa",
                 });
             }
             for (let participant of participants) {
                 await this.activityStudentService.delete(participant.id);
             }
-
+            // Cập nhật lại số lượng người trong sự kiện
+            let event = await this.activityService.findOne([], { id: activityId });
+            if (event) {
+                event.currentStudent = event.currentStudent - participantIds.length;
+                await this.activityService.save(event);
+            }
             response.json({
                 code: HttpCode.SUCCESSFUL,
                 message: "Đã xóa thành công người dùng đã điểm danh",
-                deletedCount: participantIds.length
+                deletedCount: participantIds.length,
             });
         } catch (error: any) {
             this.logger.error(error);
@@ -276,6 +288,70 @@ export class EventController extends BaseController {
 
     @httpPost("/event/addStudents", verifyAuthTokenRouter)
     public async addStudentsToEvent(request: Request, response: Response) {
-        console.log(request.body);
+        let eventId: number = Number(request.body.eventId);
+        let studentIds: number[] = request.body.students || [];
+        try {
+            if (studentIds.length === 0) {
+                return response.status(HttpCode.BAD_REQUEST).json({
+                    status: HttpCode.BAD_REQUEST,
+                    message: "Không có sinh viên nào được chọn để thêm vào buổi học",
+                });
+            }
+
+            // Kiểm tra xem sự kiện có tồn tại không
+            let event = await this.activityService.findOne([], { id: eventId });
+            if (!event) {
+                return response.status(HttpCode.NOT_FOUND).json({
+                    code: HttpCode.NOT_FOUND,
+                    message: "Không tìm thấy sự kiện",
+                });
+            }
+
+            // Lọc ra những sinh viên đã tham gia sự kiện này
+            let existingParticipants = await this.activityStudentService.find([], {
+                activityId: eventId,
+                studentId: In(studentIds),
+            });
+
+            let existingStudentIds = existingParticipants?.map((participant) => participant.studentId);
+            let newStudentIds = studentIds.filter((id) => !existingStudentIds?.includes(id));
+
+            if (newStudentIds.length === 0) {
+                return response.status(HttpCode.BAD_REQUEST).json({
+                    code: HttpCode.BAD_REQUEST,
+                    message: "Tất cả sinh viên đã tham gia sự kiện này",
+                });
+            }
+            // Cập nhật lại số lượng người trong sự kiện
+            let activity = await this.activityService.findOne([], { id: eventId });
+            if (activity) {
+                activity.currentStudent = activity.currentStudent + newStudentIds.length;
+                // Nếu số lượng sinh viên hiện tại vượt quá số lượng tối đa của lớp học, trả về lỗi
+                if (activity.currentStudent > activity.maxStudent) {
+                    return response.status(HttpCode.BAD_REQUEST).json({
+                        code: HttpCode.BAD_REQUEST,
+                        message: "Số lượng sinh viên hiện tại vượt quá số lượng tối đa của sự kiện",
+                    });
+                }
+                await this.activityService.save(activity);
+            }
+            // Thêm sinh viên mới vào sự kiện
+            for (let studentId of newStudentIds) {
+                let activityStudent = new ActivityStudent();
+                activityStudent.activityId = eventId;
+                activityStudent.studentId = studentId;
+                activityStudent.attendanceCheck = 0; // Mặc định là chưa điểm danh
+                await this.activityStudentService.save(activityStudent);
+            }
+
+            response.json({
+                code: HttpCode.SUCCESSFUL,
+                message: "Đã thêm thành công sinh viên vào buổi học",
+                addedStudents: newStudentIds,
+            });
+        } catch (error: any) {
+            this.logger.error(error);
+            response.status(HttpCode.BAD_REQUEST).render(this.routeHelper.getRenderPage(RouteHelper.INTERNAL_SERVER_ERROR));
+        }
     }
 }

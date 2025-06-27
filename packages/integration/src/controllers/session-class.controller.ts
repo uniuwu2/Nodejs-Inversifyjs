@@ -37,6 +37,16 @@ export class SessionClassController extends BaseController {
 
     @httpGet("/", verifyAuthTokenRouter, checkPermissions([Permission.ONLY_TEACHER, Permission.ONLY_ADMIN, Permission.ONLY_STUDENT]))
     public async getSessionClass(request: Request, response: Response): Promise<void> {
+        let successMessage: string = "";
+        let errorsMessage: string = "";
+        if (request.cookies.messages) {
+            successMessage = "「" + request.cookies.messages.message + "」";
+            response.clearCookie("messages");
+        }
+        if (request.cookies.errors) {
+            errorsMessage = "「" + request.cookies.errors.message + "」";
+            response.clearCookie("errors");
+        }
         try {
             let currentTeacherId = null;
             let currentStudentId = null;
@@ -47,15 +57,18 @@ export class SessionClassController extends BaseController {
 
             let courseClassList: CourseClass[] | undefined = [];
             if (currentTeacherId) {
-                courseClassList = await this.courseClassService.findAll(["course", "teacher"], {
-                    teacherId: currentTeacherId
+                courseClassList = await this.courseClassService.findAll(["course", "teacher", "classStudent"], {
+                    teacherId: currentTeacherId,
+                    status: 1, // Chỉ lấy các lớp học đang hoạt động
                 });
             } else if (currentStudentId) {
 
             } else {
-                courseClassList = await this.courseClassService.findAll(["course", "teacher"]);
+                courseClassList = await this.courseClassService.findAll(["course", "teacher", "classStudent"], {
+                    status: 1, // Chỉ lấy các lớp học đang hoạt động
+                });
             }
-
+        
             const dayOrder = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
             const dayMap: any = {
                 monday: "Thứ 2",
@@ -83,7 +96,7 @@ export class SessionClassController extends BaseController {
             let sessionClasses: any = [];
             courseClassList?.forEach((item: any) => {
                 if (item.schedule.length === 0) return;
-
+                if (item.classStudent.length === 0) return; // Không có sinh viên thì không tạo buổi học
                 const schedules = item.schedule;
                 const sessionNeeded = item.sessionNumber;
                 const createdSessions: SessionClass[] = [];
@@ -119,6 +132,7 @@ export class SessionClassController extends BaseController {
                         sessionClass.room = "";
                         sessionClass.status = 1;
                         sessionClass.reason = "";
+                        sessionClass.courseClass = item;
 
                         createdSessions.push(sessionClass);
                         totalCreated++;
@@ -132,7 +146,7 @@ export class SessionClassController extends BaseController {
                 });
             });
             // Kiểm tra xem trong danh sách sessionClasses đã có buổi nào đã tồn tại trong DB chưa
-            const existingSessions = await this.sessionClassService.findAll(["courseClass", "teacher", "courseClass.course"]);
+            const existingSessions = await this.sessionClassService.findAll(["courseClass", "teacher", "courseClass.course", "courseClass.classStudent"]);
             // Kiểm tra courseClassId, teacherId, sessionDate, sessionStartTime, sessionEndTime
             const newSessionClasses = sessionClasses.filter((sessionClass: SessionClass) => {
                 return !existingSessions?.some((existingSession: SessionClass) => {
@@ -142,6 +156,7 @@ export class SessionClassController extends BaseController {
                         existingSession.sessionStartTime === sessionClass.sessionStartTime &&
                         sessionClass.sessionDate.toISOString().split("T")[0] == (existingSession.sessionDate + "") &&
                         existingSession.sessionEndTime === sessionClass.sessionEndTime
+                        && (sessionClass.courseClass?.classStudent || sessionClass.courseClass?.classStudent.length == 0)
                     );
                 });
             });
@@ -149,6 +164,23 @@ export class SessionClassController extends BaseController {
             if (newSessionClasses.length > 0) {
                 await this.sessionClassService.saveMulti(newSessionClasses);
             }
+            // Lấy danh sách buổi học đã lưu
+            if (newSessionClasses.length > 0) {
+                //Tạo attendance cho các buổi học mới
+                for (const sessionClass of newSessionClasses) {
+                    // console.log(sessionClass.courseClass.classStudent);
+                    const attendance = new Attendance();
+                    attendance.sessionId = sessionClass.id;
+                    attendance.studentAttendance = sessionClass.courseClass.classStudent.map((student: any) => ({
+                        student_id: student.studentId,
+                        status: null,
+                        note: "",
+                        time: null,
+                    }));
+                    await this.attendanceService.save(attendance);
+                }
+            }
+
 
             let savedSessionClasses: SessionClass[] | undefined = []
             // Lấy danh sách đã lưu
@@ -169,6 +201,8 @@ export class SessionClassController extends BaseController {
                 classList: courseClassList,
                 courseClasses: JSON.stringify(savedSessionClasses),
                 teachers: teacherList,
+                successMessage: successMessage,
+                errorMessage: errorsMessage,
             });
         } catch (error: any) {
             this.logger.error(error);
@@ -320,7 +354,6 @@ export class SessionClassController extends BaseController {
             await this.sessionClassService.save(sessionClass);
             return response
                 .status(HttpCode.SUCCESSFUL)
-                .cookie("messages", { message: Messages.EDIT_SESSION_CLASS_SUCCESS })
                 .json({
                     code: HttpCode.SUCCESSFUL,
                     message: Messages.EDIT_SESSION_CLASS_SUCCESS,
@@ -355,17 +388,7 @@ export class SessionClassController extends BaseController {
             if (!courseClass) {
                 return response.status(HttpCode.BAD_REQUEST).render(this.routeHelper.getRenderPage(RouteHelper.NOT_FOUND));
             }
-            const payload = { sessionId: sessionId };
-
-            const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "1m" });
-
-            // Tạo URL điểm danh chứa token
-            const attendanceUrl = `http://localhost:9999/api/v1/attendance/${token}`;
-
-            // Tạo QR code dạng data URL
-            const qrImageUrl = await QRCode.toDataURL(attendanceUrl);
-
-
+            const expiredTime = process.env.QR_EXPIRED_TIME ? parseInt(process.env.QR_EXPIRED_TIME) : 30000; // Mặc định là 30 giây
             const attendance = await this.attendanceService.findOne([], {
                 sessionId: sessionId,
             })
@@ -373,6 +396,7 @@ export class SessionClassController extends BaseController {
                 student_id: number;
                 status: string | null;
                 note: string;
+                time: string | null;
             }[] = attendance?.studentAttendance || [];
 
             // Lấy ra tất cả student_id trong attendanceList
@@ -425,6 +449,24 @@ export class SessionClassController extends BaseController {
                 return !studentsInSessionIds.includes(student.student.id);
             });
 
+            const dayOrder = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+            const dayMap: any = {
+                monday: "Thứ 2",
+                tuesday: "Thứ 3",
+                wednesday: "Thứ 4",
+                thursday: "Thứ 5",
+                friday: "Thứ 6",
+                saturday: "Thứ 7",
+                sunday: "Chủ nhật",
+            };
+              
+            let schedule = Object.entries(courseClass.classSchedule)
+                .sort(([a], [b]) => dayOrder.indexOf(a) - dayOrder.indexOf(b))
+                .map(([day, times]) => ({
+                    day,
+                    label: dayMap[day],
+                    times,
+                }));
             if (!attendance?.studentAttendance || attendance?.studentAttendance.length === 0) {
                 // Nếu không có sinh viên nào trong buổi học, trả về danh sách rỗng
                 return response.render(this.routeHelper.getRenderPage(RouteHelper.SESSION_CLASS_DETAIL), {
@@ -438,10 +480,12 @@ export class SessionClassController extends BaseController {
                     lastPage: 0,
                     sortBy,
                     sort,
-                    qrImageUrl: qrImageUrl,
-                    qrExpiresIn: 30, // 60 giây
+                    expiredTime,
+                    // qrImageUrl: qrImageUrl,
+                    // qrExpiresIn: 30, // 60 giây
                     studentsInCourse: studentsInCourse,
                     studentsNotInSession: studentsNotInSession,
+                    schedule: schedule,
                 });
             }
             // Query lại userRepo lấy user đã lọc, áp dụng phân trang + sort
@@ -497,10 +541,13 @@ export class SessionClassController extends BaseController {
                 lastPage: Math.ceil(total / this.limitedItem),
                 sortBy,
                 sort,
-                qrImageUrl: qrImageUrl,
-                qrExpiresIn: 60, // 60 giây
+                expiredTime,
+                // qrImageUrl: qrImageUrl,
+                // qrExpiresIn: 60, // 60 giây
                 studentsInCourse: studentsInCourse,
                 studentsNotInSession: studentsNotInSession,
+                schedule: schedule,
+
             });
         } catch (error: any) {
             this.logger.error(error);

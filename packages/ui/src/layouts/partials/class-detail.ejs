@@ -39,13 +39,12 @@
                 <div class="col-md-12">
                     <strong>Lịch học:</strong>
                     <ul class="mb-0">
-                        <% Object.entries(courseClass.classSchedule).forEach(([day, times])=> { %>
-                            <li>
-                                <%= day.charAt(0).toUpperCase() + day.slice(1) %>
-                                    :
-                                    <%= times.join(', ') %>
+                        <% schedule.forEach((item, index) => { %>
+                        <li>
+                            <%= item.label %>:
+                            <%= item.times %>
                         </li>
-                        <% }); %>
+                        <% }) %>
                     </ul>
                 </div>
             </div>
